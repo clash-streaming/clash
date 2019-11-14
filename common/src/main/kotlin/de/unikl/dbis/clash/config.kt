@@ -13,7 +13,7 @@ class ClashConfig : HashMap<String, Any>() {
     companion object {
         // Controller
         const val CLASH_CONTROLLER_ENABLED = "clash.controller.enabled"
-        const val DEFAULT_CONTROLLER_ENABLED = true
+        const val DEFAULT_CONTROLLER_ENABLED = false
 
         const val CLASH_CONTROLLER_NAME = "clash.topology.controller_name"
         const val DEFAULT_CONTROLLER_NAME = "CONTROLLER"

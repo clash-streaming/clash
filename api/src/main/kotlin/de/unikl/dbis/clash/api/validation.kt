@@ -35,7 +35,6 @@ class Validate : CommonCLI(help="Validate certain scenarios") {
 
         config[ClashConfig.CLASH_TICK_RATE] = 0
         config[ClashConfig.CLASH_CONTROLLER_ENABLED] = false
-        config[ClashConfig.CLASH_REPORTER_PARALLELISM] = 0
 
         val scenario = when(scenarioName) {
             "rst1" -> Scenario.rst1()
@@ -51,9 +50,10 @@ class Validate : CommonCLI(help="Validate certain scenarios") {
         val stormTopology = buildTopology(config, optimizationResult.physicalGraph, scenario)
         val cluster = LocalCluster()
         cluster.submitTopology("test", config, stormTopology)
-        Utils.sleep(30 * 1_000)
+        Utils.sleep(10 * 1_000)
         cluster.killTopology("test")
-        cluster.shutdown()
+        Utils.sleep(5_000)
+        cluster.close()
     }
 
     fun buildTopology(config: ClashConfig, physicalGraph: PhysicalGraph, scenario: Scenario): StormTopology {

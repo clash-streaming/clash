@@ -11,23 +11,15 @@ import de.unikl.dbis.clash.readConfig
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.LoggerContext
 
-
 fun main(args: Array<String>) = ClashCLI()
         .versionOption(version())
-        .subcommands(QueryCommand(),
-                Optimize(),
+        .subcommands(
                 Json(),
-                RunStorm(),
-                JsonStorm(),
                 Validate())
         .main(args)
 
 
 class ClashCLI : CliktCommand() {
-    init {
-        registerSupported(this)
-    }
-
     override fun run() = Unit
 }
 
@@ -39,7 +31,7 @@ abstract class CommonCLI(help: String = "",
 fun disableLogging() {
     val ctx = LogManager.getContext(false) as LoggerContext
     val config = ctx.configuration
-    config.loggers["de.unikl.dbis.clash"]!!.removeAppender("STDOUT")
+    config.loggers["de.unikl.dbis.clash"]?.removeAppender("STDOUT")
     config.rootLogger.removeAppender("STDOUT")
 }
 
