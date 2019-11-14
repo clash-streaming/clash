@@ -51,7 +51,7 @@ class KafkaSinkBolt(name: String,
     override fun executeDocuments(
             message: DocumentsMessage,
             stormInRule: StormInRule) {
-        LOG.debug("Sink received tuple with ${message.documents.size} documents")
+        LOG.debug("Sink received tuple with {} documents", message.documents.size)
         for (document in message.documents) {
             this.producer!!.send(ProducerRecord(this.topic, null, document.toString()))
         }
@@ -166,7 +166,7 @@ class FileSinkBolt(name: String,
 
     override fun prepare(conf: MutableMap<String, Any>?, topologyContext: TopologyContext?, outputCollector: OutputCollector?) {
         super.prepare(conf, topologyContext, outputCollector)
-        LOG.debug("Creating file $fileName")
+        LOG.debug("Creating file {}", fileName)
         file = File(fileName)
         file.delete()
         file.createNewFile()

@@ -36,7 +36,7 @@ internal constructor(query: String) : DataCharacteristics {
             }
 
     override fun getSelectivity(predicate: BinaryPredicate): Double =
-            this.getSelectivity(predicate.leftAttributeAccess.relationAlias, predicate.rightAttributeAccess.relationAlias)
+            this.getSelectivity(predicate.leftRelationAlias, predicate.rightRelationAlias)
 
     override fun setSelectivity(r1: RelationAlias, r2: RelationAlias, selectivity: Double) {
         if (r1.inner > r2.inner) {

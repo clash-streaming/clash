@@ -153,6 +153,7 @@ class LinearConnector(val probeOrder: ProbeOrder, val graph: PhysicalGraph, val 
 
         streamsToCurrent = HashSet()
         for (current in currentNodes) {
+
             val edge = addEdge(current, nextStore, EdgeType.ALL)
             current.outgoingEdges[edge] = nextStore
             current.addRule(RelationSendRule(this.currentStep.first.relation, edge))
@@ -210,7 +211,7 @@ class LinearConnector(val probeOrder: ProbeOrder, val graph: PhysicalGraph, val 
 
     fun getPredicateEvaluation(store: Store, predicates: Set<BinaryPredicate>): Set<BinaryPredicateEvaluation> {
         return predicates.map { predicate ->
-            if(store.relation.aliases.contains(predicate.leftAttributeAccess.relationAlias))
+            if(store.relation.aliases.contains(predicate.leftRelationAlias))
                 BinaryPredicateEvaluationLeftStored(predicate)
             else BinaryPredicateEvaluationRightStored(predicate)
         }.toSet()

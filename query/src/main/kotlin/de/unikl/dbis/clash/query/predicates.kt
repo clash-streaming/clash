@@ -2,7 +2,6 @@ package de.unikl.dbis.clash.query
 
 import java.io.Serializable
 
-
 interface Predicate
 
 interface Tuple {
@@ -10,17 +9,22 @@ interface Tuple {
 }
 
 interface UnaryPredicate : Predicate, Serializable {
-    val attributeAccess: AttributeAccess
+    val relationAlias: RelationAlias
     fun evaluate(tuple: Tuple): Boolean
 }
 
-//fun Collection<BinaryPredicate>.restrict(relations: Collection<String>): Collection<BinaryPredicate> {
-//    return filter { relations.contains(it.left) || relations.contains(it.right)}
-//}
+interface UnaryTuplePredicate : UnaryPredicate {
+    override val relationAlias: RelationAlias
+}
+
+interface UnaryAttributePredicate : UnaryPredicate {
+    val attributeAccess: AttributeAccess
+    override val relationAlias: RelationAlias get() = attributeAccess.relationAlias
+}
 
 interface BinaryPredicate : Predicate, Serializable {
-    val leftAttributeAccess: AttributeAccess
-    val rightAttributeAccess: AttributeAccess
+    val leftRelationAlias: RelationAlias
+    val rightRelationAlias: RelationAlias
 
     fun joinable(left: Tuple, right: Tuple): Boolean
 
@@ -42,14 +46,26 @@ interface BinaryPredicate : Predicate, Serializable {
     }
 }
 
+interface BinaryTuplePredicate : BinaryPredicate {
+    override val leftRelationAlias: RelationAlias
+    override val rightRelationAlias: RelationAlias
+}
+
+interface BinaryAttributePredicate : BinaryPredicate {
+    val leftAttributeAccess: AttributeAccess
+    val rightAttributeAccess: AttributeAccess
+
+    override val leftRelationAlias: RelationAlias get() = leftAttributeAccess.relationAlias
+    override val rightRelationAlias: RelationAlias get() = rightAttributeAccess.relationAlias
+}
 
 fun extractAttributeAccesses(predicates: List<Predicate>): Collection<AttributeAccess> {
     val result = mutableListOf<AttributeAccess>()
 
     for(predicate in predicates) {
         when(predicate) {
-            is UnaryPredicate -> result.add(predicate.attributeAccess)
-            is BinaryPredicate -> {
+            is UnaryAttributePredicate -> result.add(predicate.attributeAccess)
+            is BinaryAttributePredicate -> {
                 result.add(predicate.leftAttributeAccess)
                 result.add(predicate.rightAttributeAccess)
             }

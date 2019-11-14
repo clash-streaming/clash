@@ -22,7 +22,7 @@ class JsonFileSpout constructor(
 
     override fun open(conf: MutableMap<String, Any>?, topologyContext: TopologyContext?, spoutOutputCollector: SpoutOutputCollector?) {
         super.open(conf, topologyContext, spoutOutputCollector)
-        LOG.debug("Opened spout ${inputName.inner}")
+        LOG.debug("Opened spout {}", inputName.inner)
         try {
             val stream = Files.lines(Paths.get(this.filePath))
             this.iterator = stream.iterator()
@@ -86,7 +86,7 @@ class LinewiseFileSpout constructor(
 
     override fun open(conf: MutableMap<String, Any>?, topologyContext: TopologyContext?, spoutOutputCollector: SpoutOutputCollector?) {
         super.open(conf, topologyContext, spoutOutputCollector)
-        LOG.debug("Opened spout ${inputName.inner}")
+        LOG.debug("Opened spout {}", inputName.inner)
         try {
             val stream = Files.lines(Paths.get(this.filePath))
             this.iterator = stream.iterator()

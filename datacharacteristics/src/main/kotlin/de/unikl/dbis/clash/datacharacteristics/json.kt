@@ -35,7 +35,7 @@ data class SymmetricJSONCharacteristics(
             this.selectivities[ordered(r1, r2)] ?: 1.0
 
     override fun getSelectivity(predicate: BinaryPredicate): Double =
-            getSelectivity(predicate.leftAttributeAccess.relationAlias, predicate.rightAttributeAccess.relationAlias)
+            getSelectivity(predicate.leftRelationAlias, predicate.rightRelationAlias)
 
     override fun setSelectivity(r1: RelationAlias, r2: RelationAlias, selectivity: Double): Unit =
             throw NotImplementedError("No need of explicitly setting properties")

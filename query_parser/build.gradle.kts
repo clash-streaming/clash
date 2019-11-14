@@ -3,7 +3,7 @@
 dependencies {
     implementation(project(":query"))
 
-    implementation("com.github.jsqlparser:jsqlparser:1.3")
+    api("com.github.jsqlparser:jsqlparser:1.3")
 }
 
 val test by tasks.getting(Test::class) {

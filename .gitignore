@@ -3,6 +3,7 @@ starters/__clash_jar_path.sh
 logs
 target
 
+.DS_Store
 
 #
 # BEGIN JetBrains.gitignore

@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager
 data class BinaryEquality(
         override val leftAttributeAccess: AttributeAccess,
         override val rightAttributeAccess: AttributeAccess
-) : BinaryPredicate {
+) : BinaryAttributePredicate {
     override fun joinable(left: Tuple, right: Tuple): Boolean {
         return if (left[leftAttributeAccess] != null) left[leftAttributeAccess] == right[rightAttributeAccess]
         else right[leftAttributeAccess] == left[rightAttributeAccess]
@@ -19,7 +19,7 @@ data class BinaryEquality(
 data class BinaryGreaterThan(
         override val leftAttributeAccess: AttributeAccess,
         override val rightAttributeAccess: AttributeAccess
-) : BinaryPredicate {
+) : BinaryAttributePredicate {
     override fun joinable(left: Tuple, right: Tuple): Boolean {
         return left[leftAttributeAccess]!! < right[rightAttributeAccess].toString()
     }
@@ -34,11 +34,11 @@ data class AttributePairEquality
  * Performs equality test on values of leftAttr of left and rightAttr right.
  */
 (override val leftAttributeAccess: AttributeAccess,
- override val rightAttributeAccess: AttributeAccess) : BinaryPredicate {
+ override val rightAttributeAccess: AttributeAccess) : BinaryAttributePredicate {
 
     override fun joinable(left: Tuple,
                           right: Tuple): Boolean {
-        LOG.debug("Evaluating $this")
+        LOG.debug("Evaluating {}", this)
         if (!(left[leftAttributeAccess] != null && right[rightAttributeAccess] != null)) {
             // attribute not present in both documents
             return false

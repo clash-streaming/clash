@@ -6,11 +6,15 @@ import de.unikl.dbis.clash.query.InputName
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.query.inputForRelation
 import de.unikl.dbis.clash.storm.DataPathMessage
+import de.unikl.dbis.clash.storm.StormEdgeLabel
 import de.unikl.dbis.clash.storm.bolts.*
 import de.unikl.dbis.clash.storm.spouts.CommonSpout
 import de.unikl.dbis.clash.storm.spouts.CommonSpoutI
 import de.unikl.dbis.clash.storm.spouts.ControlSpout
 import de.unikl.dbis.clash.support.KafkaConfig
+import de.unikl.dbis.clash.workers.stores.ActualStore
+import de.unikl.dbis.clash.workers.stores.NaiveHashStore
+import de.unikl.dbis.clash.workers.stores.NaiveNestedLoopStore
 import org.apache.storm.generated.StormTopology
 import org.apache.storm.topology.BoltDeclarer
 import org.apache.storm.topology.TopologyBuilder
@@ -20,7 +24,7 @@ import org.slf4j.LoggerFactory
 
 class StormTopologyBuilder(
         val inputGraph: PhysicalGraph,
-        val spouts: MutableMap<InputName, CommonSpoutI> = mutableMapOf(),
+        val spouts: Map<InputName, CommonSpoutI> = mapOf(),
         val inputMap: Map<RelationAlias, InputName> = mapOf(),
         val sink: CommonSinkI,
         val config: ClashConfig = ClashConfig()
@@ -88,14 +92,14 @@ class StormTopologyBuilder(
     }
 
     internal fun buildSpout(spoutNode: Spout, builder: TopologyBuilder) {
-        LOG.debug("Building spout " + spoutNode.label + "...")
+        LOG.debug("Building spout {}...", spoutNode.label)
         val spout = spouts[inputForRelation(spoutNode.relation, inputMap)] ?: throw RuntimeException("Trying to build spout '" + spoutNode.label
                 + "' but no spout with this label was registered.")
         spoutNode.rules.forEach {
             when(it) { is OutRule -> (spout as CommonSpout).addRule(it) }
         }
         builder.setSpout(spoutNode.label, spout)
-        LOG.debug("Spout " + spoutNode.label + " built.")
+        LOG.debug("Spout {} built.", spoutNode.label)
     }
 
     internal fun buildStores(builder: TopologyBuilder) {
@@ -107,8 +111,9 @@ class StormTopologyBuilder(
 
     internal fun buildStore(storeNode: Store, builder: TopologyBuilder) {
         val nodeLabel = storeNode.label
-        LOG.debug("Building store $nodeLabel...")
-        val storeBolt = if (storeNode.partitionAttributes.isEmpty()) ThetaStoreBolt(nodeLabel, config) else PartitionedStoreBolt(nodeLabel, storeNode.partitionAttributes, config)
+        LOG.debug("Building store {}...", nodeLabel)
+        val store: ActualStore<StormEdgeLabel> = if (storeNode.partitionAttributes.isEmpty()) NaiveNestedLoopStore(config) else NaiveHashStore(config)
+        val storeBolt = GeneralStore(nodeLabel, store)
         val declarer = builder
                 .setBolt(nodeLabel, storeBolt, storeNode.parallelism)
         declareGroupings(storeNode, declarer)
@@ -116,12 +121,12 @@ class StormTopologyBuilder(
         for (rule in storeNode.rules) {
             storeBolt.addRule(rule)
         }
-        LOG.debug("Store " + storeNode.label + " built.")
+        LOG.debug("Store {} built.", storeNode.label)
     }
 
     internal fun buildDispatcher(dispatcherNode: Dispatcher,
                                  builder: TopologyBuilder) {
-        LOG.debug("Building dispatcher " + dispatcherNode.label + "...")
+        LOG.debug("Building dispatcher {}...", dispatcherNode.label)
         val dispatcher = DispatchBolt(dispatcherNode.label)
         val declarer = builder
                 .setBolt(dispatcherNode.label, dispatcher, this.config.dispatcherParallelism)
@@ -141,22 +146,22 @@ class StormTopologyBuilder(
         for (rule in dispatcherNode.rules) {
             dispatcher.addRule(rule)
         }
-        LOG.debug("Dispatcher " + dispatcherNode.label + " built.")
+        LOG.debug("Dispatcher {} built.", dispatcherNode.label)
     }
 
     internal fun buildSink(sinkNode: Sink, builder: TopologyBuilder) {
-        LOG.debug("Building sink " + sinkNode.label + "...")
+        LOG.debug("Building sink {}...", sinkNode.label)
         val declarer = builder.setBolt(sinkNode.label, sink, sinkNode.parallelism)
         declareGroupings(sinkNode, declarer)
 
         for (rule in sinkNode.rules) {
             sink.addRule(rule)
         }
-        LOG.debug("Sink " + sinkNode.label + " built.")
+        LOG.debug("Sink {} built.", sinkNode.label)
     }
 
     private fun buildController(controllerInput: ControllerInput, controller: Controller, builder: TopologyBuilder) {
-        LOG.debug("Building controller " + controller.label + "...")
+        LOG.debug("Building controller {}...", controller.label)
         val kafkaConfig = KafkaConfig(config.kafkaBootstrapServers)
         val controlSpout = ControlSpout(controllerInput.label, kafkaConfig)
         builder.setSpout(controllerInput.label, controlSpout, controller.parallelism)
@@ -165,14 +170,14 @@ class StormTopologyBuilder(
         val controlBolt = ControlBolt(controller.label)
         builder.setBolt(controller.label, controlBolt)
         controller.rules.forEach { rule -> controlBolt.addRule(rule) }
-        LOG.debug("Controller " + controller.label + " built.")
+        LOG.debug("Controller {} built.", controller.label)
     }
 
     private fun buildTickSpout(tickSpout: TickSpout, builder: TopologyBuilder) {
-        LOG.debug("Building tick spout ${tickSpout.label} ...")
+        LOG.debug("Building tick spout {} ...", tickSpout.label)
         val stormTickSpout = de.unikl.dbis.clash.storm.spouts.TickSpout(config)
         builder.setSpout(tickSpout.label, stormTickSpout, 1)
         tickSpout.rules.forEach { rule -> stormTickSpout.addRule(rule as TickOutRule) }
-        LOG.debug("TickSpout ${tickSpout.label} built.")
+        LOG.debug("TickSpout {} built.", tickSpout.label)
     }
 }

@@ -69,14 +69,14 @@ fun validateAliases(selects: ProjectionList, predicates: List<Predicate>, aliase
 
     for(predicate in predicates) {
         if(predicate is UnaryPredicate) {
-            val alias = predicate.attributeAccess.relationAlias
+            val alias = predicate.relationAlias
             if(!aliases.containsKey(alias)) {
                 throw QueryParseException("Predicate referenced alias $alias which is not defined in from clause.")
             }
         }
         if(predicate is BinaryPredicate) {
-            val lalias = predicate.leftAttributeAccess.relationAlias
-            val ralias = predicate.rightAttributeAccess.relationAlias
+            val lalias = predicate.leftRelationAlias
+            val ralias = predicate.rightRelationAlias
             if(!aliases.containsKey(lalias)) {
                 throw QueryParseException("Predicate referenced alias $lalias which is not defined in from clause.")
             }

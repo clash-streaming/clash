@@ -39,6 +39,16 @@ enum class MessageVariant {
 }
 
 
+/**
+ * application time stamp, i.e. the timestamp used for guaranteeing correctness
+ */
+typealias ATS = Long
+
+/**
+ * internal time stamp, i.e. only used for measuring latency
+ */
+typealias ITS = Long
+
 abstract class AbstractMessage {
 
     abstract fun asValues(): Values
@@ -50,10 +60,10 @@ abstract class AbstractMessage {
 
 
 /**
- * It is possible to sent multiple messages over the data path, which all share sequence numbers and
- * timestamps. See the white paper for details.
+ * It is possible to sent multiple messages over the data path, which all share logical and
+ * internal timestamps. See the white paper for details.
  */
-abstract class DataPathMessage internal constructor(val seq: Long, val timestamp: Long) : AbstractMessage() {
+abstract class DataPathMessage internal constructor(val ats: ATS, val its: ITS) : AbstractMessage() {
 
     abstract override fun asValues(): Values
 
@@ -71,10 +81,10 @@ abstract class DataPathMessage internal constructor(val seq: Long, val timestamp
         /* Fields and schema */
         private val MESSAGE_TYPE_FIELD = "_type"
         private val MESSAGE_TYPE_INDEX = 0
-        private val SEQ_FIELD = "_seq"
-        private val SEQ_INDEX = 1
-        private val TIMESTAMP_FIELD = "_ts"
-        private val TIMESTAMP_INDEX = 2
+        private val ATS_FIELD = "_ats"
+        private val ATS_INDEX = 1
+        private val ITS_FIELD = "_its"
+        private val ITS_INDEX = 2
         private val PAYLOAD_FIELD = "_payload"
         private val PAYLOAD_INDEX = 3
         private val GROUPING_INDEX = 4
@@ -82,27 +92,28 @@ abstract class DataPathMessage internal constructor(val seq: Long, val timestamp
         val schema: Fields
             get() = Fields(
                     MESSAGE_TYPE_FIELD,
-                    SEQ_FIELD,
-                    TIMESTAMP_FIELD,
+                    ATS_FIELD,
+                    ITS_FIELD,
                     PAYLOAD_FIELD,
                     GROUPING_FIELD
             )
 
         fun fromTuple(tuple: Tuple): DataPathMessage {
-            val seq = tuple.getLong(SEQ_INDEX)!!
-            val timestamp = tuple.getLong(TIMESTAMP_INDEX)!!
+            val ats = tuple.getLong(ATS_INDEX)!!
+            val its = tuple.getLong(ITS_INDEX)!!
 
             val type = tuple.getInteger(MESSAGE_TYPE_INDEX)!!
             return when (type) {
                 DOCUMENT_LIST_TYPE -> {
+                    @Suppress("UNCHECKED_CAST")
                     val documents = tuple.getValue(PAYLOAD_INDEX) as List<Document>
-                    DocumentsMessage(seq, timestamp, documents)
+                    DocumentsMessage(ats, its, documents)
                 }
                 SINGLE_DOCUMENT_TYPE -> {
                     val document = tuple.getValue(PAYLOAD_INDEX) as Document
-                    DocumentsMessage(seq, timestamp, document)
+                    DocumentsMessage(ats, its, document)
                 }
-                FINISHED_TYPE -> FinishedMessage(seq, timestamp)
+                FINISHED_TYPE -> FinishedMessage(ats, its)
                 else -> throw RuntimeException("No Message type $type known")
             }
         }
@@ -157,51 +168,51 @@ class ControlMessage(instruction: String) : AbstractMessage() {
 
 class ControlMessageCommandException(code: String) : RuntimeException("Don't know how to produce instruction $code")
 
-class TickMessage(val seq: Long, val timestamp: Long) : AbstractMessage() {
+class TickMessage(val ats: ATS, val its: ITS) : AbstractMessage() {
     override fun asValues(): Values {
-        return Values(seq, timestamp)
+        return Values(ats, its)
     }
 
     companion object {
         /* Fields and schema */
-        private val SEQ_FIELD = "_seq"
-        private val SEQ_INDEX = 0
-        private val TIMESTAMP_FIELD = "_ts"
-        private val TIMESTAMP_INDEX = 1
+        private val ATS_FIELD = "_ats"
+        private val ATS_INDEX = 0
+        private val ITS_FIELD = "_its"
+        private val ITS_INDEX = 1
 
         fun fromTuple(tuple: Tuple): TickMessage {
-            return TickMessage(tuple.getLong(SEQ_INDEX), tuple.getLong(TIMESTAMP_INDEX))
+            return TickMessage(tuple.getLong(ATS_INDEX), tuple.getLong(ITS_INDEX))
         }
 
         val schema: Fields
-            get() = Fields(SEQ_FIELD, TIMESTAMP_FIELD)
+            get() = Fields(ATS_FIELD, ITS_FIELD)
     }
 }
 
-class DocumentsMessage(seq: Long,
-                       timestamp: Long,
-                       val documents: List<Document>) : DataPathMessage(seq, timestamp) {
+class DocumentsMessage(ats: ATS,
+                       its: ITS,
+                       val documents: List<Document>) : DataPathMessage(ats, its) {
 
-    constructor(seq: Long,
-                timestamp: Long,
-                document: Document) : this(seq, timestamp, listOf<Document>(document))
+    constructor(ats: ATS,
+                its: ITS,
+                document: Document) : this(ats, its, listOf<Document>(document))
 
     override fun asValues(groupingAttribute: String): Values {
         val groupingValue = this.documents[0][groupingAttribute] ?: "_"
         return if (documents.size == 1) {
             Values(
                     SINGLE_DOCUMENT_TYPE,
-                    this.seq,
-                    this.timestamp,
-                    this.documents[0],
+                    ats,
+                    its,
+                    documents[0],
                     groupingValue
             )
         } else {
             Values(
                     DOCUMENT_LIST_TYPE,
-                    this.seq,
-                    this.timestamp,
-                    this.documents,
+                    ats,
+                    its,
+                    documents,
                     groupingValue
             )
         }
@@ -213,9 +224,9 @@ class DocumentsMessage(seq: Long,
 }
 
 
-class FinishedMessage(seq: Long, timestamp: Long) : DataPathMessage(seq, timestamp) {
+class FinishedMessage(ats: ATS, its: ITS) : DataPathMessage(ats, its) {
     override fun asValues(groupingAttribute: String): Values {
-        return Values(FINISHED_TYPE, this.seq, this.timestamp, 0, groupingAttribute)
+        return Values(FINISHED_TYPE, ats, its, 0, groupingAttribute)
     }
 
     override fun asValues(): Values {
@@ -223,12 +234,12 @@ class FinishedMessage(seq: Long, timestamp: Long) : DataPathMessage(seq, timesta
     }
 }
 
-class PunctuationMessage(seq: Long, timestamp: Long) : DataPathMessage(seq, timestamp) {
+class PunctuationMessage(ats: ATS, its: ITS) : DataPathMessage(ats, its) {
     override fun asValues(): Values {
         return asValues("")
     }
 
     override fun asValues(groupingAttribute: String): Values {
-        return Values(PUNCTUATION_TYPE, this.seq, this.timestamp, 0, groupingAttribute)
+        return Values(PUNCTUATION_TYPE, ats, its, 0, groupingAttribute)
     }
 }

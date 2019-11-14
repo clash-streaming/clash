@@ -56,7 +56,7 @@ abstract class AbstractBolt(open val name: String) : BaseRichBolt(), CommonSinkI
      * rule is handled by executeDataPath, and a reporting rule is handled by executeReporting.
      */
     override fun execute(tuple: Tuple) {
-        LOG.debug(this.name + " handles tuple " + tuple)
+        LOG.debug("{} handles tuple {}", this.name, tuple)
         val start = System.currentTimeMillis()
         val variant = MessageVariant.getVariantFor(tuple, this.ruleSet)
         val inRule = this.ruleSet.inRuleFor(tuple.sourceStreamId)
@@ -69,7 +69,7 @@ abstract class AbstractBolt(open val name: String) : BaseRichBolt(), CommonSinkI
     }
 
     fun executeTick(fromTuple: TickMessage, inRule: StormInRule) {
-        if(fromTuple.seq % 10 == 0L) {
+        if(fromTuple.ats % 10 == 0L) {
 
         }
     }
@@ -140,8 +140,7 @@ class DispatchBolt(name: String) : AbstractBolt(name), IDispatcherStats by Dispa
                         this.outputCollector.emit(sendRule.outgoingEdgeLabel,
                                 DocumentsMessage(seq.toLong(), System.currentTimeMillis(), documents))
                         LOG.debug(
-                                "Sending message of relation '" + sendRule.relation + "' "
-                                        + "to " + sendRule.outgoingEdgeLabel)
+                                "Sending message of relation '{}' to {}", sendRule.relation, sendRule.outgoingEdgeLabel)
                     }
                 }
         seq += 1

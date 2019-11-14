@@ -47,7 +47,7 @@ class ManualCharacteristics : DataCharacteristics {
      * @return the selectivity of the join over this predicate
      */
     override fun getSelectivity(predicate: BinaryPredicate): Double =
-            predicatewiseSelectivities.getOrDefault(predicate, getSelectivity(predicate.leftAttributeAccess.relationAlias, predicate.rightAttributeAccess.relationAlias))
+            predicatewiseSelectivities.getOrDefault(predicate, getSelectivity(predicate.leftRelationAlias, predicate.rightRelationAlias))
 
     override fun setSelectivity(r1: RelationAlias, r2: RelationAlias, selectivity: Double) {
         val (ss1, ss2) = sort(r1, r2)

@@ -5,6 +5,7 @@ import net.sf.jsqlparser.expression.*
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression
 import net.sf.jsqlparser.expression.operators.relational.*
 import net.sf.jsqlparser.schema.Column
+import net.sf.jsqlparser.expression.Function
 
 
 /**
@@ -16,10 +17,10 @@ fun extractPredicates(where: Expression?): List<Predicate> {
         return listOf()
     }
     val result = mutableListOf<Predicate>()
-    val binaryPredicates = mutableListOf<BinaryExpression>()
     val isNulls = mutableListOf<IsNullExpression>()
     val betweenPredicates = mutableListOf<Between>()
     val ins = mutableListOf<InExpression>()
+    val functions = mutableListOf<Function>()
     class PredicateVisitor : ExpressionVisitorAdapter() {
         override fun visit(expr: AndExpression) {
             expr.leftExpression.accept(this)
@@ -45,7 +46,6 @@ fun extractPredicates(where: Expression?): List<Predicate> {
         }
 
         override fun visit(expr: GreaterThanEquals) {
-            binaryPredicates.add(expr)
         }
 
         override fun visit(expr: MinorThan) {
@@ -56,24 +56,23 @@ fun extractPredicates(where: Expression?): List<Predicate> {
         }
 
         override fun visit(expr: MinorThanEquals) {
-            binaryPredicates.add(expr)
         }
 
         override fun visit(expr: NotEqualsTo) {
-            binaryPredicates.add(expr)
         }
 
         override fun visit(expr: LikeExpression) {
-            binaryPredicates.add(expr)
             result += interpretLike(expr)
         }
 
         override fun visit(expr: IsNullExpression) {
-            isNulls.add(expr)
         }
 
         override fun visit(expr: InExpression) {
-            ins.add(expr)
+        }
+
+        override fun visit(expr: Function) {
+            result += interpretFunction(expr)
         }
     }
 
@@ -165,6 +164,19 @@ fun interpretBinaryLesserThan(expr: MinorThan): Predicate {
 
     // reverse the greater-than direction
     return BinaryGreaterThan(rightAccess, leftAccess)
+}
+
+fun interpretFunction(expr: Function): Predicate {
+    fun parseSimilarity(expr: Function): Similarity {
+        val leftRelationName = (expr.parameters.expressions[0] as Column).columnName
+        val rightRelationName = (expr.parameters.expressions[1] as Column).columnName
+        return Similarity(RelationAlias(leftRelationName), RelationAlias(rightRelationName))
+    }
+
+    return when(expr.name) {
+        "similar" -> parseSimilarity(expr)
+        else -> throw QueryParseException("Function with name ${expr.name} is not implemented.")
+    }
 }
 
 fun extractParameters(expressionList: ExpressionList): List<String> {

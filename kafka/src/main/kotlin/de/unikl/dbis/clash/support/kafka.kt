@@ -3,13 +3,14 @@ package de.unikl.dbis.clash.support
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.ListTopicsOptions
 import org.apache.kafka.clients.admin.NewTopic
+import java.io.Serializable
 import java.util.*
 import java.util.concurrent.ExecutionException
 
 
 data class KafkaConfig(
         val kafkaBootstrapServers: String
-)
+): Serializable
 
 
 // TODO this does not work before execution of main program

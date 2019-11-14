@@ -3,7 +3,7 @@ package de.unikl.dbis.clash.query
 
 data class ConstantEquality<T>(
         override val attributeAccess: AttributeAccess,
-        val constant: T) : UnaryPredicate {
+        val constant: T) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return tuple[attributeAccess] == constant
     }
@@ -16,7 +16,7 @@ data class ConstantEquality<T>(
 data class UnaryLike(
         override val attributeAccess: AttributeAccess,
         val likeExpr: String
-) : UnaryPredicate {
+) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         val subject = tuple[attributeAccess]!!
 
@@ -48,7 +48,7 @@ data class UnaryLike(
 
 data class AttributeLesserThanConstant<T>(
         override val attributeAccess: AttributeAccess,
-        val constant: T): UnaryPredicate {
+        val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
             is Int -> tuple[attributeAccess]!!.toInt() < constant
@@ -66,7 +66,7 @@ data class AttributeLesserThanConstant<T>(
 
 data class AttributeGreaterThanConstant<T>(
         override val attributeAccess: AttributeAccess,
-        val constant: T): UnaryPredicate {
+        val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
             is Int -> tuple[attributeAccess]!!.toInt() > constant

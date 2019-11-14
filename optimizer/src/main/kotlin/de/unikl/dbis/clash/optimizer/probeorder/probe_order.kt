@@ -86,6 +86,6 @@ fun listToProbeOrder(list: List<MtNode>, predicates: Collection<BinaryPredicate>
  * this method returns "x.a = y.a" and "y.b = z.b".
  */
 fun predicatesForJoin(predicates: Collection<BinaryPredicate>, from: Collection<RelationAlias>, to: Collection<RelationAlias>): Set<BinaryPredicate> {
-    return predicates.filter { from.contains(it.leftAttributeAccess.relationAlias) && to.contains(it.rightAttributeAccess.relationAlias) ||
-            from.contains(it.rightAttributeAccess.relationAlias) && to.contains(it.leftAttributeAccess.relationAlias)}.toSet()
+    return predicates.filter { from.contains(it.leftRelationAlias) && to.contains(it.rightRelationAlias) ||
+            from.contains(it.rightRelationAlias) && to.contains(it.leftRelationAlias)}.toSet()
 }

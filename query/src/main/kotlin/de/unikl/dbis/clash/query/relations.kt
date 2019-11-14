@@ -19,8 +19,8 @@ data class Relation(
      */
     fun subRelation(vararg relationAliases: RelationAlias): Relation {
         val newWindows = windowDefinition.filter { relationAliases.contains(it.key) }
-        val newPredicates: Collection<Predicate> = unaryPredicates.filter { relationAliases.contains(it.attributeAccess.relationAlias) } +
-                binaryPredicates.filter { relationAliases.contains(it.leftAttributeAccess.relationAlias) && relationAliases.contains(it.rightAttributeAccess.relationAlias) }
+        val newPredicates: Collection<Predicate> = unaryPredicates.filter { relationAliases.contains(it.relationAlias) } +
+                binaryPredicates.filter { relationAliases.contains(it.leftRelationAlias) && relationAliases.contains(it.rightRelationAlias) }
         val newAttributeAccesses = extractAttributeAccesses(unaryPredicates + binaryPredicates)
         return Relation(newWindows, newPredicates, newAttributeAccesses)
     }
@@ -32,7 +32,7 @@ data class Relation(
     fun baseRelations(): Collection<Relation> = windowDefinition.map {
         Relation(
                 mapOf(it.key to it.value),
-                unaryPredicates.filter { predicate -> predicate.attributeAccess.relationAlias == it.key },
+                unaryPredicates.filter { predicate -> predicate.relationAlias == it.key },
                 attributeAccesses.filter { attributeAccess -> attributeAccess.relationAlias == it.key })
     }
 
@@ -73,8 +73,8 @@ fun isCrossProductAlias(binaryPredicates: Collection<BinaryPredicate>, relationA
 fun isCrossProductAlias(binaryPredicates: Collection<BinaryPredicate>, relationAliases1: Collection<RelationAlias>, relationAliases2: Collection<RelationAlias>): Boolean {
     return binaryPredicates.none {
         predicate -> relationAliases1.times(relationAliases2).any {
-        predicate.leftAttributeAccess.relationAlias == it.first && predicate.rightAttributeAccess.relationAlias == it.second
-                || predicate.rightAttributeAccess.relationAlias == it.first && predicate.leftAttributeAccess.relationAlias == it.second
+        predicate.leftRelationAlias == it.first && predicate.rightRelationAlias == it.second
+                || predicate.rightRelationAlias == it.first && predicate.leftRelationAlias == it.second
     }
     }
 }

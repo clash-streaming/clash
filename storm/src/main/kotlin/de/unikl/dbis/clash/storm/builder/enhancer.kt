@@ -43,9 +43,6 @@ class PhysicalGraphEnhancer(
         copyStores()
         buildSink()
 
-        if (this.config.reporterParallelism > 0) {
-            buildReporter()
-        }
         if (this.config.controllerEnabled) {
             buildController()
         }
@@ -121,24 +118,6 @@ class PhysicalGraphEnhancer(
             val sendRule = RelationSendRule(stormPhysicalGraph.sink.relation, edgeName)
             creator.addRule(sendRule)
             stormPhysicalGraph.sink.addRule(RelationReceiveRule(stormPhysicalGraph.sink.relation, edgeName))
-        }
-    }
-
-    private fun buildReporter() {
-        val reporter = Reporter(
-                this.config.reporterName,
-                this.config.reporterParallelism)
-        this.stormPhysicalGraph.reporter = reporter
-
-        val reporterSender = listOf(
-                stormPhysicalGraph.sink,
-                stormPhysicalGraph.dispatcher)
-                .plus(stormPhysicalGraph.relationStores.values)
-
-        reporterSender.forEach { node ->
-            val edge = addEdge(node, reporter, EdgeType.SHUFFLE)
-            node.addRule(ReportOutRule(edge))
-            reporter.addRule(ReportInRule(edge))
         }
     }
 
