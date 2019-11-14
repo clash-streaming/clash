@@ -14,4 +14,7 @@ include 'documents'
 include 'storm'
 include 'kafka'
 include 'api'
+include 'workers_measurements'
+include 'microbenchmarks'
+include 'datagenerator'
 

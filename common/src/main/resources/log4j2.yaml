@@ -1,0 +1,33 @@
+Configuration:
+  status: info
+  name: YAMLConfigTest
+  properties:
+    property:
+      name: filename
+      value: logs/clashrun.log
+  Appenders:
+    Console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "%d{HH:mm:ss} %p %C{1.} [%t] %m%n"
+    File:
+      name: File
+      fileName: ${filename}-${date:yyyy-MM-dd HHmmss}
+      PatternLayout:
+        Pattern: "%d %p %C{1.} [%t] %m%n"
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        ref: STDOUT
+    Logger:
+      - name: de.unikl.dbis.clash
+        level: info
+        additivity: false
+        AppenderRef:
+          - level: info
+            ref: STDOUT
+          - level: info
+            ref: File

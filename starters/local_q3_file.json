@@ -1,0 +1,86 @@
+{
+  "query": "SELECT l.orderkey, o.orderdate, o.shippriority FROM customer c, orders o, lineitem l WHERE c.custkey = o.custkey AND l.orderkey = o.orderkey AND c.mktsegment = 'HOUSEHOLD' AND o.orderdate < date '1995-03-20' AND l.shipdate > date '1995-03-20'",
+  "optimizationParameters": {
+    "taskCapacity": 1500000,
+    "availableTasks": 48,
+    "probeOrderOptimizationStrategy": { "name": "LeastIntermediate"},
+    "globalStrategy": { "name": "Flat" },
+  },
+  "dataCharacteristics": {
+    "rates": {
+      "c": 150000.0,
+      "o": 1500000.0,
+      "l": 6001215.0
+    },
+    "selectivities": {
+      "c": {
+        "o": 0.0000066667
+      },
+      "o": {
+        "l": 0.0000006667
+      }
+    }
+  },
+  "cluster": {
+    "type": "local",
+    "sources": {
+      "customer": {
+        "type": "tpch-file",
+        "path": "/Users/manuel/research/datasets/tpc-h/sf1_zipf1/customer.tbl",
+        "attributes": [
+          "custkey",
+          "name",
+          "address",
+          "nationkey",
+          "phone",
+          "acctbal",
+          "mktsegment",
+          "comment"
+        ],
+        "millisDelay": 1
+      },
+      "orders": {
+        "type": "tpch-file",
+        "path": "/Users/manuel/research/datasets/tpc-h/sf1_zipf1/order.tbl",
+        "attributes": [
+          "orderkey",
+          "custkey",
+          "orderstatus",
+          "totalprice",
+          "orderdate",
+          "orderpriority",
+          "clerk",
+          "shippriority",
+          "comment"
+        ],
+        "millisDelay": 1
+      },
+      "lineitem": {
+        "type": "tpch-file",
+        "path": "/Users/manuel/research/datasets/tpc-h/sf1_zipf1/lineitem.tbl",
+        "attributes": [
+          "orderkey",
+          "partkey",
+          "suppkey",
+          "linenumber",
+          "quantity",
+          "extendedprice",
+          "discount",
+          "tax",
+          "returnflag",
+          "linestatus",
+          "shipdate",
+          "commitdate",
+          "receiptdate",
+          "shipinstruct",
+          "shipmode",
+          "comment"
+        ],
+        "millisDelay": 1
+      }
+    },
+    "sink": {
+      "type": "null"
+    }
+  }
+}
