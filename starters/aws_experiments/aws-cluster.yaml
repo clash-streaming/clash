@@ -1,0 +1,17 @@
+clash.postgres.hostname: ip-172-31-28-41.eu-central-1.compute.internal
+clash.postgres.db_name: tpch-sf1
+
+clash.kafka.bootstrap: "ip-172-31-29-98.eu-central-1.compute.internal:9092"
+
+clash.reporter.parallelism: 0
+clash.reporter.type: Postgres
+clash.reporter.postgres.hostname: "ip-172-31-28-41.eu-central-1.compute.internal"
+clash.reporter.postgres.port: "5432"
+clash.reporter.postgres.db_name: "clash-test"
+clash.reporter.postgres.user: "clash"
+clash.reporter.postgres.password: "clash"
+
+clash.probe_log.enabled: false
+
+topology.worker.max.heap.size.mb: 2000
+topology.component.resources.onheap.memory.mb: 2000

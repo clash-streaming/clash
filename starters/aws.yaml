@@ -1,0 +1,20 @@
+nimbus.seeds:
+  - ec2-18-195-30-61.eu-central-1.compute.amazonaws.com
+
+
+clash.controller.enabled: false
+
+clash.reporter.parallelism: 0
+clash.reporter.type: Influx
+clash.reporter.postgres.hostname: "dbis-exp1"
+clash.reporter.postgres.port: "5432"
+clash.reporter.postgres.db_name: "clash-test"
+clash.reporter.postgres.user: "clash"
+clash.reporter.postgres.password: "clash"
+
+clash.probe_log.enabled: false
+
+clash.influx.url: "http://172.31.28.41:8086"
+clash.influx.username: clash
+clash.influx.password: clash
+clash.influx.db_name: clash-metrics

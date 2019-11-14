@@ -1,0 +1,14 @@
+clash.postgres.hostname: dbis-expsrv1
+clash.postgres.db_name: tpch-sf1
+
+clash.kafka.bootstrap: "dbis-expsrv1:9092"
+
+clash.reporter.parallelism: 0
+clash.reporter.type: Postgres
+clash.reporter.postgres.hostname: "dbis-expsrv1"
+clash.reporter.postgres.port: "5432"
+clash.reporter.postgres.db_name: "clash-test"
+clash.reporter.postgres.user: "clash"
+clash.reporter.postgres.password: "clash"
+
+clash.probe_log.enabled: false
