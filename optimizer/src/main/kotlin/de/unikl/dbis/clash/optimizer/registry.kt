@@ -1,5 +1,6 @@
 package de.unikl.dbis.clash.optimizer
 
+import de.unikl.dbis.clash.optimizer.constant.BinaryTheta
 import de.unikl.dbis.clash.optimizer.materializationtree.strategies.BottomUpTheta
 import de.unikl.dbis.clash.optimizer.materializationtree.strategies.FlatTheta
 import de.unikl.dbis.clash.optimizer.materializationtree.strategies.LeftDeepGreedyTheta
@@ -7,6 +8,7 @@ import de.unikl.dbis.clash.optimizer.materializationtree.strategies.TopDownTheta
 import de.unikl.dbis.clash.optimizer.probeorder.LeastIntermediatesProbeOrder
 import de.unikl.dbis.clash.optimizer.probeorder.LeastSentProbeOrder
 import de.unikl.dbis.clash.optimizer.probeorder.ProbeOrderOptimizationStrategy
+import de.unikl.dbis.clash.optimizer.similarity.SimilarityOptimizer
 import kotlin.system.exitProcess
 
 
@@ -20,9 +22,11 @@ object GlobalStrategyRegistry {
     fun initialize(name: String = DEFAULT, args: Map<String, Any>? = null): GlobalStrategy {
         return when(name) {
             "Flat" -> FlatTheta()
+            "BinaryTheta" -> BinaryTheta()
             "LeftDeepGreedy" -> LeftDeepGreedyTheta()
             "BottomUpTheta" -> BottomUpTheta()
             "TopDownTheta" -> TopDownTheta()
+            "Similarity" -> SimilarityOptimizer()
             else -> {
                 System.err.println("Unknown Global Strategy $name")
                 exitProcess(1)

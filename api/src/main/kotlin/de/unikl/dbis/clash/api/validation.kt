@@ -37,8 +37,10 @@ class Validate : CommonCLI(help="Validate certain scenarios") {
         config[ClashConfig.CLASH_CONTROLLER_ENABLED] = false
 
         val scenario = when(scenarioName) {
+            "rs_theta1" -> Scenario.rs_theta1()
             "rst1" -> Scenario.rst1()
             "tpchq3j" -> Scenario.tpchq3j()
+            "similarity1" -> Scenario.similarity1()
             else -> throw RuntimeException("Validation scenario $scenarioName unknown.")
         }
         runLocalCluster(scenario)
@@ -78,6 +80,25 @@ data class Scenario(
         val expectedFilename: String
 ) {
     companion object {
+        fun rs_theta1(): Scenario {
+            return Scenario (
+                    parseQuery("SELECT * FROM r, s WHERE r.x < s.y"),
+                    AllCross(),
+                    GlobalStrategyRegistry.initialize("BinaryTheta"),
+                    OptimizationParameters(),
+                    OutsideInterface(mapOf(
+                            InputName("r") to JsonFileSpout(InputName("r"), RelationAlias("r"),"validation/rs_theta1_r.json"),
+                            InputName("s") to JsonFileSpout(InputName("s"), RelationAlias("s"),"validation/rs_theta1_s.json")
+                    ),
+                            FileSinkBolt("output", "validation/rs_theta1_result.json")
+                    ),mapOf(
+                    RelationAlias("r") to InputName("r"),
+                    RelationAlias("s") to InputName("s")
+            ),
+                    "validation/rs_theta1_result.json",
+                    "validation/rs_theta1_expected.json")
+        }
+
         fun rst1(): Scenario {
             return Scenario (
                     parseQuery("SELECT * FROM r, s, t WHERE r.x = s.x AND s.y = t.y"),
@@ -121,6 +142,27 @@ data class Scenario(
                     "validation/tpchq3j_result.json",
                     "validation/tpchq3j_expected.json")
         }
+
+        fun similarity1(): Scenario {
+            return Scenario(
+                    parseQuery("SELECT * FROM input in1, input in2 WHERE similar(in1, in2)"),
+                    AllCross(),
+                    GlobalStrategyRegistry.initialize("Similarity"),
+                    OptimizationParameters(),
+                    OutsideInterface(mapOf(
+                            InputName("input") to JsonFileSpout(InputName("input"), RelationAlias("in1"), "validation/similarity1_input.json"),
+                            InputName("input") to JsonFileSpout(InputName("input"), RelationAlias("in2"), "validation/similarity1_input.json")
+                    ),
+                            FileSinkBolt("output", "validation/similarity1_result.json")
+                    ),
+                    mapOf(
+                            RelationAlias("in1") to InputName("input"),
+                            RelationAlias("in2") to InputName("input")
+                    ),
+                    "validation/similarity1_result.json",
+                    "validation/similarity1_expected.json"
+            )
+        }
     }
 }
 
@@ -159,4 +201,4 @@ fun compareJsonFiles(actual: String, expected: String) {
     }
 }
 
-fun readJsonFile(path: String): Set<JSONObject> = File(path).readLines().map { JSONObject(it) }.toSet()
+fun readJsonFile(path: String): Set<JSONObject> = File(path).readLines().flatMap { if(it.isEmpty()) listOf() else listOf(JSONObject(it)) }.toSet()

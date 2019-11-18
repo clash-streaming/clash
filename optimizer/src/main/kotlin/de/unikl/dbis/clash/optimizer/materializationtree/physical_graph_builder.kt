@@ -34,7 +34,7 @@ interface NodeBuilder {
 
 class MatMultiStreamBuilder(val multiStream: MatMultiStream) : NodeBuilder {
     override fun addStores(physicalGraph: PhysicalGraph) {
-        val store = Store(label(multiStream.relation), multiStream.partitioning, multiStream.relation, multiStream.parallelism)
+        val store = PartitionedStore(label(multiStream.relation), multiStream.partitioning, multiStream.relation, multiStream.parallelism)
         physicalGraph.relationStores[multiStream.relation] = store
     }
 
@@ -101,7 +101,7 @@ class MatSourceBuilder(val matSource: MatSource) : NodeBuilder {
     }
 
     override fun addStores(physicalGraph: PhysicalGraph) {
-        val store = Store(label(matSource.relation), matSource.partitioning, matSource.relation, matSource.parallelism)
+        val store = PartitionedStore(label(matSource.relation), matSource.partitioning, matSource.relation, matSource.parallelism)
         physicalGraph.relationStores[matSource.relation] = store
 
         physicalGraph.relationProducers[matSource.relation]!!.forEach {

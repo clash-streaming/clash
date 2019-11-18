@@ -37,7 +37,5 @@ tasks.jar {
         attributes["Multi-Release"] = "true"
     }
 
-    configurations["compileClasspath"].forEach { file: File ->
-        from(zipTree(file.absoluteFile))
-    }
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 }

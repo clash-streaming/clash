@@ -46,14 +46,12 @@ data class UnaryLike(
     }
 }
 
-data class AttributeLesserThanConstant<T>(
+data class AttributeLessThanConstant<T>(
         override val attributeAccess: AttributeAccess,
         val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
-            is Int -> tuple[attributeAccess]!!.toInt() < constant
             is Long -> tuple[attributeAccess]!!.toLong() < constant
-            is Float -> tuple[attributeAccess]!!.toFloat() < constant
             is Double -> tuple[attributeAccess]!!.toDouble() < constant
             else -> tuple[attributeAccess]!! < constant.toString()
         }
@@ -69,9 +67,7 @@ data class AttributeGreaterThanConstant<T>(
         val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
-            is Int -> tuple[attributeAccess]!!.toInt() > constant
             is Long -> tuple[attributeAccess]!!.toLong() > constant
-            is Float -> tuple[attributeAccess]!!.toFloat() > constant
             is Double -> tuple[attributeAccess]!!.toDouble() > constant
             else -> tuple[attributeAccess]!! > constant.toString()
         }
@@ -79,5 +75,38 @@ data class AttributeGreaterThanConstant<T>(
 
     override fun toString(): String {
         return "$attributeAccess > $constant"
+    }
+}
+
+
+data class AttributeLessThanOrEqualConstant<T>(
+        override val attributeAccess: AttributeAccess,
+        val constant: T): UnaryAttributePredicate {
+    override fun evaluate(tuple: Tuple): Boolean {
+        return when(constant) {
+            is Long -> tuple[attributeAccess]!!.toLong() <= constant
+            is Double -> tuple[attributeAccess]!!.toDouble() <= constant
+            else -> tuple[attributeAccess]!! <= constant.toString()
+        }
+    }
+
+    override fun toString(): String {
+        return "$attributeAccess <= $constant"
+    }
+}
+
+data class AttributeGreaterThanOrEqualConstant<T>(
+        override val attributeAccess: AttributeAccess,
+        val constant: T): UnaryAttributePredicate {
+    override fun evaluate(tuple: Tuple): Boolean {
+        return when(constant) {
+            is Long -> tuple[attributeAccess]!!.toLong() >= constant
+            is Double -> tuple[attributeAccess]!!.toDouble() >= constant
+            else -> tuple[attributeAccess]!! >= constant.toString()
+        }
+    }
+
+    override fun toString(): String {
+        return "$attributeAccess >= $constant"
     }
 }

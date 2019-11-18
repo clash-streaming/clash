@@ -37,7 +37,7 @@ object DotPrinter {
             is Reporter -> toDotLine(sb, node)
             is Sink -> toDotLine(sb, node)
             is Spout -> toDotLine(sb, node)
-            is Store -> toDotLine(sb, node)
+            is PartitionedStore -> toDotLine(sb, node)
             else -> throw RuntimeException("Cannot produce DotLine since I don't know the type of $node")
         }
     }
@@ -88,7 +88,7 @@ object DotPrinter {
         }
     }
 
-    internal fun toDotLine(sb: StringBuilder, store: Store) {
+    internal fun toDotLine(sb: StringBuilder, store: PartitionedStore) {
         createNodeWithOptions(sb, store.label, store.rules)
         for ((key, value) in store.outgoingEdges) {
             toDotLine(sb, store.label, key, value.label)

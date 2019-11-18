@@ -16,7 +16,7 @@ in order to see all available validation queries. Run
 
 ```bash
 $ clash validation tpchq2j
-``` 
+```
 
 to run the **tpch** query **q2** which computes only **joins** for validation.
 

@@ -39,3 +39,5 @@ data class CostEstimation(
         val probeCost: Double,
         val numTasks: Long
 )
+
+fun emptyCost(): CostEstimation = CostEstimation(0.0,0.0,0)

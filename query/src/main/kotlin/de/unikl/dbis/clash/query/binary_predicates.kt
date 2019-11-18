@@ -16,16 +16,33 @@ data class BinaryEquality(
     }
 }
 
-data class BinaryGreaterThan(
+data class BinaryLessThan(
         override val leftAttributeAccess: AttributeAccess,
         override val rightAttributeAccess: AttributeAccess
 ) : BinaryAttributePredicate {
     override fun joinable(left: Tuple, right: Tuple): Boolean {
-        return left[leftAttributeAccess]!! < right[rightAttributeAccess].toString()
+        return left[leftAttributeAccess] != null &&
+                right[rightAttributeAccess] != null &&
+                left[leftAttributeAccess]!! < right[rightAttributeAccess].toString()
     }
 
     override fun toString(): String {
         return "$leftAttributeAccess < $rightAttributeAccess"
+    }
+}
+
+data class BinaryLessThanOrEqual (
+        override val leftAttributeAccess: AttributeAccess,
+        override val rightAttributeAccess: AttributeAccess
+) : BinaryAttributePredicate {
+    override fun joinable(left: Tuple, right: Tuple): Boolean {
+        return left[leftAttributeAccess] != null &&
+                right[rightAttributeAccess] != null &&
+                left[leftAttributeAccess]!! <= right[rightAttributeAccess].toString()
+    }
+
+    override fun toString(): String {
+        return "$leftAttributeAccess <= $rightAttributeAccess"
     }
 }
 

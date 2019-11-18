@@ -43,15 +43,24 @@ data class Sink(override val label: String,
                 val relation: Relation,
                 override val parallelism: Long) : Node by CommonNode(label, parallelism)
 
-data class Store(
+interface Store : Node {
+    val relation: Relation
+}
+
+data class PartitionedStore(
         override val label: String,
         val partitionAttributes: AttributeAccessList,
-        val relation: Relation,
-        override val parallelism: Long) : Node by CommonNode(label, parallelism)
+        override val relation: Relation,
+        override val parallelism: Long) : Store, Node by CommonNode(label, parallelism)
 
 data class InputStub(override val label: String, val relation: Relation) : Node by CommonNode(label, 1)
 data class OutputStub(override val label: String,
                       val relation: Relation) : Node by CommonNode(label, 1)
+data class ThetaStore (
+        override val label: String,
+        override val relation: Relation,
+        override val parallelism: Long
+) : Store, Node by CommonNode(label, parallelism)
 
 class CommonNode(
         override val label: String,

@@ -112,7 +112,10 @@ class StormTopologyBuilder(
     internal fun buildStore(storeNode: Store, builder: TopologyBuilder) {
         val nodeLabel = storeNode.label
         LOG.debug("Building store {}...", nodeLabel)
-        val store: ActualStore<StormEdgeLabel> = if (storeNode.partitionAttributes.isEmpty()) NaiveNestedLoopStore(config) else NaiveHashStore(config)
+
+        // TODO
+//        val store: ActualStore<StormEdgeLabel> = if (storeNode.partitionAttributes.isEmpty()) NaiveNestedLoopStore(config) else NaiveHashStore(config)
+        val store =  NaiveNestedLoopStore<StormEdgeLabel>(config)
         val storeBolt = GeneralStore(nodeLabel, store)
         val declarer = builder
                 .setBolt(nodeLabel, storeBolt, storeNode.parallelism)

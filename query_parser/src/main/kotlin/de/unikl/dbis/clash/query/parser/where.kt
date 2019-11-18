@@ -46,16 +46,24 @@ fun extractPredicates(where: Expression?): List<Predicate> {
         }
 
         override fun visit(expr: GreaterThanEquals) {
+            result += when(isUnary(expr)) {
+                true -> interpretUnaryGreaterThanOrEqual(expr)
+                false -> interpretBinaryGreaterThanOrEqual(expr)
+            }
         }
 
         override fun visit(expr: MinorThan) {
             result += when(isUnary(expr)) {
-                true -> interpretUnaryLesserThan(expr)
-                false -> interpretBinaryLesserThan(expr)
+                true -> interpretUnaryLessThan(expr)
+                false -> interpretBinaryLessThan(expr)
             }
         }
 
         override fun visit(expr: MinorThanEquals) {
+            result += when(isUnary(expr)) {
+                true -> interpretUnaryLessThanOrEqual(expr)
+                false -> interpretBinaryLessThanOrEqual(expr)
+            }
         }
 
         override fun visit(expr: NotEqualsTo) {
@@ -125,8 +133,25 @@ fun interpretUnaryGreaterThan(expr: GreaterThan): AttributeGreaterThanConstant<A
     return when(constant) {
         is StringValue -> AttributeGreaterThanConstant(attributeAccess, constant.value)
         is LongValue -> AttributeGreaterThanConstant(attributeAccess, constant.value)
+        is DoubleValue -> AttributeGreaterThanConstant(attributeAccess, constant.value)
         is DateTimeLiteralExpression -> AttributeGreaterThanConstant(attributeAccess, constant.value)
         else -> throw QueryParseException("GreaterThan with type ${constant::class.java} is not implemented.")
+    }
+}
+
+fun interpretUnaryGreaterThanOrEqual(expr: GreaterThanEquals): AttributeGreaterThanOrEqualConstant<Any> {
+    val (col, constant) = if (isColumn(expr.leftExpression)) {
+        Pair(expr.leftExpression as Column, expr.rightExpression)
+    } else {
+        Pair(expr.rightExpression as Column, expr.leftExpression)
+    }
+    val attributeAccess = toAttributeAccess(col)
+    return when(constant) {
+        is StringValue -> AttributeGreaterThanOrEqualConstant(attributeAccess, constant.value)
+        is LongValue -> AttributeGreaterThanOrEqualConstant(attributeAccess, constant.value)
+        is DoubleValue -> AttributeGreaterThanOrEqualConstant(attributeAccess, constant.value)
+        is DateTimeLiteralExpression -> AttributeGreaterThanOrEqualConstant(attributeAccess, constant.value)
+        else -> throw QueryParseException("GreaterThanOrEqual with type ${constant::class.java} is not implemented.")
     }
 }
 
@@ -137,25 +162,11 @@ fun interpretBinaryGreaterThan(expr: GreaterThan): Predicate {
     val leftAccess = toAttributeAccess(left)
     val rightAccess = toAttributeAccess(right)
 
-    return BinaryGreaterThan(leftAccess, rightAccess)
+    // reverse the greater-than direction
+    return BinaryLessThan(rightAccess, leftAccess)
 }
 
-fun interpretUnaryLesserThan(expr: MinorThan): AttributeLesserThanConstant<Any> {
-    val (col, constant) = if (isColumn(expr.leftExpression)) {
-        Pair(expr.leftExpression as Column, expr.rightExpression)
-    } else {
-        Pair(expr.rightExpression as Column, expr.leftExpression)
-    }
-    val attributeAccess = toAttributeAccess(col)
-    return when(constant) {
-        is StringValue -> AttributeLesserThanConstant(attributeAccess, constant.value)
-        is LongValue -> AttributeLesserThanConstant(attributeAccess, constant.value)
-        is DateTimeLiteralExpression -> AttributeLesserThanConstant(attributeAccess, constant.value)
-        else -> throw QueryParseException("GreaterThan with type ${constant::class.java} is not implemented.")
-    }
-}
-
-fun interpretBinaryLesserThan(expr: MinorThan): Predicate {
+fun interpretBinaryGreaterThanOrEqual(expr: GreaterThanEquals): Predicate {
     val left = expr.leftExpression as Column
     val right = expr.rightExpression as Column
 
@@ -163,7 +174,60 @@ fun interpretBinaryLesserThan(expr: MinorThan): Predicate {
     val rightAccess = toAttributeAccess(right)
 
     // reverse the greater-than direction
-    return BinaryGreaterThan(rightAccess, leftAccess)
+    return BinaryLessThanOrEqual(rightAccess, leftAccess)
+}
+
+fun interpretUnaryLessThan(expr: MinorThan): AttributeLessThanConstant<Any> {
+    val (col, constant) = if (isColumn(expr.leftExpression)) {
+        Pair(expr.leftExpression as Column, expr.rightExpression)
+    } else {
+        Pair(expr.rightExpression as Column, expr.leftExpression)
+    }
+    val attributeAccess = toAttributeAccess(col)
+    return when(constant) {
+        is StringValue -> AttributeLessThanConstant(attributeAccess, constant.value)
+        is LongValue -> AttributeLessThanConstant(attributeAccess, constant.value)
+        is DoubleValue -> AttributeLessThanConstant(attributeAccess, constant.value)
+        is DateTimeLiteralExpression -> AttributeLessThanConstant(attributeAccess, constant.value)
+        else -> throw QueryParseException("GreaterThan with type ${constant::class.java} is not implemented.")
+    }
+}
+
+
+fun interpretUnaryLessThanOrEqual(expr: MinorThanEquals): AttributeLessThanOrEqualConstant<Any> {
+    val (col, constant) = if (isColumn(expr.leftExpression)) {
+        Pair(expr.leftExpression as Column, expr.rightExpression)
+    } else {
+        Pair(expr.rightExpression as Column, expr.leftExpression)
+    }
+    val attributeAccess = toAttributeAccess(col)
+    return when(constant) {
+        is StringValue -> AttributeLessThanOrEqualConstant(attributeAccess, constant.value)
+        is LongValue -> AttributeLessThanOrEqualConstant(attributeAccess, constant.value)
+        is DoubleValue -> AttributeLessThanOrEqualConstant(attributeAccess, constant.value)
+        is DateTimeLiteralExpression -> AttributeLessThanOrEqualConstant(attributeAccess, constant.value)
+        else -> throw QueryParseException("GreaterThanOrEqual with type ${constant::class.java} is not implemented.")
+    }
+}
+
+fun interpretBinaryLessThan(expr: MinorThan): Predicate {
+    val left = expr.leftExpression as Column
+    val right = expr.rightExpression as Column
+
+    val leftAccess = toAttributeAccess(left)
+    val rightAccess = toAttributeAccess(right)
+
+    return BinaryLessThan(leftAccess, rightAccess)
+}
+
+fun interpretBinaryLessThanOrEqual(expr: MinorThanEquals): Predicate {
+    val left = expr.leftExpression as Column
+    val right = expr.rightExpression as Column
+
+    val leftAccess = toAttributeAccess(left)
+    val rightAccess = toAttributeAccess(right)
+
+    return BinaryLessThanOrEqual(leftAccess, rightAccess)
 }
 
 fun interpretFunction(expr: Function): Predicate {

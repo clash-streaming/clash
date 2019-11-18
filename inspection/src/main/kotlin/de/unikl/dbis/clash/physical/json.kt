@@ -23,21 +23,21 @@ fun PhysicalGraph.toJson(): JSONObject {
     fun niceLabel(node: Node): String {
         return when(node) {
             is Spout, is InputStub -> "${node.label}-spout"
-            is Store -> "${node.label}-store"
+            is PartitionedStore -> "${node.label}-store"
             else -> node.label
         }
     }
 
     fun addPartitioning(obj: JSONObject, node: Node) {
         when(node) {
-            is Store -> obj.put("partitioning", node.partitionAttributes)
+            is PartitionedStore -> obj.put("partitioning", node.partitionAttributes)
         }
     }
 
     fun nodeType(node: Node): String {
         return when(node) {
             is Spout, is InputStub -> "Spout"
-            is Store -> "Store"
+            is PartitionedStore -> "Store"
             is Sink, is OutputStub -> "Sink"
             else -> "UNKNOWN"
         }

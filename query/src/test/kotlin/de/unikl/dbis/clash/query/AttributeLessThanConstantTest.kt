@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test
 
 internal class AttributeLesserThanConstantTest {
 
-    internal class AttributeLesserThanConstantTest {
+    internal class AttributeLessThanConstantTest {
         @Test
         fun `predicate works for numbers`() {
             val attributeAccess = AttributeAccess("x", "a")
-            val predicate = AttributeLesserThanConstant(attributeAccess, 55)
+            val predicate = AttributeLessThanConstant(attributeAccess, 55)
 
             val d1 = TestTuple(attributeAccess, "8")
             Assertions.assertThat(predicate.evaluate(d1)).isTrue()
@@ -27,7 +27,7 @@ internal class AttributeLesserThanConstantTest {
         @Test
         fun `predicate works for strings`() {
             val attributeAccess = AttributeAccess("x", "a")
-            val predicate = AttributeLesserThanConstant(attributeAccess, "55")
+            val predicate = AttributeLessThanConstant(attributeAccess, "55")
 
             val d1 = TestTuple(attributeAccess, "8")
             Assertions.assertThat(predicate.evaluate(d1)).isFalse()
