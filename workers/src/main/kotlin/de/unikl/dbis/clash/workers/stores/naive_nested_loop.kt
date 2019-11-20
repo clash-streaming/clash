@@ -5,6 +5,7 @@ import de.unikl.dbis.clash.documents.Document
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluation
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationLeftStored
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationRightStored
+import de.unikl.dbis.clash.physical.GenericBinaryPredicateEvaluation
 import de.unikl.dbis.clash.query.AttributeAccess
 import org.slf4j.LoggerFactory
 import java.io.Serializable
@@ -64,6 +65,7 @@ class NaiveNestedLoopStore<T>(val config: ClashConfig): ActualStore<T>, Serializ
                     val (left, right) = when(predicateEvaluation) {
                         is BinaryPredicateEvaluationLeftStored -> Pair(storedDocument, probedDocument)
                         is BinaryPredicateEvaluationRightStored -> Pair(probedDocument, storedDocument)
+                        is GenericBinaryPredicateEvaluation -> Pair(storedDocument, probedDocument)
                         else -> throw RuntimeException("Predicate Evaluation was not of type BinaryPredicateEvaluation!")
                     }
                     val predicate = predicateEvaluation.predicate

@@ -231,5 +231,6 @@ class StoreAndJoinRule
 interface BinaryPredicateEvaluation: Serializable {
     val predicate: BinaryPredicate
 }
+data class GenericBinaryPredicateEvaluation(override val predicate: BinaryPredicate): BinaryPredicateEvaluation
 data class BinaryPredicateEvaluationLeftStored(override val predicate: BinaryPredicate): BinaryPredicateEvaluation
 data class BinaryPredicateEvaluationRightStored(override val predicate: BinaryPredicate): BinaryPredicateEvaluation

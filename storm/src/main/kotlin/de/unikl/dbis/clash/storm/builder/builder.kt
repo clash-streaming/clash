@@ -12,6 +12,7 @@ import de.unikl.dbis.clash.storm.spouts.CommonSpout
 import de.unikl.dbis.clash.storm.spouts.CommonSpoutI
 import de.unikl.dbis.clash.storm.spouts.ControlSpout
 import de.unikl.dbis.clash.support.KafkaConfig
+import de.unikl.dbis.clash.workers.stores.ActualSimilarityStore
 import de.unikl.dbis.clash.workers.stores.ActualStore
 import de.unikl.dbis.clash.workers.stores.NaiveHashStore
 import de.unikl.dbis.clash.workers.stores.NaiveNestedLoopStore
@@ -113,9 +114,12 @@ class StormTopologyBuilder(
         val nodeLabel = storeNode.label
         LOG.debug("Building store {}...", nodeLabel)
 
-        // TODO
-//        val store: ActualStore<StormEdgeLabel> = if (storeNode.partitionAttributes.isEmpty()) NaiveNestedLoopStore(config) else NaiveHashStore(config)
-        val store =  NaiveNestedLoopStore<StormEdgeLabel>(config)
+        val store: ActualStore<StormEdgeLabel> = when(storeNode) {
+            is PartitionedStore -> NaiveHashStore(config)
+            is ThetaStore -> NaiveNestedLoopStore(config)
+            is SimilarityStore -> ActualSimilarityStore(config)
+            else -> NaiveNestedLoopStore(config)
+        }
         val storeBolt = GeneralStore(nodeLabel, store)
         val declarer = builder
                 .setBolt(nodeLabel, storeBolt, storeNode.parallelism)

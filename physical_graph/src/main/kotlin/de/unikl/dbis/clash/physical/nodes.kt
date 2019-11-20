@@ -61,6 +61,11 @@ data class ThetaStore (
         override val relation: Relation,
         override val parallelism: Long
 ) : Store, Node by CommonNode(label, parallelism)
+data class SimilarityStore (
+        override val label: String,
+        override val relation: Relation,
+        override val parallelism: Long
+) : Store, Node by CommonNode(label, parallelism)
 
 class CommonNode(
         override val label: String,
