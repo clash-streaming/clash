@@ -1,4 +1,4 @@
-package de.unikl.dbis.clash.api.json_args
+package de.unikl.dbis.clash.api.jsonArgs
 
 import com.beust.klaxon.Klaxon
 import org.assertj.core.api.Assertions.assertThat

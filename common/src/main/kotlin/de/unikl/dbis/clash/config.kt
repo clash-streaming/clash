@@ -82,7 +82,10 @@ class ClashConfig : HashMap<String, Any>() {
         const val DEFAULT_TICK_SPOUT_NAME = "tickspout"
     }
 
-    val kafkaBootstrapServers: String get() = getOrDefaultString(CLASH_KAFKA_BOOTSTRAP_SERVERS, DEFAULT_KAFKA_BOOTSTRAP_SERVERS)
+    val kafkaBootstrapServers: String get() = getOrDefaultString(
+        CLASH_KAFKA_BOOTSTRAP_SERVERS,
+        DEFAULT_KAFKA_BOOTSTRAP_SERVERS
+    )
 
     /**
      * @return The degree or parallelism for spouts
@@ -221,6 +224,8 @@ class ClashConfig : HashMap<String, Any>() {
     }
 }
 
+class ConfigReadException(e: String) : RuntimeException(e)
+
 fun readConfig(configFilePath: String): ClashConfig {
     var inputStream: InputStream? = null
     var configMap: Map<String, Any>? = null
@@ -232,13 +237,13 @@ fun readConfig(configFilePath: String): ClashConfig {
             configMap = yaml.load<Any>(InputStreamReader(inputStream)) as Map<String, Any>
         }
     } catch (e: IOException) {
-        throw RuntimeException(e)
+        throw ConfigReadException(e.localizedMessage)
     } finally {
         if (inputStream != null) {
             try {
                 inputStream.close()
             } catch (e: IOException) {
-                throw RuntimeException(e)
+                throw ConfigReadException(e.localizedMessage)
             }
         }
     }
@@ -270,6 +275,8 @@ fun getConfigFileInputStream(configFilePath: String): InputStream? {
     return null
 }
 
+class ResourceFindException(e: String) : RuntimeException(e)
+
 fun findResources(name: String): List<URL> {
     try {
         val resources = Thread.currentThread().contextClassLoader.getResources(name)
@@ -279,6 +286,6 @@ fun findResources(name: String): List<URL> {
         }
         return ret
     } catch (e: IOException) {
-        throw RuntimeException(e)
+        throw ResourceFindException(e.localizedMessage)
     }
 }

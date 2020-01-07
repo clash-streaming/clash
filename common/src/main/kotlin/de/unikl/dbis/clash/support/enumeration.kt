@@ -79,7 +79,7 @@ fun <T> List<T>.subsetsOfSize(m: Int): List<Set<T>> {
  *
  * Source: http://www.informatik.uni-ulm.de/ni/Lehre/WS03/DMM/Software/partitions.pdf
  */
-
+@Suppress("ComplexMethod")
 fun <T> List<T>.partitions(k: Int): List<List<List<T>>> {
     TODO()
     fun pInitializeFirst(): Pair<IntArray, IntArray> {

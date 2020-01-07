@@ -52,7 +52,13 @@ class Clash @JvmOverloads constructor(
     }
 
     fun optimize(): OptimizationResult {
-        if (optimizationResult == null) optimizationResult = optimizationParameters.globalStrategy.optimize(this.query!!, this.dataCharacteristics, this.optimizationParameters)
+        if (optimizationResult == null) {
+            optimizationResult = optimizationParameters.globalStrategy.optimize(
+                this.query!!,
+                this.dataCharacteristics,
+                this.optimizationParameters
+            )
+        }
         return optimizationResult!!
     }
 

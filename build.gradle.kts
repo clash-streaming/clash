@@ -3,11 +3,20 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.3.41"
     id("org.jlleitschuh.gradle.ktlint") version "9.1.1"
+    id("io.gitlab.arturbosch.detekt") version "1.3.1"
 }
 
 repositories {
     mavenCentral()
     maven("https://plugins.gradle.org/m2/")
+
+    jcenter {
+        content {
+            // just allow to include kotlinx projects
+            // detekt needs 'kotlinx-html' for the html report
+            includeGroup("org.jetbrains.kotlinx")
+        }
+    }
 }
 
 allprojects {
@@ -19,6 +28,7 @@ subprojects {
     val projectName = this.name
 
     apply(plugin = "kotlin")
+    apply(plugin = "io.gitlab.arturbosch.detekt")
 
     repositories {
         jcenter()
@@ -43,8 +53,16 @@ subprojects {
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.2")
     }
 
+    val projectJvmTarget = "1.8"
+
     tasks.withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = projectJvmTarget
+    }
+
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        exclude("resources/")
+        exclude("build/")
+        jvmTarget = projectJvmTarget
     }
 
     apply(plugin = "org.jlleitschuh.gradle.ktlint") // Version should be inherited from parent

@@ -1,4 +1,4 @@
-package de.unikl.dbis.clash.api.json_args
+package de.unikl.dbis.clash.api.jsonArgs
 
 import com.beust.klaxon.TypeAdapter
 import com.beust.klaxon.TypeFor

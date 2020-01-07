@@ -1,4 +1,4 @@
-package de.unikl.dbis.clash.api.json_args
+package de.unikl.dbis.clash.api.jsonArgs
 
 import de.unikl.dbis.clash.datacharacteristics.DataCharacteristics
 import de.unikl.dbis.clash.datacharacteristics.SymmetricJSONCharacteristics

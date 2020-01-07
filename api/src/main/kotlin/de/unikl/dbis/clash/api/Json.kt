@@ -9,9 +9,9 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import de.unikl.dbis.clash.ClashConfig
-import de.unikl.dbis.clash.api.json_args.JsonArg
-import de.unikl.dbis.clash.api.json_args.JsonLocalCluster
-import de.unikl.dbis.clash.api.json_args.JsonRemoteCluster
+import de.unikl.dbis.clash.api.jsonArgs.JsonArg
+import de.unikl.dbis.clash.api.jsonArgs.JsonLocalCluster
+import de.unikl.dbis.clash.api.jsonArgs.JsonRemoteCluster
 import de.unikl.dbis.clash.datacharacteristics.AllCross
 import de.unikl.dbis.clash.optimizer.GlobalStrategy
 import de.unikl.dbis.clash.optimizer.GlobalStrategyRegistry
@@ -24,6 +24,7 @@ import de.unikl.dbis.clash.physical.PhysicalGraph
 import de.unikl.dbis.clash.physical.toJson
 import de.unikl.dbis.clash.query.InputName
 import de.unikl.dbis.clash.query.Query
+import de.unikl.dbis.clash.query.parser.QueryParseException
 import de.unikl.dbis.clash.query.parser.parseQuery
 import de.unikl.dbis.clash.readConfig
 import de.unikl.dbis.clash.storm.bolts.CommonSinkI
@@ -36,6 +37,8 @@ import org.apache.storm.generated.StormTopology
 import org.apache.storm.utils.Utils
 import org.json.JSONArray
 import org.json.JSONObject
+
+const val TOPOLOGY_RUNTIME = 600_000L
 
 /**
  * Accepts a single json document as input of following format:
@@ -160,7 +163,7 @@ class Json : CliktCommand() {
         try {
             val parsedQuery = parseQuery(query)
             success(parsedQuery)
-        } catch (e: Exception) {
+        } catch (e: QueryParseException) {
             failure(e)
         }
     }
@@ -176,7 +179,7 @@ class Json : CliktCommand() {
 
         val cluster = LocalCluster()
         cluster.submitTopology("test", config, stormTopology)
-        Utils.sleep(600_000)
+        Utils.sleep(TOPOLOGY_RUNTIME)
         cluster.killTopology("test")
         cluster.shutdown()
     }
@@ -221,9 +224,9 @@ class Json : CliktCommand() {
                 .codeSource
                 .location
                 .toURI()).absolutePath
-        val name = fullName.subSequence(0, fullName.length - 4) // strip the ".jar"
-//        return "$name-stormCluster.jar"
-        return "/Users/manuel/research/clash/clash/build/libs/clash-0.2.0-stormCluster.jar"
+        val name = fullName.subSequence(0, fullName.length - ".jar".length)
+       return "$name-stormCluster.jar"
+        // return "/Users/manuel/research/clash/clash/build/libs/clash-0.2.0-stormCluster.jar"
     }
 }
 

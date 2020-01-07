@@ -29,6 +29,9 @@ import org.apache.storm.generated.StormTopology
 import org.apache.storm.utils.Utils
 import org.json.JSONObject
 
+const val TOPOLOGY_EXECUTION_TIME = 10 * 1_000L
+const val TOPOLOGY_DYING_TIME = 5_000L
+
 class Validate : CommonCLI(help = "Validate certain scenarios") {
     val scenarioName by argument()
     val silent by option("--silent", "-s").flag(default = false)
@@ -40,24 +43,28 @@ class Validate : CommonCLI(help = "Validate certain scenarios") {
         config[ClashConfig.CLASH_CONTROLLER_ENABLED] = false
 
         val scenario = when (scenarioName) {
-            "rs_theta1" -> Scenario.rs_theta1()
+            "rs_theta1" -> Scenario.rsTheta1()
             "rst1" -> Scenario.rst1()
             "tpchq3j" -> Scenario.tpchq3j()
             "similarity1" -> Scenario.similarity1()
-            else -> throw RuntimeException("Validation scenario $scenarioName unknown.")
+            else -> throw UnknownScenarioException(scenarioName)
         }
         runLocalCluster(scenario)
         compareJsonFiles(scenario.actualFilename, scenario.expectedFilename)
     }
 
     fun runLocalCluster(scenario: Scenario) {
-        val optimizationResult = scenario.globalStrategy.optimize(scenario.query, scenario.dataCharacteristics, scenario.optimizationParameters)
+        val optimizationResult = scenario.globalStrategy.optimize(
+            scenario.query,
+            scenario.dataCharacteristics,
+            scenario.optimizationParameters
+        )
         val stormTopology = buildTopology(config, optimizationResult.physicalGraph, scenario)
         val cluster = LocalCluster()
         cluster.submitTopology("test", config, stormTopology)
-        Utils.sleep(10 * 1_000)
+        Utils.sleep(TOPOLOGY_EXECUTION_TIME)
         cluster.killTopology("test")
-        Utils.sleep(5_000)
+        Utils.sleep(TOPOLOGY_DYING_TIME)
         cluster.close()
     }
 
@@ -72,6 +79,9 @@ class Validate : CommonCLI(help = "Validate certain scenarios") {
     }
 }
 
+class UnknownScenarioException(scenarioName: String) : RuntimeException("Validation scenario $scenarioName unknown.")
+
+@Suppress("MaxLineLength")
 data class Scenario(
     val query: Query,
     val dataCharacteristics: DataCharacteristics,
@@ -83,7 +93,7 @@ data class Scenario(
     val expectedFilename: String
 ) {
     companion object {
-        fun rs_theta1(): Scenario {
+        fun rsTheta1(): Scenario {
             return Scenario(
                     parseQuery("SELECT * FROM r, s WHERE r.x < s.y"),
                     AllCross(),
@@ -203,4 +213,7 @@ fun compareJsonFiles(actual: String, expected: String) {
     }
 }
 
-fun readJsonFile(path: String): Set<JSONObject> = File(path).readLines().flatMap { if (it.isEmpty()) listOf() else listOf(JSONObject(it)) }.toSet()
+fun readJsonFile(path: String): Set<JSONObject> = File(path)
+    .readLines()
+    .flatMap { if (it.isEmpty()) listOf() else listOf(JSONObject(it)) }
+    .toSet()

@@ -36,8 +36,10 @@ fun disableLogging() {
     config.rootLogger.removeAppender("STDOUT")
 }
 
+const val VERSION_NUMBER = "0.3.0"
+
 fun version(): String {
-    return "0.3.0"
+    return VERSION_NUMBER
     // TODO: This makes a computer with locale de-DE throw an exception?
     // return ResourceBundle.getBundle("version").getString("version")
 }
