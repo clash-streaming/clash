@@ -108,7 +108,7 @@ fun mustBroadcast(seen: Pair<String, List<PartitionedRelation>>, other: Partitio
 }
 
 
-fun partitioningOptions(queries: List<Query3>): Map<String, Set<String>> {
+fun partitioningOptions(queries: Collection<Query3>): Map<String, Set<String>> {
     val result = mutableMapOf<String, MutableSet<String>>()
     for(q in queries) {
         for(qr in q.relations)  {
@@ -230,7 +230,7 @@ class IlpBuilder3() {
 }
 
 class Scenario(val statistics: Statistics, val configuration: Configuration, val debugMode: Boolean = false) {
-    fun createIlp3(queries: List<Query3>): IlpProblem {
+    fun createIlp3(queries: Collection<Query3>): IlpProblem {
         val partitioningOptions = partitioningOptions(queries)
         val builder = IlpBuilder3()
         for(query in queries) {
@@ -280,8 +280,8 @@ class RandomQueryGenerator(val relations: Map<String, List<String>>) {
         return Query3(simplifiedRelations)
     }
 
-    fun generateMany(numQueries: Int, length: Int): List<Query3> {
-        val result = mutableListOf<Query3>()
+    fun generateMany(numQueries: Int, length: Int, allowDuplicates: Boolean = true): Collection<Query3> {
+        val result = if(allowDuplicates) mutableListOf<Query3>() else mutableSetOf<Query3>()
         repeat(numQueries) { result += generate(length) }
         return result
     }
@@ -320,6 +320,140 @@ fun main() {
             "Y" to listOf("a", "n", "o"),
             "Z" to listOf("o", "p", "q")
     ))
+    val rng100_3 = RandomQueryGenerator(mapOf(
+            "Q1" to listOf("a1", "b1", "c1"),
+            "R1" to listOf("c1", "d1", "e1"),
+            "S1" to listOf("e1", "f1", "g1"),
+            "T1" to listOf("g1", "h1", "i1"),
+            "U1" to listOf("g1", "j1", "k1"),
+            "V1" to listOf("g1", "l1", "m1"),
+            "W1" to listOf("a1", "e1", "g1"),
+            "X1" to listOf("a1", "m1", "n1"),
+            "Y1" to listOf("a1", "n1", "o1"),
+            "Z1" to listOf("o1", "p1", "q1"),
+            "Q2" to listOf("o1", "b2", "c2"),
+            "R2" to listOf("c2", "d2", "e2"),
+            "S2" to listOf("e2", "f2", "g2"),
+            "T2" to listOf("g2", "h2", "i2"),
+            "U2" to listOf("g2", "j2", "k2"),
+            "V2" to listOf("g2", "l2", "m2"),
+            "W2" to listOf("a2", "n1", "g2"),
+            "X2" to listOf("a2", "m2", "n2"),
+            "Y2" to listOf("a2", "n2", "o2"),
+            "Z2" to listOf("o2", "p2", "q2"),
+            "Q3" to listOf("a3", "b3", "c3"),
+            "R3" to listOf("c3", "d3", "e3"),
+            "S3" to listOf("e3", "f3", "g3"),
+            "T3" to listOf("g3", "h3", "i3"),
+            "U3" to listOf("g3", "j3", "k3"),
+            "V3" to listOf("a2", "l3", "m3"),
+            "W3" to listOf("a3", "e3", "g3"),
+            "X3" to listOf("a3", "m3", "j2"),
+            "Y3" to listOf("a3", "n3", "o3"),
+            "Z3" to listOf("o3", "p3", "q3"),
+            "Q4" to listOf("a4", "b4", "c4"),
+            "R4" to listOf("c4", "d4", "g3"),
+            "S4" to listOf("e4", "f4", "g4"),
+            "T4" to listOf("g4", "h4", "i4"),
+            "U4" to listOf("g4", "j4", "k4"),
+            "V4" to listOf("g4", "l4", "m4"),
+            "W4" to listOf("a4", "e4", "g4"),
+            "X4" to listOf("e3", "m4", "n4"),
+            "Y4" to listOf("a4", "n4", "o4"),
+            "Z4" to listOf("o4", "p4", "q4"),
+            "Q5" to listOf("a5", "b5", "c5"),
+            "R5" to listOf("c5", "d5", "e5"),
+            "S5" to listOf("e5", "f5", "i4"),
+            "T5" to listOf("g5", "h5", "i5"),
+            "U5" to listOf("g5", "e4", "k5"),
+            "V5" to listOf("g5", "l5", "m5"),
+            "W5" to listOf("a5", "e5", "g5"),
+            "X5" to listOf("a5", "m5", "n5"),
+            "Y5" to listOf("a5", "n5", "o5"),
+            "Z5" to listOf("o5", "p5", "q5"),
+            "Q6" to listOf("a1", "b1", "c1"),
+            "R6" to listOf("c1", "d1", "e1"),
+            "S6" to listOf("a5", "f1", "g1"),
+            "T6" to listOf("g1", "h1", "i1"),
+            "U6" to listOf("g1", "j1", "k1"),
+            "V6" to listOf("g1", "l1", "m1"),
+            "W6" to listOf("a1", "e1", "c5"),
+            "X6" to listOf("a1", "m1", "n1"),
+            "Y6" to listOf("a1", "n1", "o1"),
+            "Z6" to listOf("o1", "p1", "q1"),
+            "Q7" to listOf("a2", "b2", "c2"),
+            "R7" to listOf("c2", "d2", "e2"),
+            "S7" to listOf("e2", "f2", "g2"),
+            "T7" to listOf("g2", "h2", "i2"),
+            "U7" to listOf("e2", "j2", "k2"),
+            "V7" to listOf("g2", "l2", "m2"),
+            "W7" to listOf("a2", "e2", "g2"),
+            "X7" to listOf("a2", "m2", "e2"),
+            "Y7" to listOf("a2", "n2", "o2"),
+            "Z7" to listOf("o2", "p2", "q2"),
+            "Q8" to listOf("a3", "b3", "c3"),
+            "R8" to listOf("c3", "d3", "e3"),
+            "S8" to listOf("e3", "f3", "g3"),
+            "T8" to listOf("g3", "h3", "i3"),
+            "U8" to listOf("g3", "j3", "k3"),
+            "V8" to listOf("g3", "l3", "m3"),
+            "W8" to listOf("a3", "e3", "g3"),
+            "X8" to listOf("a3", "m3", "n3"),
+            "Y8" to listOf("a3", "n3", "o3"),
+            "Z8" to listOf("o3", "p3", "q3"),
+            "Q9" to listOf("a4", "b4", "c4"),
+            "R9" to listOf("c4", "d4", "e4"),
+            "S9" to listOf("e4", "f4", "g4"),
+            "T9" to listOf("e3", "h4", "i4"),
+            "U9" to listOf("g4", "j4", "k4"),
+            "V9" to listOf("g4", "f3", "g3"),
+            "W9" to listOf("a4", "e4", "g4"),
+            "X9" to listOf("a4", "m4", "n4"),
+            "Y9" to listOf("a4", "n4", "o4"),
+            "Z9" to listOf("o4", "p4", "q4"),
+            "Q10" to listOf("a5", "b5", "c5"),
+            "R10" to listOf("c5", "d5", "e5"),
+            "S10" to listOf("c4", "f5", "g5"),
+            "T10" to listOf("g5", "h5", "i5"),
+            "U10" to listOf("g5", "j5", "k5"),
+            "V10" to listOf("g5", "c1", "m5"),
+            "W10" to listOf("a5", "e5", "g5"),
+            "X10" to listOf("a5", "m5", "n5"),
+            "Y10" to listOf("a5", "n5", "c2"),
+            "Z10" to listOf("o5", "p5", "q5")
+    ))
+    val rng50_no_part = RandomQueryGenerator(mapOf(
+            "Q1" to listOf("a"),
+            "R1" to listOf("a"),
+            "S1" to listOf("a"),
+            "T1" to listOf("a"),
+            "U1" to listOf("a"),
+            "V1" to listOf("a"),
+            "W1" to listOf("a"),
+            "X1" to listOf("a"),
+            "Y1" to listOf("a"),
+            "Z1" to listOf("a"),
+            "Q2" to listOf("a"),
+            "R2" to listOf("a"),
+            "S2" to listOf("a"),
+            "T2" to listOf("a"),
+            "U2" to listOf("a"),
+            "V2" to listOf("a"),
+            "W2" to listOf("a"),
+            "X2" to listOf("a"),
+            "Y2" to listOf("a"),
+            "Z2" to listOf("a"),
+            "Q3" to listOf("a"),
+            "R3" to listOf("a"),
+            "S3" to listOf("a"),
+            "T3" to listOf("a"),
+            "U3" to listOf("a"),
+            "V3" to listOf("a"),
+            "W3" to listOf("a"),
+            "X3" to listOf("a"),
+            "Y3" to listOf("a"),
+            "Z3" to listOf("a")
+    ))
 
     val costWithoutSharing = mutableListOf<Double>()
     val costWithSharing = mutableListOf<Double>()
@@ -328,7 +462,7 @@ fun main() {
     val examinedProbeOrders = mutableListOf<Int>()
 
     for(i in 1..100) {
-        val ilp = scenario.createIlp3(rng10_3.generateMany(100, 3))
+        val ilp = scenario.createIlp3(rng50_no_part.generateMany(30, 6, false))
         val timeBefore = System.currentTimeMillis()
         val result = computeIlpSolution(ilp.ilp)
         times += (System.currentTimeMillis() - timeBefore)
@@ -346,6 +480,10 @@ fun main() {
 
         usedVariables += (ilp.builder.probeOrderTaskVariables.size + ilp.builder.probeOrderVariables.size)
         examinedProbeOrders += ilp.builder.probeOrderVariables.size
+
+        println("================")
+        println("===== $i =======")
+        println("================")
     }
 
     println("===============")
@@ -355,4 +493,5 @@ fun main() {
     println("Average variables used  ${usedVariables.average()}")
     println("Average probe orders ${examinedProbeOrders.average()}")
 
+    Runtime.getRuntime().exec("say es ist fertig")
 }
