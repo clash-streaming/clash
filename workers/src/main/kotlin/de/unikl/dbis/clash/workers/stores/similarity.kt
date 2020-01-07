@@ -7,7 +7,7 @@ import de.unikl.dbis.clash.query.AttributeAccess
 import java.io.Serializable
 
 class ActualSimilarityStore<T>(val config: ClashConfig) : ActualStore<T>, Serializable {
-    val tree = TreeWithMapModified()
+//    val tree = TreeWithMapModified() TODO
 
     override fun store(ats: Long, documents: List<Document>): DelayedStoreJoinResult<T> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

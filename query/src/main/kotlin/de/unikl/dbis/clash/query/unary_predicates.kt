@@ -51,6 +51,7 @@ data class AttributeLessThanConstant<T>(
         val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
+            is Int -> tuple[attributeAccess]!!.toInt() < constant
             is Long -> tuple[attributeAccess]!!.toLong() < constant
             is Double -> tuple[attributeAccess]!!.toDouble() < constant
             else -> tuple[attributeAccess]!! < constant.toString()
@@ -67,6 +68,7 @@ data class AttributeGreaterThanConstant<T>(
         val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
+            is Int -> tuple[attributeAccess]!!.toInt() > constant
             is Long -> tuple[attributeAccess]!!.toLong() > constant
             is Double -> tuple[attributeAccess]!!.toDouble() > constant
             else -> tuple[attributeAccess]!! > constant.toString()
@@ -84,6 +86,7 @@ data class AttributeLessThanOrEqualConstant<T>(
         val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
+            is Int -> tuple[attributeAccess]!!.toInt() <= constant
             is Long -> tuple[attributeAccess]!!.toLong() <= constant
             is Double -> tuple[attributeAccess]!!.toDouble() <= constant
             else -> tuple[attributeAccess]!! <= constant.toString()
@@ -100,6 +103,7 @@ data class AttributeGreaterThanOrEqualConstant<T>(
         val constant: T): UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return when(constant) {
+            is Int -> tuple[attributeAccess]!!.toInt() >= constant
             is Long -> tuple[attributeAccess]!!.toLong() >= constant
             is Double -> tuple[attributeAccess]!!.toDouble() >= constant
             else -> tuple[attributeAccess]!! >= constant.toString()
