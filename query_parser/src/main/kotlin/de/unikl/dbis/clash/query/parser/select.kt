@@ -9,7 +9,6 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem
 import net.sf.jsqlparser.statement.select.SelectItem
 import net.sf.jsqlparser.statement.select.SelectItemVisitorAdapter
 
-
 /**
  * This file contains functions for handling the SELECT part of a query
  */

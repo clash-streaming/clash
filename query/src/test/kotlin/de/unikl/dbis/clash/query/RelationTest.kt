@@ -1,6 +1,5 @@
 package de.unikl.dbis.clash.query
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class RelationTest {
@@ -57,5 +56,4 @@ internal class RelationTest {
 //                )
 //        )
     }
-
 }

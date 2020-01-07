@@ -1,6 +1,7 @@
 package de.unikl.dbis.clash.storm.reporters
 
 import com.codahale.metrics.MetricRegistry
+import java.util.concurrent.TimeUnit
 import metrics_influxdb.HttpInfluxdbProtocol
 import metrics_influxdb.InfluxdbProtocol
 import metrics_influxdb.InfluxdbReporter
@@ -8,8 +9,6 @@ import metrics_influxdb.api.measurements.MetricMeasurementTransformer
 import org.apache.storm.metrics2.reporters.ScheduledStormReporter
 import org.apache.storm.utils.ObjectReader
 import org.slf4j.LoggerFactory
-import java.util.concurrent.TimeUnit
-
 
 class InfluxStormReporter : ScheduledStormReporter() {
     val INFLUX_SCHEME = "influx.scheme"
@@ -52,7 +51,6 @@ class InfluxStormReporter : ScheduledStormReporter() {
         LOG.debug("Preparing...")
         val builder = InfluxdbReporter.forRegistry(metricsRegistry)
 
-
 //        val durationUnit = MetricsUtils.getMetricsDurationUnit(reporterConf)
         val durationUnit = TimeUnit.MILLISECONDS
         if (durationUnit != null) {
@@ -70,10 +68,10 @@ class InfluxStormReporter : ScheduledStormReporter() {
             builder.filter(filter)
         }
 
-        //defaults to 10
+        // defaults to 10
         reportingPeriod = getReportPeriod(reporterConf)
 
-        //defaults to seconds
+        // defaults to seconds
         reportingPeriodUnit = getReportPeriodUnit(reporterConf)
 
         val influxdbProtocol = getInfluxdbProtocol(reporterConf)
@@ -88,7 +86,6 @@ class InfluxStormReporter : ScheduledStormReporter() {
         val LOG = LoggerFactory.getLogger(InfluxStormReporter::class.java)!!
     }
 }
-
 
 /**
  * Metrics are communicated in the form
@@ -129,5 +126,4 @@ class InfluxStormTransformer : MetricMeasurementTransformer {
         val splittedLast = splitted.last()
         return splittedLast
     }
-
 }

@@ -1,6 +1,5 @@
 package de.unikl.dbis.clash.query
 
-
 class QueryBuilder {
     internal val from: MutableMap<RelationAlias, WindowDefinition> = mutableMapOf()
     internal val to: MutableList<String> = mutableListOf()

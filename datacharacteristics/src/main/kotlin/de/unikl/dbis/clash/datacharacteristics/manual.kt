@@ -5,7 +5,6 @@ import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.query.RelationAlias
 import java.util.HashMap
 
-
 fun sort(r1: RelationAlias, r2: RelationAlias): Array<RelationAlias> {
     val comparison = r1.inner.compareTo(r2.inner)
     return when {

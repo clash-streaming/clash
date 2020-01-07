@@ -2,14 +2,29 @@ package de.unikl.dbis.clash.optimizer.materializationtree.strategies
 
 import de.unikl.dbis.clash.datacharacteristics.DataCharacteristics
 import de.unikl.dbis.clash.estimator.estimateSize
-import de.unikl.dbis.clash.optimizer.*
-import de.unikl.dbis.clash.optimizer.materializationtree.*
+import de.unikl.dbis.clash.optimizer.CostEstimation
+import de.unikl.dbis.clash.optimizer.OptimizationParameters
+import de.unikl.dbis.clash.optimizer.PartitioningAttributesSelection
+import de.unikl.dbis.clash.optimizer.globalNumTasks
+import de.unikl.dbis.clash.optimizer.globalProbeTuplesSent
+import de.unikl.dbis.clash.optimizer.globalTuplesMaterialized
+import de.unikl.dbis.clash.optimizer.materializationtree.MatMultiStream
+import de.unikl.dbis.clash.optimizer.materializationtree.MatSource
+import de.unikl.dbis.clash.optimizer.materializationtree.MaterializationTree
+import de.unikl.dbis.clash.optimizer.materializationtree.MtNode
+import de.unikl.dbis.clash.optimizer.materializationtree.MultiStream
+import de.unikl.dbis.clash.optimizer.materializationtree.NonMatMultiStream
+import de.unikl.dbis.clash.optimizer.materializationtree.TreeOptimizationResult
+import de.unikl.dbis.clash.optimizer.materializationtree.TreeStrategy
+import de.unikl.dbis.clash.optimizer.materializationtree.createMultiStreamImpl
+import de.unikl.dbis.clash.optimizer.materializationtree.parallelismFor
+import de.unikl.dbis.clash.optimizer.materializationtree.storageCostFor
+import de.unikl.dbis.clash.optimizer.noPartitioning
 import de.unikl.dbis.clash.query.AttributeAccess
 import de.unikl.dbis.clash.query.BinaryEquality
 import de.unikl.dbis.clash.query.Query
 import de.unikl.dbis.clash.query.RelationAlias
 import kotlin.math.ceil
-
 
 /**
  * The idea of this algorithm is, to start with a flat tree and iteratively combine children of the root
@@ -48,7 +63,7 @@ class TopDownTheta : TreeStrategy() {
         val children = query.inputMap.keys.toList()
         val n = children.size
         val initialChildren = mutableListOf<TDTree>()
-        for(i in 0 until n) {
+        for (i in 0 until n) {
             initialChildren += TDTree(i, i, listOf(children[i]), emptyList())
         }
         var currentT = TDTree(0, n - 1, children, initialChildren)
@@ -57,11 +72,11 @@ class TopDownTheta : TreeStrategy() {
         var currentCapacity = children.map { dataCharacteristics.getRate(it) }.sum()
         var usedTasks = 5 // TODO
 //        var usedTasks = children.map { parallelismFor(it, dataCharacteristics, params.taskCapacity) }.sum()
-        while(currentCapacity < maxCapacity && usedTasks < params.availableTasks) {
+        while (currentCapacity < maxCapacity && usedTasks < params.availableTasks) {
             val (i, j, scost) = findMinScost(currentT, dataCharacteristics, n) ?: break
             currentCapacity += scost
             usedTasks += ceil(scost / params.taskCapacity).toInt()
-            if(currentCapacity > maxCapacity || usedTasks > params.availableTasks) {
+            if (currentCapacity > maxCapacity || usedTasks > params.availableTasks) {
                 break
             }
             currentT = materialize(currentT, i, j)
@@ -82,14 +97,14 @@ class TopDownTheta : TreeStrategy() {
         var bestJ = 0
         var bestSCost: Double = Double.MAX_VALUE
 
-        for(i in 0 until n-1) {
+        for (i in 0 until n - 1) {
             for (j in i until n) {
-                if(!valid(currentT, i, j)) {
+                if (!valid(currentT, i, j)) {
                     continue
                 }
                 foundSomething = true
                 val ijCost = costFor(i, j, currentT.relationAliases, dataCharacteristics)
-                if(ijCost < bestSCost) {
+                if (ijCost < bestSCost) {
                     bestSCost = ijCost
                     bestI = i
                     bestJ = j
@@ -97,7 +112,7 @@ class TopDownTheta : TreeStrategy() {
             }
         }
 
-        if(foundSomething) {
+        if (foundSomething) {
             return Triple(bestI, bestJ, bestSCost)
         } else {
             return null
@@ -105,7 +120,7 @@ class TopDownTheta : TreeStrategy() {
     }
 
     private fun materialize(tree: TDTree, i: Int, j: Int): TDTree {
-        for ((index, child )in tree.children.withIndex()) {
+        for ((index, child)in tree.children.withIndex()) {
             // indeces are completely in a child => delegate to that child
             if (i >= child.leftIndex && j <= child.rightIndex) {
                 val newChildren = tree.children.subList(0, index) + materialize(child, i, j) + tree.children.subList(index + 1, tree.children.size)
@@ -118,12 +133,12 @@ class TopDownTheta : TreeStrategy() {
         val materializedChildAliases = tree.relationAliases.subList(i - tree.leftIndex, j - tree.leftIndex + 1)
         val materializedChildChildren = tree.children.subList(indexOfLeftChild, indexOfRightChild + 1)
         val materializedChild = TDTree(i, j, materializedChildAliases, materializedChildChildren)
-        val newChildren = tree.children.subList(0, indexOfLeftChild) + materializedChild + tree.children.subList(indexOfRightChild+1, tree.children.size)
+        val newChildren = tree.children.subList(0, indexOfLeftChild) + materializedChild + tree.children.subList(indexOfRightChild + 1, tree.children.size)
         return TDTree(tree.leftIndex, tree.rightIndex, tree.relationAliases, newChildren)
     }
 
     private fun costFor(i: Int, j: Int, relationAliases: List<RelationAlias>, dataCharacteristics: DataCharacteristics): Double {
-        return estimateSize(relationAliases.subList(i, j+1), dataCharacteristics)
+        return estimateSize(relationAliases.subList(i, j + 1), dataCharacteristics)
     }
 
     private fun valid(tree: TDTree, i: Int, j: Int): Boolean {
@@ -148,7 +163,7 @@ class TopDownTheta : TreeStrategy() {
     }
 
     private fun buildRoot(tree: TDTree, query: Query, dataCharacteristics: DataCharacteristics, optimizationParameters: OptimizationParameters): NonMatMultiStream {
-        val children = tree.children.map { buildTree(it, query, dataCharacteristics, optimizationParameters, noPartitioning())}
+        val children = tree.children.map { buildTree(it, query, dataCharacteristics, optimizationParameters, noPartitioning()) }
         return NonMatMultiStream(
                 query.result,
                 children,
@@ -157,12 +172,12 @@ class TopDownTheta : TreeStrategy() {
     }
 
     private fun buildTree(tree: TDTree, query: Query, dataCharacteristics: DataCharacteristics, optimizationParameters: OptimizationParameters, partitioning: PartitioningAttributesSelection): MtNode {
-        if(tree.leftIndex == tree.rightIndex) {
+        if (tree.leftIndex == tree.rightIndex) {
             val relation = query.result.subRelation(tree.relationAliases.first())
             val partitioningAttributes = partitioning[relation.aliases.toList()] ?: listOf()
             return MatSource(relation, parallelismFor(relation, dataCharacteristics, optimizationParameters.taskCapacity), partitioningAttributes, storageCostFor(relation, dataCharacteristics))
         } else {
-            val children = tree.children.map { buildTree(it, query, dataCharacteristics, optimizationParameters, noPartitioning())}
+            val children = tree.children.map { buildTree(it, query, dataCharacteristics, optimizationParameters, noPartitioning()) }
             val childRelation = query.result.subRelation(*tree.relationAliases.toTypedArray())
             return MatMultiStream(
                     childRelation,
@@ -178,7 +193,7 @@ class TopDownTheta : TreeStrategy() {
 
 data class TDTree(val leftIndex: Int, val rightIndex: Int, val relationAliases: List<RelationAlias>, val children: List<TDTree>) {
     override fun toString(): String {
-        if(leftIndex == rightIndex) {
+        if (leftIndex == rightIndex) {
             return relationAliases.first().inner
         }
         return children.joinToString(",", "(", ")")
@@ -186,24 +201,24 @@ data class TDTree(val leftIndex: Int, val rightIndex: Int, val relationAliases: 
 }
 
 fun fixInnerPartitioning(matTree: MtNode) {
-    if(matTree is MultiStream) {
+    if (matTree is MultiStream) {
         matTree.children.forEach { fixInnerPartitioning(it) }
         // do we need to fix something?
         // only if a child has no partitioning
         // and the child appears in an equi predicate
         val candidates = mutableMapOf<MtNode, MutableList<AttributeAccess>>()
-        for(child in matTree.children) {
-            if(child.partitioning.isNotEmpty() || child is MatSource)
+        for (child in matTree.children) {
+            if (child.partitioning.isNotEmpty() || child is MatSource)
                 continue
-            for(predicate in matTree.relation.binaryPredicates) {
-                if(predicate is BinaryEquality) {
-                    if(child.relation.aliases.contains(predicate.leftAttributeAccess.relationAlias)
-                            && !child.relation.aliases.contains(predicate.rightAttributeAccess.relationAlias)) {
+            for (predicate in matTree.relation.binaryPredicates) {
+                if (predicate is BinaryEquality) {
+                    if (child.relation.aliases.contains(predicate.leftAttributeAccess.relationAlias) &&
+                            !child.relation.aliases.contains(predicate.rightAttributeAccess.relationAlias)) {
                         candidates.getOrPut(child, { mutableListOf() })
                         candidates[child]!!.add(predicate.leftAttributeAccess)
                     }
-                    if(child.relation.aliases.contains(predicate.rightAttributeAccess.relationAlias)
-                            && !child.relation.aliases.contains(predicate.leftAttributeAccess.relationAlias)) {
+                    if (child.relation.aliases.contains(predicate.rightAttributeAccess.relationAlias) &&
+                            !child.relation.aliases.contains(predicate.leftAttributeAccess.relationAlias)) {
                         candidates.getOrPut(child, { mutableListOf() })
                         candidates[child]!!.add(predicate.rightAttributeAccess)
                     }
@@ -211,7 +226,7 @@ fun fixInnerPartitioning(matTree: MtNode) {
             }
         }
 
-        for(candidate in candidates) {
+        for (candidate in candidates) {
             candidate.key.partitioning = candidate.value
         }
     }

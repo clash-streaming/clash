@@ -1,7 +1,5 @@
 package de.unikl.dbis.clash.physical
 
-
-
 object DotPrinter {
 
     /**
@@ -119,7 +117,7 @@ object DotPrinter {
 
 fun InRule.dotLabel(): String {
     val edgeLabel = this.incomingEdgeLabel.label
-    val rest = when(this) {
+    val rest = when (this) {
         is ReportInRule -> this.dotLabel()
         is ControlInRule -> this.dotLabel()
         is TickInRule -> this.dotLabel()
@@ -132,7 +130,7 @@ fun InRule.dotLabel(): String {
 }
 
 fun OutRule.dotLabel(): String {
-    return when(this) {
+    return when (this) {
         is ReportOutRule -> this.dotLabel()
         is ControlOutRule -> this.dotLabel()
         is TickOutRule -> this.dotLabel()

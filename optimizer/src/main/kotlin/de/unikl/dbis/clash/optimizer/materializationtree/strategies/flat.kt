@@ -1,11 +1,23 @@
 package de.unikl.dbis.clash.optimizer.materializationtree.strategies
 
 import de.unikl.dbis.clash.datacharacteristics.DataCharacteristics
-import de.unikl.dbis.clash.optimizer.*
-import de.unikl.dbis.clash.optimizer.materializationtree.*
+import de.unikl.dbis.clash.optimizer.CostEstimation
+import de.unikl.dbis.clash.optimizer.OptimizationParameters
+import de.unikl.dbis.clash.optimizer.PartitioningAttributesSelection
+import de.unikl.dbis.clash.optimizer.globalNumTasks
+import de.unikl.dbis.clash.optimizer.globalProbeTuplesSent
+import de.unikl.dbis.clash.optimizer.globalTuplesMaterialized
+import de.unikl.dbis.clash.optimizer.materializationtree.MatSource
+import de.unikl.dbis.clash.optimizer.materializationtree.MaterializationTree
+import de.unikl.dbis.clash.optimizer.materializationtree.NonMatMultiStream
+import de.unikl.dbis.clash.optimizer.materializationtree.TreeOptimizationResult
+import de.unikl.dbis.clash.optimizer.materializationtree.TreeStrategy
+import de.unikl.dbis.clash.optimizer.materializationtree.createMultiStreamImpl
+import de.unikl.dbis.clash.optimizer.materializationtree.parallelismFor
+import de.unikl.dbis.clash.optimizer.materializationtree.storageCostFor
+import de.unikl.dbis.clash.optimizer.noPartitioning
 import de.unikl.dbis.clash.query.Query
 import de.unikl.dbis.clash.query.Relation
-
 
 /**
  * All strategies in this file issue minimal materialization, a.k.a., they produce a flat tree.
@@ -40,8 +52,7 @@ class FlatTheta : TreeStrategy() {
  *
  * This can be used as starting point for iterative building of other shapes of materialization trees.
  */
-fun createFlatTree(relation: Relation, dataCharacteristics: DataCharacteristics, params: OptimizationParameters, partitioning: PartitioningAttributesSelection): MaterializationTree {
-    val leafRelations = relation.baseRelations()
+fun createFlatTree(relation: Relation, dataCharacteristics: DataCharacteristics, params: OptimizationParameters, partitioning: PartitioningAttributesSelection): MaterializationTree { val leafRelations = relation.baseRelations()
     val children = leafRelations.map {
         val storageCost = storageCostFor(it, dataCharacteristics)
         val partitioningAttributes = partitioning[it.aliases.toList()] ?: listOf()

@@ -18,14 +18,15 @@ fun main(args: Array<String>) = ClashCLI()
                 Validate())
         .main(args)
 
-
 class ClashCLI : CliktCommand() {
     override fun run() = Unit
 }
 
-abstract class CommonCLI(help: String = "",
-                         epilog: String = "") : CliktCommand(help, epilog) {
-    val config by option("--config", "-c").convert { readConfig(it) }.default( ClashConfig() ) // TODO
+abstract class CommonCLI(
+    help: String = "",
+    epilog: String = ""
+) : CliktCommand(help, epilog) {
+    val config by option("--config", "-c").convert { readConfig(it) }.default(ClashConfig()) // TODO
 }
 
 fun disableLogging() {

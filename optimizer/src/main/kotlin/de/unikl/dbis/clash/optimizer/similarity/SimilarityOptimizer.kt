@@ -1,14 +1,26 @@
 package de.unikl.dbis.clash.optimizer.similarity
 
 import de.unikl.dbis.clash.datacharacteristics.DataCharacteristics
-import de.unikl.dbis.clash.optimizer.*
-import de.unikl.dbis.clash.physical.*
+import de.unikl.dbis.clash.optimizer.GlobalStrategy
+import de.unikl.dbis.clash.optimizer.OptimizationParameters
+import de.unikl.dbis.clash.optimizer.OptimizationResult
+import de.unikl.dbis.clash.optimizer.emptyCost
+import de.unikl.dbis.clash.physical.EdgeType
+import de.unikl.dbis.clash.physical.GenericBinaryPredicateEvaluation
+import de.unikl.dbis.clash.physical.JoinResultRule
+import de.unikl.dbis.clash.physical.OutputStub
+import de.unikl.dbis.clash.physical.PhysicalGraph
+import de.unikl.dbis.clash.physical.RelationReceiveRule
+import de.unikl.dbis.clash.physical.RelationSendRule
+import de.unikl.dbis.clash.physical.SimilarityStore
+import de.unikl.dbis.clash.physical.addEdge
+import de.unikl.dbis.clash.physical.label
 import de.unikl.dbis.clash.query.Query
 import java.lang.RuntimeException
 
 class SimilarityOptimizer() : GlobalStrategy {
     override fun optimize(query: Query, dataCharacteristics: DataCharacteristics, params: OptimizationParameters): OptimizationResult {
-        if(query.inputMap.size != 2) {
+        if (query.inputMap.size != 2) {
             throw RuntimeException("Similarity strategy cannot handle ${query.inputMap.size} relations, has to be exactly 2.")
         }
         val (aliasA, aliasB) = query.inputMap.keys.toList()

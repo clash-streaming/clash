@@ -5,7 +5,18 @@ import de.unikl.dbis.clash.optimizer.GlobalStrategy
 import de.unikl.dbis.clash.optimizer.OptimizationParameters
 import de.unikl.dbis.clash.optimizer.OptimizationResult
 import de.unikl.dbis.clash.optimizer.emptyCost
-import de.unikl.dbis.clash.physical.*
+import de.unikl.dbis.clash.physical.BinaryPredicateEvaluation
+import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationLeftStored
+import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationRightStored
+import de.unikl.dbis.clash.physical.EdgeType
+import de.unikl.dbis.clash.physical.JoinResultRule
+import de.unikl.dbis.clash.physical.OutputStub
+import de.unikl.dbis.clash.physical.PhysicalGraph
+import de.unikl.dbis.clash.physical.RelationReceiveRule
+import de.unikl.dbis.clash.physical.RelationSendRule
+import de.unikl.dbis.clash.physical.ThetaStore
+import de.unikl.dbis.clash.physical.addEdge
+import de.unikl.dbis.clash.physical.label
 import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Query
 import java.lang.RuntimeException
@@ -16,7 +27,7 @@ import java.lang.RuntimeException
  */
 class BinaryTheta : GlobalStrategy {
     override fun optimize(query: Query, dataCharacteristics: DataCharacteristics, params: OptimizationParameters): OptimizationResult {
-        if(query.inputMap.size != 2) {
+        if (query.inputMap.size != 2) {
             throw RuntimeException("BinaryTheta strategy cannot handle ${query.inputMap.size} relations, has to be exactly 2.")
         }
         val (aliasA, aliasB) = query.inputMap.keys.toList()
@@ -66,7 +77,6 @@ class BinaryTheta : GlobalStrategy {
         val storeBResultEdge = addEdge(storeB, outputStub, EdgeType.SHUFFLE)
         storeB.addRule(RelationSendRule(query.result, storeBResultEdge))
 
-
         return OptimizationResult(physicalGraph, emptyCost())
     }
 
@@ -78,10 +88,9 @@ class BinaryTheta : GlobalStrategy {
      */
     private fun predicatesForStore(store: ThetaStore, binaryPredicates: Collection<BinaryPredicate>): Set<BinaryPredicateEvaluation> {
         return binaryPredicates.map { predicate ->
-            if(store.relation.aliases.contains(predicate.leftRelationAlias))
+            if (store.relation.aliases.contains(predicate.leftRelationAlias))
                 BinaryPredicateEvaluationLeftStored(predicate)
             else BinaryPredicateEvaluationRightStored(predicate)
         }.toSet()
     }
-
 }

@@ -2,7 +2,6 @@ package de.unikl.dbis.clash.query
 
 import java.io.Serializable
 
-
 data class WindowDefinition internal constructor(val variant: Variant, val amount: Long) : Serializable {
     enum class Variant {
         None,
@@ -11,7 +10,7 @@ data class WindowDefinition internal constructor(val variant: Variant, val amoun
     }
 
     override fun toString(): String {
-        return when(variant) {
+        return when (variant) {
             Variant.None -> "[∞]"
             Variant.TimeInS -> "[$amount s]"
             Variant.Count -> "[$amount t]"

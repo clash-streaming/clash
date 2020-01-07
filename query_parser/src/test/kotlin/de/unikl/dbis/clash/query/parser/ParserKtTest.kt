@@ -1,13 +1,26 @@
 package de.unikl.dbis.clash.query.parser
 
-import de.unikl.dbis.clash.query.*
+import de.unikl.dbis.clash.query.AttributeAccess
+import de.unikl.dbis.clash.query.BinaryEquality
+import de.unikl.dbis.clash.query.ConstantEquality
+import de.unikl.dbis.clash.query.RelationAlias
+import de.unikl.dbis.clash.query.WindowDefinition
 import io.mockk.mockk
-import net.sf.jsqlparser.expression.*
+import net.sf.jsqlparser.expression.DateValue
+import net.sf.jsqlparser.expression.DoubleValue
+import net.sf.jsqlparser.expression.HexValue
+import net.sf.jsqlparser.expression.LongValue
+import net.sf.jsqlparser.expression.NullValue
+import net.sf.jsqlparser.expression.SignedExpression
+import net.sf.jsqlparser.expression.StringValue
+import net.sf.jsqlparser.expression.TimeValue
+import net.sf.jsqlparser.expression.TimestampValue
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo
 import net.sf.jsqlparser.schema.Column
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions.entry
 import org.junit.jupiter.api.Test
-
 
 internal class ParserKtTest {
 
@@ -40,7 +53,6 @@ internal class ParserKtTest {
                 entry(RelationAlias("y"), WindowDefinition.infinite())
         )
     }
-
 
     @Test
     fun `from with window and without alias is found`() {
@@ -95,7 +107,6 @@ internal class ParserKtTest {
                 entry(RelationAlias("y2"), WindowDefinition.infinite())
         )
     }
-
 
     @Test
     fun `from with window and without alias is found for multiple relations`() {
@@ -193,7 +204,7 @@ internal class ParserKtTest {
 
         val e2 = EqualsTo()
         e2.leftExpression = DoubleValue("1.02")
-        e2.rightExpression= Column("x")
+        e2.rightExpression = Column("x")
         assertThat(isUnary(e2)).isTrue()
     }
 
@@ -226,7 +237,6 @@ internal class ParserKtTest {
     @Test
     fun `regression test - date function is treated as constant`() {
         val q = """SELECT * FROM x WHERE o.orderdate < date '1995-03-01'"""
-
     }
 
     @Test

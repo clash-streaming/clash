@@ -15,12 +15,12 @@ import de.unikl.dbis.clash.storm.builder.StormTopologyBuilder
 import de.unikl.dbis.clash.storm.spouts.CommonSpoutI
 import org.apache.storm.generated.StormTopology
 
-
 class Clash @JvmOverloads constructor(
-        private val config: ClashConfig = ClashConfig(),
-        private val dataCharacteristics: DataCharacteristics = AllCross(),
-        private val optimizationParameters: OptimizationParameters = OptimizationParameters(),
-        private var query: Query? = null) {
+    private val config: ClashConfig = ClashConfig(),
+    private val dataCharacteristics: DataCharacteristics = AllCross(),
+    private val optimizationParameters: OptimizationParameters = OptimizationParameters(),
+    private var query: Query? = null
+) {
 
     private val sources: MutableMap<InputName, CommonSpoutI> = mutableMapOf()
     private val sinks: MutableMap<Relation, CommonSinkI> = mutableMapOf()
@@ -52,7 +52,7 @@ class Clash @JvmOverloads constructor(
     }
 
     fun optimize(): OptimizationResult {
-        if(optimizationResult == null) optimizationResult = optimizationParameters.globalStrategy.optimize(this.query!!, this.dataCharacteristics, this.optimizationParameters)
+        if (optimizationResult == null) optimizationResult = optimizationParameters.globalStrategy.optimize(this.query!!, this.dataCharacteristics, this.optimizationParameters)
         return optimizationResult!!
     }
 
@@ -70,7 +70,6 @@ class Clash @JvmOverloads constructor(
         storageCost = optimizationResult!!.costEstimation.storageCost
     }
 
-
     @Throws(InvalidClashTopologyException::class)
     fun buildStormTopology(): StormTopology {
         if (this.physicalGraph == null) {
@@ -83,8 +82,8 @@ class Clash @JvmOverloads constructor(
         val builder = StormTopologyBuilder(
                 this.physicalGraph!!,
                 this.sources,
-                sink=sink, // TODO maybe there is an input mapping missing
-                config=this.config)
+                sink = sink, // TODO maybe there is an input mapping missing
+                config = this.config)
         return builder.build()
     }
 }

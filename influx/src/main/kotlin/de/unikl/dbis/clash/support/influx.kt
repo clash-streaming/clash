@@ -4,10 +4,10 @@ import org.influxdb.InfluxDBFactory
 import org.influxdb.InfluxDBIOException
 
 data class InfluxConfig(
-        val influxDbName: String,
-        val influxUsername: String,
-        val influxPassword: String,
-        val influxUrl: String
+    val influxDbName: String,
+    val influxUsername: String,
+    val influxPassword: String,
+    val influxUrl: String
 )
 
 fun checkInflux(config: InfluxConfig): Boolean {
@@ -24,7 +24,7 @@ fun checkInflux(config: InfluxConfig): Boolean {
     }
 
     val dbName = config.influxDbName
-    if(!influxDB.databaseExists(dbName)) {
+    if (!influxDB.databaseExists(dbName)) {
         influxDB.createDatabase(dbName)
         println("Created InfluxDB $dbName")
     }

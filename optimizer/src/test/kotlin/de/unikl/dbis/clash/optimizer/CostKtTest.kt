@@ -11,7 +11,6 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-
 internal class CostKtTest {
     val rRate = 100.0
     val sRate = 100.0
@@ -39,7 +38,6 @@ internal class CostKtTest {
     val rsPred = BinaryEquality(AttributeAccess("R", "x"), AttributeAccess("S", "x"))
     val stPred = BinaryEquality(AttributeAccess("S", "y"), AttributeAccess("T", "y"))
 
-
     @Test
     fun `probeTuplesSentForProbeOrder works correctly for R,S,T`() {
         val probeOrderForR = ProbeOrder(listOf(
@@ -53,7 +51,6 @@ internal class CostKtTest {
                 Assertions.entry(sNode, rRate * sRate * rsSel * tParallelism * 1.0 / 2.0)
         )
     }
-
 
     @Test
     fun `relationSizeForProbeOrder works correctly for R,S,T`() {
@@ -70,8 +67,8 @@ internal class CostKtTest {
                 Pair(tNode, setOf(stPred))
         )
         assertThat(res.steps.first { it.first == rNode }.third).isEqualTo(rRate, Assertions.offset(0.001))
-        assertThat(res.steps.first { it.first == sNode }.third).isEqualTo(rRate * sRate * rsSel * 1.0/2.0, Assertions.offset(0.001))
-        assertThat(res.steps.first { it.first == tNode }.third).isEqualTo(rRate * sRate * rsSel * tRate * stSel * 1.0/3.0, Assertions.offset(0.001))
+        assertThat(res.steps.first { it.first == sNode }.third).isEqualTo(rRate * sRate * rsSel * 1.0 / 2.0, Assertions.offset(0.001))
+        assertThat(res.steps.first { it.first == tNode }.third).isEqualTo(rRate * sRate * rsSel * tRate * stSel * 1.0 / 3.0, Assertions.offset(0.001))
     }
 
     @Test
@@ -89,7 +86,7 @@ internal class CostKtTest {
                 Pair(tNode, setOf(stPred))
         )
         assertThat(res.steps.first { it.first == sNode }.third).isEqualTo(sRate, Assertions.offset(0.001))
-        assertThat(res.steps.first { it.first == rNode }.third).isEqualTo(rRate * sRate * rsSel * 1.0/2.0, Assertions.offset(0.001))
-        assertThat(res.steps.first { it.first == tNode }.third).isEqualTo(rRate * sRate * rsSel * tRate * stSel * 1.0/3.0, Assertions.offset(0.001))
+        assertThat(res.steps.first { it.first == rNode }.third).isEqualTo(rRate * sRate * rsSel * 1.0 / 2.0, Assertions.offset(0.001))
+        assertThat(res.steps.first { it.first == tNode }.third).isEqualTo(rRate * sRate * rsSel * tRate * stSel * 1.0 / 3.0, Assertions.offset(0.001))
     }
 }

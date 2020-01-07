@@ -1,6 +1,5 @@
 package de.unikl.dbis.clash.api.json_args
 
-
 /**
  * Parent object that is fed into CLASH.
  *
@@ -10,8 +9,8 @@ package de.unikl.dbis.clash.api.json_args
  * If a cluster is given, a topology is produced and sent to the cluster.
  */
 data class JsonArg(
-        val query: String,
-        val optimizationParameters: JsonOptimizationParameters? = null,
-        val dataCharacteristics: JsonDataCharacteristicsArg? = null,
-        val cluster: JsonClusterArg? = null
+    val query: String,
+    val optimizationParameters: JsonOptimizationParameters? = null,
+    val dataCharacteristics: JsonDataCharacteristicsArg? = null,
+    val cluster: JsonClusterArg? = null
 )

@@ -3,7 +3,7 @@ package de.unikl.dbis.clash.optimizer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class OptimizeKtTest {
+internal class RegistryTest {
 
     @Test
     fun `DEFAULT of GlobalStrategyRegistry is contained in SUPPORTED`() {

@@ -5,12 +5,16 @@ import de.unikl.dbis.clash.query.InputName
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.storm.FinishedMessage
 import de.unikl.dbis.clash.support.PostgresConfig
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.ResultSet
+import java.sql.SQLException
+import java.sql.Statement
+import java.util.Properties
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.utils.Utils
 import org.slf4j.LoggerFactory
-import java.sql.*
-import java.util.*
 
 /**
  * The PgTableSpout emits the tuples from a postgres table with configurable delay.
@@ -40,11 +44,13 @@ class PgTableSpout : CommonSpout, CommonSpoutI {
      * @param millisDelay the amount of delay in milliseconds between two tuples
      * @param config ClashConfig where Postgres connection information is stored
      */
-    constructor(inputName: InputName,
-                baseRelation: RelationAlias,
-                query: String,
-                millisDelay: Int,
-                config: PostgresConfig) : super(millisDelay) {
+    constructor(
+        inputName: InputName,
+        baseRelation: RelationAlias,
+        query: String,
+        millisDelay: Int,
+        config: PostgresConfig
+    ) : super(millisDelay) {
         this.inputName = inputName
         this.relationAlias = baseRelation
         this.query = query
@@ -59,7 +65,6 @@ class PgTableSpout : CommonSpout, CommonSpoutI {
         createResultSet()
         loadMetadata()
     }
-
 
     override fun nextTuple() {
         if (this.alreadyFinishedSent) {
@@ -117,7 +122,6 @@ class PgTableSpout : CommonSpout, CommonSpoutI {
             e.printStackTrace()
             throw RuntimeException()
         }
-
     }
 
     private fun createResultSet() {
@@ -130,7 +134,6 @@ class PgTableSpout : CommonSpout, CommonSpoutI {
             e.printStackTrace()
             throw RuntimeException()
         }
-
     }
 
     private fun loadMetadata() {
@@ -146,7 +149,6 @@ class PgTableSpout : CommonSpout, CommonSpoutI {
             e.printStackTrace()
             throw RuntimeException()
         }
-
     }
 
     override fun toString(): String {

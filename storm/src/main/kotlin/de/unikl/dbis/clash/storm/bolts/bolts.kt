@@ -3,17 +3,27 @@ package de.unikl.dbis.clash.storm.bolts
 import com.codahale.metrics.Counter
 import com.codahale.metrics.Timer
 import de.unikl.dbis.clash.physical.Rule
-import de.unikl.dbis.clash.storm.*
+import de.unikl.dbis.clash.storm.ControlMessage
+import de.unikl.dbis.clash.storm.DataPathMessage
+import de.unikl.dbis.clash.storm.DocumentsMessage
+import de.unikl.dbis.clash.storm.EdgyOutputCollector
+import de.unikl.dbis.clash.storm.FinishedMessage
+import de.unikl.dbis.clash.storm.MessageVariant
+import de.unikl.dbis.clash.storm.PunctuationMessage
+import de.unikl.dbis.clash.storm.SiRuleSet
+import de.unikl.dbis.clash.storm.StormInRule
+import de.unikl.dbis.clash.storm.StormRelationReceiveRule
+import de.unikl.dbis.clash.storm.StormRelationSendRule
+import de.unikl.dbis.clash.storm.TickMessage
+import java.io.Serializable
+import java.util.HashMap
+import java.util.HashSet
 import org.apache.storm.task.OutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichBolt
 import org.apache.storm.tuple.Tuple
 import org.slf4j.LoggerFactory
-import java.io.Serializable
-import java.util.HashMap
-import java.util.HashSet
-
 
 abstract class AbstractBolt(open val name: String) : BaseRichBolt(), CommonSinkI {
     val ruleSet = SiRuleSet()
@@ -69,8 +79,7 @@ abstract class AbstractBolt(open val name: String) : BaseRichBolt(), CommonSinkI
     }
 
     fun executeTick(fromTuple: TickMessage, inRule: StormInRule) {
-        if(fromTuple.ats % 10 == 0L) {
-
+        if (fromTuple.ats % 10 == 0L) {
         }
     }
 
@@ -89,16 +98,18 @@ abstract class AbstractBolt(open val name: String) : BaseRichBolt(), CommonSinkI
         }
     }
 
-
-
-    open fun executeDocuments(message: DocumentsMessage,
-                              stormInRule: StormInRule) {
+    open fun executeDocuments(
+        message: DocumentsMessage,
+        stormInRule: StormInRule
+    ) {
     }
 
     fun executeFinished(message: FinishedMessage, stormInRule: StormInRule) {}
 
-    fun executePunctuation(message: PunctuationMessage,
-                           stormInRule: StormInRule) {
+    fun executePunctuation(
+        message: PunctuationMessage,
+        stormInRule: StormInRule
+    ) {
     }
 
     open fun resetState() { }
@@ -107,7 +118,6 @@ abstract class AbstractBolt(open val name: String) : BaseRichBolt(), CommonSinkI
         private val LOG = LoggerFactory.getLogger(AbstractBolt::class.java)
     }
 }
-
 
 /**
  * The DispatchBolt collects tuples from the spouts. The incoming tuples are assumed to have exactly
@@ -123,8 +133,9 @@ class DispatchBolt(name: String) : AbstractBolt(name), IDispatcherStats by Dispa
     }
 
     override fun executeDocuments(
-            message: DocumentsMessage,
-            stormInRule: StormInRule) {
+        message: DocumentsMessage,
+        stormInRule: StormInRule
+    ) {
         val timerContext = dispatchingTimer.time()
 
         val documents = message.documents
@@ -155,7 +166,6 @@ class DispatchBolt(name: String) : AbstractBolt(name), IDispatcherStats by Dispa
     }*/
         timerContext.stop()
         tuplesDispatchedCounter.inc()
-
     }
 
     override fun resetState() {
@@ -182,7 +192,7 @@ interface IDispatcherStats : Serializable {
     var dispatchingTimer: Timer
 }
 
-class DispatcherStats: IDispatcherStats {
+class DispatcherStats : IDispatcherStats {
     override lateinit var tuplesDispatchedCounter: Counter
 
     override lateinit var dispatchingTimer: Timer
@@ -192,7 +202,6 @@ class DispatcherStats: IDispatcherStats {
         dispatchingTimer = topologyContext.registerTimer("clash_metric.dispatchingTimer")
     }
 }
-
 
 class FinishedJoiner : Serializable {
     private val waitingFor = mutableMapOf<String, MutableSet<Int>>()
@@ -231,7 +240,6 @@ internal class SequenceTable : Serializable {
 
     private val inner = mutableMapOf<String, MutableMap<Int, Long>>()
 
-
     fun update(sourceComponent: String, sourceTask: Int, seq: Long) {
         val value = this.inner[sourceComponent]!![sourceTask]!!
         if (seq > value) {
@@ -247,7 +255,6 @@ internal class SequenceTable : Serializable {
     }
 }
 
-
 interface IStormStats : Serializable {
     fun registerMetrics(topologyContext: TopologyContext)
 
@@ -257,7 +264,7 @@ interface IStormStats : Serializable {
     val storeMessagesReadCounter: Counter
 }
 
-class StormStats: IStormStats {
+class StormStats : IStormStats {
     override lateinit var probeTuplesReadCounter: Counter
     override lateinit var probeMessagesReadCounter: Counter
     override lateinit var storeTuplesReadCounter: Counter

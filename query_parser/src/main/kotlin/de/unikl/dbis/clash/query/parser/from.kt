@@ -9,7 +9,6 @@ import net.sf.jsqlparser.statement.select.FromItemVisitorAdapter
 import net.sf.jsqlparser.statement.select.Join
 import net.sf.jsqlparser.statement.select.TableFunction
 
-
 /**
  * This file contains functions for handling the FROM part of a query
  */
@@ -26,11 +25,11 @@ data class BasicFrom(val inputName: InputName, val windowArgs: List<String>, val
             if (windowArgs[0] != "sliding") {
                 throw QueryParseException("Window type '${windowArgs[0]}' is not supported.")
             }
-            if (windowArgs[1].toLongOrNull() == null
-                    || windowArgs[1].toLong() <= 0) {
+            if (windowArgs[1].toLongOrNull() == null ||
+                    windowArgs[1].toLong() <= 0) {
                 throw QueryParseException("Do not understand window size ${windowArgs[1]}.")
             }
-            return when(windowArgs[2]) {
+            return when (windowArgs[2]) {
                 "seconds", "second" -> WindowDefinition.seconds(windowArgs[1].toLong())
                 "minutes", "minute" -> WindowDefinition.minutes(windowArgs[1].toLong())
                 "hours", "hour" -> WindowDefinition.hours(windowArgs[1].toLong())
@@ -40,8 +39,8 @@ data class BasicFrom(val inputName: InputName, val windowArgs: List<String>, val
 }
 
 fun extractFrom(
-        stmt: FromItem,
-        joins: List<Join>
+    stmt: FromItem,
+    joins: List<Join>
 ): MutableList<BasicFrom> {
 
     val fromElements = mutableListOf<BasicFrom>()

@@ -11,7 +11,6 @@ import de.unikl.dbis.clash.optimizer.probeorder.ProbeOrderOptimizationStrategy
 import de.unikl.dbis.clash.optimizer.similarity.SimilarityOptimizer
 import kotlin.system.exitProcess
 
-
 /**
  * Here are all strategies collected that can be used.
  */
@@ -20,7 +19,7 @@ object GlobalStrategyRegistry {
     val SUPPORTED = arrayOf("Flat", "LeftDeepGreedy")
 
     fun initialize(name: String = DEFAULT, args: Map<String, Any>? = null): GlobalStrategy {
-        return when(name) {
+        return when (name) {
             "Flat" -> FlatTheta()
             "BinaryTheta" -> BinaryTheta()
             "LeftDeepGreedy" -> LeftDeepGreedyTheta()
@@ -35,13 +34,12 @@ object GlobalStrategyRegistry {
     }
 }
 
-
 object ProbeOrderStrategyRegistry {
     const val DEFAULT = "LeastSent"
     val SUPPORTED = arrayOf("LeastIntermediate", "LeastSent")
 
     fun initialize(name: String = DEFAULT, args: Map<String, Any>? = null): ProbeOrderOptimizationStrategy {
-        return when(name) {
+        return when (name) {
             "LeastIntermediate" -> LeastIntermediatesProbeOrder()
             "LeastSent" -> LeastSentProbeOrder()
             else -> {

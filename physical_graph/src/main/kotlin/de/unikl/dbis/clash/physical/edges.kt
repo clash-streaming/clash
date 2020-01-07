@@ -2,31 +2,30 @@ package de.unikl.dbis.clash.physical
 
 import java.io.Serializable
 
-
 open class EdgeLabel
 /**
  * Generates a new EdgeLabel.
- * @param edgeType  The type that corresponds to the distribution method
- * @param from      The node this edge originates
- * @param to        The node this edge arrives
- */
-(val edgeType: EdgeType,
- val from: Node,
- val to: Node) : Serializable {
+ * @param edgeType The type that corresponds to the distribution method
+ * @param from The node this edge originates
+ * @param to The node this edge arrives
+ */(
+     val edgeType: EdgeType,
+     val from: Node,
+     val to: Node
+ ) : Serializable {
     val label: String
 
     init {
         this.label = "s_" + EdgeLabel.globalCounter++
     }
 
-
     override fun equals(other: Any?): Boolean {
-        return (other != null
-                && other is EdgeLabel
-                && other.edgeType == this.edgeType
-                && other.from == this.from
-                && other.to == this.to
-                && other.label == this.label)
+        return (other != null &&
+                other is EdgeLabel &&
+                other.edgeType == this.edgeType &&
+                other.from == this.from &&
+                other.to == this.to &&
+                other.label == this.label)
     }
 
     override fun hashCode(): Int {
@@ -49,7 +48,6 @@ open class EdgeLabel
     }
 }
 
-
 class GroupedEdgeLabel
 /**
  * Generates a new GroupedEdgeLabel.
@@ -57,16 +55,16 @@ class GroupedEdgeLabel
  * @param group The attribute according to which the stream is grouped
  * @param from The node this edge originates
  * @param to The node this edge arrives
- */
-(
-        from: Node,
-        to: Node,
-        val group: String) : EdgeLabel(EdgeType.GROUP_BY, from, to) {
+ */(
+     from: Node,
+     to: Node,
+     val group: String
+ ) : EdgeLabel(EdgeType.GROUP_BY, from, to) {
 
     override fun equals(other: Any?): Boolean {
-        return (super.equals(other)
-                && other is GroupedEdgeLabel
-                && other.group == this.group)
+        return (super.equals(other) &&
+                other is GroupedEdgeLabel &&
+                other.group == this.group)
     }
 
     override fun hashCode(): Int {
@@ -82,7 +80,6 @@ class GroupedEdgeLabel
                 this.group)
     }
 }
-
 
 /**
  * Created by manuel on 08.11.16.

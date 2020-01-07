@@ -4,7 +4,6 @@ import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.query.RelationAlias
 
-
 class TpchOnlyJoinsCharacteristics
 internal constructor(query: String) : DataCharacteristics {
     private val rates = mutableMapOf<RelationAlias, Double>()
@@ -115,5 +114,4 @@ internal constructor(query: String) : DataCharacteristics {
             return TpchOnlyJoinsCharacteristics(Q11)
         }
     }
-
 }

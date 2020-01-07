@@ -7,12 +7,12 @@ import de.unikl.dbis.clash.optimizer.materializationtree.MtNode
 import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.operations.joinRelations
 
-
 interface ProbeOrderOptimizationStrategy {
-    fun optimize(dataCharacteristics: DataCharacteristics,
-                 predicates: Collection<BinaryPredicate>,
-                 children: Collection<MtNode>): Pair<ProbeOrders, ProbeCost>
-
+    fun optimize(
+        dataCharacteristics: DataCharacteristics,
+        predicates: Collection<BinaryPredicate>,
+        children: Collection<MtNode>
+    ): Pair<ProbeOrders, ProbeCost>
 }
 
 /**
@@ -23,7 +23,7 @@ interface ProbeOrderOptimizationStrategy {
  *
  * This means, it does not care how many receivers there are.
  */
-class LeastIntermediatesProbeOrder: ProbeOrderOptimizationStrategy {
+class LeastIntermediatesProbeOrder : ProbeOrderOptimizationStrategy {
     override fun optimize(dataCharacteristics: DataCharacteristics, predicates: Collection<BinaryPredicate>, children: Collection<MtNode>):
             Pair<ProbeOrders, ProbeCost> {
         val probeOrders = ProbeOrders(children.associate { Pair(it, leastIntermediatesProbeOrderFor(dataCharacteristics, predicates, children, it)) })
@@ -39,7 +39,7 @@ class LeastIntermediatesProbeOrder: ProbeOrderOptimizationStrategy {
         var cost = 0.0
         var currentRelation = startingNode.relation
 
-        while(schedulableNodes.isNotEmpty()) {
+        while (schedulableNodes.isNotEmpty()) {
             // find the element which generates the smallest join size with the chosen prefix
             val (nextNode, joinSize, foundRelation) = schedulableNodes.map {
                 val candidateRelation = joinRelations(currentRelation, it.relation, predicates)
@@ -64,7 +64,7 @@ class LeastIntermediatesProbeOrder: ProbeOrderOptimizationStrategy {
  * At step P It selects two relations R' and R'' and minimizes $(P \Join R') \cdot N(R'')$.
  * Note that the choice of R'' is not fixed at this point.
  */
-class LeastSentProbeOrder: ProbeOrderOptimizationStrategy {
+class LeastSentProbeOrder : ProbeOrderOptimizationStrategy {
     override fun optimize(dataCharacteristics: DataCharacteristics, predicates: Collection<BinaryPredicate>, children: Collection<MtNode>):
             Pair<ProbeOrders, ProbeCost> {
         val probeOrders = ProbeOrders(children.associate { Pair(it, leastSentProbeOrderFor(dataCharacteristics, predicates, children, it)) })
@@ -77,7 +77,7 @@ class LeastSentProbeOrder: ProbeOrderOptimizationStrategy {
 
         val result = mutableListOf(Pair(startingNode, setOf<BinaryPredicate>()))
         var cost = 0.0
-        while(todo.isNotEmpty()) {
+        while (todo.isNotEmpty()) {
             // find the element which generates the smallest join size with the chosen prefix
             val (nextRelation, cur) = todo.map { node ->
                 // TODO does this what I think it does?

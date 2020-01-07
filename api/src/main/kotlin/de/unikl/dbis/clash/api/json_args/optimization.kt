@@ -9,12 +9,11 @@ import de.unikl.dbis.clash.optimizer.ProbeOrderStrategyRegistry
 import de.unikl.dbis.clash.optimizer.probeorder.ProbeOrderOptimizationStrategy
 import de.unikl.dbis.clash.query.RelationAlias
 
-
 data class JsonOptimizationParameters(
-        val taskCapacity: Long,
-        val availableTasks: Long,
-        val globalStrategy: JsonGlobalStragegy,
-        val probeOrderOptimizationStrategy: JsonProbeOrderStrategy
+    val taskCapacity: Long,
+    val availableTasks: Long,
+    val globalStrategy: JsonGlobalStragegy,
+    val probeOrderOptimizationStrategy: JsonProbeOrderStrategy
 ) {
     fun get(): OptimizationParameters {
         return OptimizationParameters(
@@ -27,8 +26,8 @@ data class JsonOptimizationParameters(
 }
 
 data class JsonGlobalStragegy(
-        val name: String,
-        val params: Map<String, Any>? = null
+    val name: String,
+    val params: Map<String, Any>? = null
 ) {
     fun get(): GlobalStrategy {
         return GlobalStrategyRegistry.initialize(name, params)
@@ -36,8 +35,8 @@ data class JsonGlobalStragegy(
 }
 
 data class JsonProbeOrderStrategy(
-        val name: String,
-        val params: Map<String, Any>? = null
+    val name: String,
+    val params: Map<String, Any>? = null
 ) {
     fun get(): ProbeOrderOptimizationStrategy {
         return ProbeOrderStrategyRegistry.initialize(name, params)
@@ -45,16 +44,15 @@ data class JsonProbeOrderStrategy(
 }
 
 data class JsonDataCharacteristicsArg(
-        val rates: Map<String, Double>,
-        val selectivities: Map<String, Map<String, Double>>
+    val rates: Map<String, Double>,
+    val selectivities: Map<String, Map<String, Double>>
 ) {
     fun get(): DataCharacteristics {
         val dcRates = rates.map { RelationAlias(it.key) to it.value }.toMap()
         val dcSelectivities = selectivities
                 .flatMap { outer -> outer.value
-                        .map { inner -> Pair(RelationAlias(outer.key), RelationAlias(inner.key)) to inner.value} }
+                        .map { inner -> Pair(RelationAlias(outer.key), RelationAlias(inner.key)) to inner.value } }
                 .toMap()
         return SymmetricJSONCharacteristics(dcRates, dcSelectivities)
     }
 }
-

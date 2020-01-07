@@ -1,13 +1,32 @@
 package de.unikl.dbis.clash.storm.builder
 
 import de.unikl.dbis.clash.ClashConfig
-import de.unikl.dbis.clash.physical.*
+import de.unikl.dbis.clash.physical.ControlOutRule
+import de.unikl.dbis.clash.physical.Controller
+import de.unikl.dbis.clash.physical.ControllerInput
+import de.unikl.dbis.clash.physical.Dispatcher
+import de.unikl.dbis.clash.physical.EdgeType
+import de.unikl.dbis.clash.physical.InputStub
+import de.unikl.dbis.clash.physical.Node
+import de.unikl.dbis.clash.physical.OutRule
+import de.unikl.dbis.clash.physical.PartitionedStore
+import de.unikl.dbis.clash.physical.PhysicalGraph
+import de.unikl.dbis.clash.physical.SimilarityStore
+import de.unikl.dbis.clash.physical.Sink
+import de.unikl.dbis.clash.physical.Spout
+import de.unikl.dbis.clash.physical.Store
+import de.unikl.dbis.clash.physical.ThetaStore
+import de.unikl.dbis.clash.physical.TickOutRule
+import de.unikl.dbis.clash.physical.TickSpout
 import de.unikl.dbis.clash.query.InputName
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.query.inputForRelation
 import de.unikl.dbis.clash.storm.DataPathMessage
 import de.unikl.dbis.clash.storm.StormEdgeLabel
-import de.unikl.dbis.clash.storm.bolts.*
+import de.unikl.dbis.clash.storm.bolts.CommonSinkI
+import de.unikl.dbis.clash.storm.bolts.ControlBolt
+import de.unikl.dbis.clash.storm.bolts.DispatchBolt
+import de.unikl.dbis.clash.storm.bolts.GeneralStore
 import de.unikl.dbis.clash.storm.spouts.CommonSpout
 import de.unikl.dbis.clash.storm.spouts.CommonSpoutI
 import de.unikl.dbis.clash.storm.spouts.ControlSpout
@@ -22,18 +41,16 @@ import org.apache.storm.topology.TopologyBuilder
 import org.apache.storm.tuple.Fields
 import org.slf4j.LoggerFactory
 
-
 class StormTopologyBuilder(
-        val inputGraph: PhysicalGraph,
-        val spouts: Map<InputName, CommonSpoutI> = mapOf(),
-        val inputMap: Map<RelationAlias, InputName> = mapOf(),
-        val sink: CommonSinkI,
-        val config: ClashConfig = ClashConfig()
+    val inputGraph: PhysicalGraph,
+    val spouts: Map<InputName, CommonSpoutI> = mapOf(),
+    val inputMap: Map<RelationAlias, InputName> = mapOf(),
+    val sink: CommonSinkI,
+    val config: ClashConfig = ClashConfig()
 ) {
     companion object {
         val LOG = LoggerFactory.getLogger(StormTopologyBuilder::class.java)!!
     }
-
 
     private lateinit var enhancedGraph: StormPhysicalGraph
 
@@ -55,10 +72,10 @@ class StormTopologyBuilder(
         this.buildDispatcher(this.enhancedGraph.dispatcher, builder)
         this.buildSink(this.enhancedGraph.sink, builder)
 
-        if(enhancedGraph.controller != null) {
+        if (enhancedGraph.controller != null) {
             this.buildController(this.enhancedGraph.controllerInput!!, this.enhancedGraph.controller!!, builder)
         }
-        if(this.enhancedGraph.tickSpout != null) {
+        if (this.enhancedGraph.tickSpout != null) {
             this.buildTickSpout(this.enhancedGraph.tickSpout!!, builder)
         }
 
@@ -94,10 +111,10 @@ class StormTopologyBuilder(
 
     internal fun buildSpout(spoutNode: Spout, builder: TopologyBuilder) {
         LOG.debug("Building spout {}...", spoutNode.label)
-        val spout = spouts[inputForRelation(spoutNode.relation, inputMap)] ?: throw RuntimeException("Trying to build spout '" + spoutNode.label
-                + "' but no spout with this label was registered.")
+        val spout = spouts[inputForRelation(spoutNode.relation, inputMap)] ?: throw RuntimeException("Trying to build spout '" + spoutNode.label +
+                "' but no spout with this label was registered.")
         spoutNode.rules.forEach {
-            when(it) { is OutRule -> (spout as CommonSpout).addRule(it) }
+            when (it) { is OutRule -> (spout as CommonSpout).addRule(it) }
         }
         builder.setSpout(spoutNode.label, spout)
         LOG.debug("Spout {} built.", spoutNode.label)
@@ -114,7 +131,7 @@ class StormTopologyBuilder(
         val nodeLabel = storeNode.label
         LOG.debug("Building store {}...", nodeLabel)
 
-        val store: ActualStore<StormEdgeLabel> = when(storeNode) {
+        val store: ActualStore<StormEdgeLabel> = when (storeNode) {
             is PartitionedStore -> NaiveHashStore(config)
             is ThetaStore -> NaiveNestedLoopStore(config)
             is SimilarityStore -> ActualSimilarityStore(config)
@@ -131,8 +148,10 @@ class StormTopologyBuilder(
         LOG.debug("Store {} built.", storeNode.label)
     }
 
-    internal fun buildDispatcher(dispatcherNode: Dispatcher,
-                                 builder: TopologyBuilder) {
+    internal fun buildDispatcher(
+        dispatcherNode: Dispatcher,
+        builder: TopologyBuilder
+    ) {
         LOG.debug("Building dispatcher {}...", dispatcherNode.label)
         val dispatcher = DispatchBolt(dispatcherNode.label)
         val declarer = builder

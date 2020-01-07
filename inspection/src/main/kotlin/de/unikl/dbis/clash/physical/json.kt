@@ -2,7 +2,6 @@ package de.unikl.dbis.clash.physical
 
 import org.json.JSONObject
 
-
 /**
  * A PhysicalGraph's JSON representation is as follows:
  * {
@@ -21,7 +20,7 @@ import org.json.JSONObject
 
 fun PhysicalGraph.toJson(): JSONObject {
     fun niceLabel(node: Node): String {
-        return when(node) {
+        return when (node) {
             is Spout, is InputStub -> "${node.label}-spout"
             is PartitionedStore -> "${node.label}-store"
             else -> node.label
@@ -29,13 +28,13 @@ fun PhysicalGraph.toJson(): JSONObject {
     }
 
     fun addPartitioning(obj: JSONObject, node: Node) {
-        when(node) {
+        when (node) {
             is PartitionedStore -> obj.put("partitioning", node.partitionAttributes)
         }
     }
 
     fun nodeType(node: Node): String {
-        return when(node) {
+        return when (node) {
             is Spout, is InputStub -> "Spout"
             is PartitionedStore -> "Store"
             is Sink, is OutputStub -> "Sink"

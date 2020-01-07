@@ -12,10 +12,10 @@ fun allProbeOrders(query: IlpQuery): Collection<ProbeOrder> {
 }
 
 fun probeOrdersFor(head: List<QueriedRelation>, query: IlpQuery): Collection<ProbeOrder> {
-    return when(head.size) {
+    return when (head.size) {
         query.relations.size -> { explode(head).map { ProbeOrder(it.first, it.second) } }
         else -> {
-            val nextElements = query.relations.filter { !head.contains(it) && notCross(head, it)}
+            val nextElements = query.relations.filter { !head.contains(it) && notCross(head, it) }
             val x = nextElements.map { probeOrdersFor(head + it, query) }
             x.flatten()
         }
@@ -33,7 +33,7 @@ fun probeOrdersFor(head: List<QueriedRelation>, query: IlpQuery): Collection<Pro
  */
 fun explode(boundRelations: List<QueriedRelation>): List<Pair<QueriedRelation, List<PartitionedRelation>>> {
     fun _explode_rec(prefix: List<Pair<QueriedRelation, List<PartitionedRelation>>>, reminder: List<QueriedRelation>): List<Pair<QueriedRelation, List<PartitionedRelation>>> {
-        if(reminder.isEmpty()) {
+        if (reminder.isEmpty()) {
             return prefix
         } else {
             val current = reminder.first()

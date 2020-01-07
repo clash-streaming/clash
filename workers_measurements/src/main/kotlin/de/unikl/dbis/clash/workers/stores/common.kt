@@ -6,15 +6,14 @@ import de.unikl.dbis.clash.query.AttributeAccess
 class EmptyReceiver
 
 data class StoreResult(
-        val ats: Long,
-        val documents: List<Document>
+    val ats: Long,
+    val documents: List<Document>
 )
 
 data class ProbeResult(
-        val ats: Long,
-        val documents: List<Document>
+    val ats: Long,
+    val documents: List<Document>
 )
-
 
 class RandomDocumentGenerator {
     val accesses = listOf(AttributeAccess("R.x"), AttributeAccess("R.y"), AttributeAccess("R.z"))

@@ -3,8 +3,6 @@ package de.unikl.dbis.clash.query
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class AttributeLesserThanConstantTest {
-
     internal class AttributeLessThanConstantTest {
         @Test
         fun `predicate works for numbers`() {
@@ -42,4 +40,3 @@ internal class AttributeLesserThanConstantTest {
             Assertions.assertThat(predicate.evaluate(d4)).isTrue()
         }
     }
-}

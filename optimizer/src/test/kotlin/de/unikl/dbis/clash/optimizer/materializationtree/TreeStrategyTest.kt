@@ -5,9 +5,7 @@ import de.unikl.dbis.clash.optimizer.OptimizationParameters
 import de.unikl.dbis.clash.optimizer.materializationtree.strategies.FlatTheta
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.query.parser.parseQuery
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-
 
 internal class TreeStrategyTest {
 //    @Test TODO
@@ -36,4 +34,3 @@ internal class TreeStrategyTest {
 //        assertThat { treeStrategy.optimize(query, dataCharacteristics, params1) }.doesNotThrowAnyException()
     }
 }
-

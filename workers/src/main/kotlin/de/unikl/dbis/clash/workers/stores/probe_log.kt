@@ -5,25 +5,30 @@ import de.unikl.dbis.clash.documents.Document
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluation
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationLeftStored
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationRightStored
-import org.slf4j.LoggerFactory
 import java.io.Serializable
-import java.util.*
+import java.util.SortedMap
+import java.util.TreeMap
+import org.slf4j.LoggerFactory
 
 // TODO T was edeg label
-data class LaterProbe<T>(private val timestamp: Long,
-                      val creationTime: Long,
-                      val documents: List<Document>,
-                      val predicates: Collection<BinaryPredicateEvaluation>,
-                      val resultTargets: Collection<T>)
+data class LaterProbe<T>(
+    private val timestamp: Long,
+    val creationTime: Long,
+    val documents: List<Document>,
+    val predicates: Collection<BinaryPredicateEvaluation>,
+    val resultTargets: Collection<T>
+)
 
 interface ProbeLogI<T> {
     fun restrict()
 
-    fun put(seq: Long,
-            creationTime: Long,
-            documents: List<Document>,
-            predicates: Collection<BinaryPredicateEvaluation>,
-            resultTargets: Collection<T>)
+    fun put(
+        seq: Long,
+        creationTime: Long,
+        documents: List<Document>,
+        predicates: Collection<BinaryPredicateEvaluation>,
+        resultTargets: Collection<T>
+    )
 
     fun size(): Int
 
@@ -31,7 +36,7 @@ interface ProbeLogI<T> {
 }
 
 // TODO T was edeg label
-class ProbeLog<T>(config: ClashConfig): ProbeLogI<T>, Serializable {
+class ProbeLog<T>(config: ClashConfig) : ProbeLogI<T>, Serializable {
     val probeLogMaxKeys = config.probeLogMaxKeys
     private val buffer = TreeMap<Long, LaterProbe<T>>()
 
@@ -53,16 +58,18 @@ class ProbeLog<T>(config: ClashConfig): ProbeLogI<T>, Serializable {
         return this.buffer.subMap(fromSeq, toSeq)
     }
 
-    override fun put(seq: Long,
-                     creationTime: Long,
-                     documents: List<Document>,
-                     predicates: Collection<BinaryPredicateEvaluation>,
-                     resultTargets: Collection<T>) {
+    override fun put(
+        seq: Long,
+        creationTime: Long,
+        documents: List<Document>,
+        predicates: Collection<BinaryPredicateEvaluation>,
+        resultTargets: Collection<T>
+    ) {
         val laterProbe = LaterProbe(seq, creationTime, documents, predicates, resultTargets)
         this.buffer[seq] = laterProbe
-        if(probeLogMaxKeys > 0)
+        if (probeLogMaxKeys > 0)
             restrict()
-        //this.clearUpto(seq - 1000) // TODO this is a hack before: 1000
+        // this.clearUpto(seq - 1000) // TODO this is a hack before: 1000
     }
 
     override fun size(): Int {
@@ -88,16 +95,18 @@ class ProbeLog<T>(config: ClashConfig): ProbeLogI<T>, Serializable {
         return result
     }
 
-    fun join(probed: Collection<Document>,
-             stored: Collection<Document>,
-             predicates: Collection<BinaryPredicateEvaluation>): List<Document> {
+    fun join(
+        probed: Collection<Document>,
+        stored: Collection<Document>,
+        predicates: Collection<BinaryPredicateEvaluation>
+    ): List<Document> {
         val result = ArrayList<Document>()
 
         for (probedDocument in probed) {
             for (storedDocument in stored) {
                 var isJoinable = true
                 for (predicateEvaluation in predicates) {
-                    val (left, right) = when(predicateEvaluation) {
+                    val (left, right) = when (predicateEvaluation) {
                         is BinaryPredicateEvaluationLeftStored -> Pair(storedDocument, probedDocument)
                         is BinaryPredicateEvaluationRightStored -> Pair(probedDocument, storedDocument)
                         else -> throw RuntimeException("Predicate Evaluation was not of type BinaryPredicateEvaluation!")
@@ -123,7 +132,6 @@ class ProbeLog<T>(config: ClashConfig): ProbeLogI<T>, Serializable {
     }
 }
 
-
 class DelayedStoreJoinResult<T>(val seq: Long) {
     private val _inner = mutableListOf<InnerDelayedStoreJoinResult>()
 
@@ -131,9 +139,10 @@ class DelayedStoreJoinResult<T>(val seq: Long) {
         get() = this._inner
 
     fun add(
-            creationTime: Long,
-            joinResult: List<Document>,
-            resultTargets: Collection<T>) {
+        creationTime: Long,
+        joinResult: List<Document>,
+        resultTargets: Collection<T>
+    ) {
         this._inner.add(InnerDelayedStoreJoinResult(creationTime, joinResult, resultTargets))
     }
 
@@ -146,9 +155,9 @@ class DelayedStoreJoinResult<T>(val seq: Long) {
     }
 
     inner class InnerDelayedStoreJoinResult internal constructor(
-            var creationTime: Long,
-            var joinResult: List<Document>,
-            var resultTargets: Collection<T>
+        var creationTime: Long,
+        var joinResult: List<Document>,
+        var resultTargets: Collection<T>
     )
 }
 

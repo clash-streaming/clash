@@ -1,9 +1,9 @@
 package de.unikl.dbis.clash.storm.spouts
 
 import de.unikl.dbis.clash.documents.Document
+import java.util.EmptyStackException
+import java.util.Stack
 import org.apache.storm.utils.Utils
-import java.util.*
-
 
 class ExplicitTupleSpout : CommonSpout() {
 
@@ -16,7 +16,6 @@ class ExplicitTupleSpout : CommonSpout() {
         } catch (e: EmptyStackException) {
             Utils.sleep(60000)
         }
-
     }
 
     fun put(document: Document): ExplicitTupleSpout {

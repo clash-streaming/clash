@@ -25,7 +25,7 @@ enum class MessageVariant {
             val receivingStream = tuple.sourceStreamId
             val stormInRule = ruleSet.inRuleFor(receivingStream)
 
-            return when(stormInRule) {
+            return when (stormInRule) {
                 is StormControlInRule -> Control
                 is StormIntermediateJoinRule,
                 is StormJoinResultRule,
@@ -37,7 +37,6 @@ enum class MessageVariant {
         }
     }
 }
-
 
 /**
  * application time stamp, i.e. the timestamp used for guaranteeing correctness
@@ -57,7 +56,6 @@ abstract class AbstractMessage {
         return this.asValues()
     }
 }
-
 
 /**
  * It is possible to sent multiple messages over the data path, which all share logical and
@@ -120,7 +118,6 @@ abstract class DataPathMessage internal constructor(val ats: ATS, val its: ITS) 
     }
 }
 
-
 class ControlMessage(instruction: String) : AbstractMessage() {
     val instruction: Instruction
 
@@ -135,7 +132,6 @@ class ControlMessage(instruction: String) : AbstractMessage() {
     enum class Instruction constructor(private val serInstruction: String) {
         RESET_STATE(RESET_STATE_CODE),
         REPORT(REPORT_CODE);
-
 
         companion object {
 
@@ -189,13 +185,17 @@ class TickMessage(val ats: ATS, val its: ITS) : AbstractMessage() {
     }
 }
 
-class DocumentsMessage(ats: ATS,
-                       its: ITS,
-                       val documents: List<Document>) : DataPathMessage(ats, its) {
+class DocumentsMessage(
+    ats: ATS,
+    its: ITS,
+    val documents: List<Document>
+) : DataPathMessage(ats, its) {
 
-    constructor(ats: ATS,
-                its: ITS,
-                document: Document) : this(ats, its, listOf<Document>(document))
+    constructor(
+        ats: ATS,
+        its: ITS,
+        document: Document
+    ) : this(ats, its, listOf<Document>(document))
 
     override fun asValues(groupingAttribute: String): Values {
         val groupingValue = this.documents[0][groupingAttribute] ?: "_"
@@ -222,7 +222,6 @@ class DocumentsMessage(ats: ATS,
         return this.asValues("_")
     }
 }
-
 
 class FinishedMessage(ats: ATS, its: ITS) : DataPathMessage(ats, its) {
     override fun asValues(groupingAttribute: String): Values {

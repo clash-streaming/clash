@@ -2,19 +2,36 @@ package de.unikl.dbis.clash.optimizer.materializationtree.strategies
 
 import de.unikl.dbis.clash.datacharacteristics.DataCharacteristics
 import de.unikl.dbis.clash.estimator.estimateSize
-import de.unikl.dbis.clash.optimizer.*
-import de.unikl.dbis.clash.optimizer.materializationtree.*
+import de.unikl.dbis.clash.optimizer.CostEstimation
+import de.unikl.dbis.clash.optimizer.OptimizationParameters
+import de.unikl.dbis.clash.optimizer.PartitioningAttributesSelection
+import de.unikl.dbis.clash.optimizer.globalNumTasks
+import de.unikl.dbis.clash.optimizer.globalProbeTuplesSent
+import de.unikl.dbis.clash.optimizer.globalTuplesMaterialized
+import de.unikl.dbis.clash.optimizer.joinSize
+import de.unikl.dbis.clash.optimizer.materializationtree.MatMultiStream
+import de.unikl.dbis.clash.optimizer.materializationtree.MatSource
+import de.unikl.dbis.clash.optimizer.materializationtree.MaterializationTree
+import de.unikl.dbis.clash.optimizer.materializationtree.MtNode
+import de.unikl.dbis.clash.optimizer.materializationtree.NonMatMultiStream
+import de.unikl.dbis.clash.optimizer.materializationtree.TreeOptimizationResult
+import de.unikl.dbis.clash.optimizer.materializationtree.TreeStrategy
+import de.unikl.dbis.clash.optimizer.materializationtree.createMultiStreamImpl
+import de.unikl.dbis.clash.optimizer.materializationtree.parallelismFor
+import de.unikl.dbis.clash.optimizer.materializationtree.storageCostFor
+import de.unikl.dbis.clash.optimizer.minimalRequiredTasks
+import de.unikl.dbis.clash.optimizer.noPartitioning
+import de.unikl.dbis.clash.optimizer.tuplesMaterializedForRelation
 import de.unikl.dbis.clash.query.Predicate
 import de.unikl.dbis.clash.query.Query
 import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.query.isCrossProduct
 import de.unikl.dbis.clash.support.ceil
 
-
 /**
  * This strategy constructs a left deep plan, such that the number of materialized intermediate tuples is minimized
  */
-open class LeftDeepGreedyTheta: TreeStrategy() {
+open class LeftDeepGreedyTheta : TreeStrategy() {
     override fun optimizeTree(query: Query, dataCharacteristics: DataCharacteristics, params: OptimizationParameters): TreeOptimizationResult {
         val tree = leastMaterializationGeneralizedLeftDeep(query, dataCharacteristics, params, 5) // TODO why 5?
         val numTasks = globalNumTasks(tree.root)
@@ -33,12 +50,12 @@ internal fun leastMaterializationGeneralizedLeftDeep(query: Query, dataCharacter
     var bestCost = Double.POSITIVE_INFINITY
     val relation = query.result
 
-    for(startRelation in relation.baseRelations()) {
+    for (startRelation in relation.baseRelations()) {
         val notYetJoinedRelations = relation.baseRelations().toMutableSet()
         notYetJoinedRelations.remove(startRelation)
         val joinedRelations = mutableListOf(startRelation)
         var cost = 0.0
-        while(notYetJoinedRelations.isNotEmpty()) {
+        while (notYetJoinedRelations.isNotEmpty()) {
             val nextRelation = notYetJoinedRelations
                     .filter {
                         optimizationParameters.crossProductsAllowed || !isCrossProduct(relation.binaryPredicates, joinedRelations, it)
@@ -52,7 +69,7 @@ internal fun leastMaterializationGeneralizedLeftDeep(query: Query, dataCharacter
             notYetJoinedRelations.remove(nextRelation.first)
             cost += nextRelation.second
         }
-        if(cost < bestCost) {
+        if (cost < bestCost) {
             bestOrder = joinedRelations
             bestCost = cost
         }
@@ -67,7 +84,6 @@ internal fun leastMaterializationGeneralizedLeftDeep(query: Query, dataCharacter
     return MaterializationTree(plan)
 }
 
-
 /**
  * For a list [a, b, c, d, ...] constructs a left-deep tree recursively "top-down" as follows:
  *        ...
@@ -79,11 +95,11 @@ internal fun leastMaterializationGeneralizedLeftDeep(query: Query, dataCharacter
  *
  */
 internal fun leftDeepFor(orderedRelations: List<Relation>, dataCharacteristics: DataCharacteristics, optimizationParameters: OptimizationParameters, binaryPredicates: Collection<Predicate>, upperIsMaterialized: Boolean = false): MtNode {
-    if(orderedRelations.size < 2) {
+    if (orderedRelations.size < 2) {
         error("Cannot produce left-deep tree for less than two relations!")
     }
     // Termination
-    if(orderedRelations.size == 2) {
+    if (orderedRelations.size == 2) {
         val leftChild = matSource(orderedRelations[0], dataCharacteristics, optimizationParameters, noPartitioning())
         val rightChild = matSource(orderedRelations[1], dataCharacteristics, optimizationParameters, noPartitioning())
         return if (upperIsMaterialized) {
@@ -102,7 +118,6 @@ internal fun leftDeepFor(orderedRelations: List<Relation>, dataCharacteristics: 
     }
 }
 
-
 /**
  * For a list [a, b, c, d, ...] constructs a left-deep tree bottom-up as follows:
  *        ...
@@ -115,23 +130,23 @@ internal fun leftDeepFor(orderedRelations: List<Relation>, dataCharacteristics: 
  * Where the last node is n-ary.
  */
 internal fun leftDeepFor2(query: Query, orderedRelations: List<Relation>, dataCharacteristics: DataCharacteristics, optimizationParameters: OptimizationParameters, binaryPredicates: Collection<Predicate>, upperIsMaterialized: Boolean = false): MtNode {
-    if(orderedRelations.size < 2) {
+    if (orderedRelations.size < 2) {
         error("Cannot produce left-deep tree for less than two relations!")
     }
 
-    var currentTree: MtNode  = matSource(orderedRelations[0], dataCharacteristics, optimizationParameters, noPartitioning())
+    var currentTree: MtNode = matSource(orderedRelations[0], dataCharacteristics, optimizationParameters, noPartitioning())
     var currentMaterializationCost = orderedRelations.map { estimateSize(it, dataCharacteristics) }.sum()
     var currentRequiredTasks = minimalRequiredTasks(query, dataCharacteristics, optimizationParameters.taskCapacity)
     var i = 1
 
     // Build the left-deep part as long as there are enough resources
-    while(i < orderedRelations.size - 1) {
+    while (i < orderedRelations.size - 1) {
         var relationToAdd = orderedRelations[i]
 
         val relationIfJoined = currentTree.relation.join(binaryPredicates, relationToAdd)
         val sizeOfNewStore = tuplesMaterializedForRelation(relationIfJoined, dataCharacteristics)
         val tasksOfNewStore = (sizeOfNewStore / optimizationParameters.taskCapacity.toDouble()).ceil()
-        if(currentMaterializationCost + sizeOfNewStore > optimizationParameters.totalCapacity ||
+        if (currentMaterializationCost + sizeOfNewStore > optimizationParameters.totalCapacity ||
                 tasksOfNewStore + currentRequiredTasks > optimizationParameters.availableTasks) {
             // There is no space for materializing the additional result
             break
@@ -147,7 +162,7 @@ internal fun leftDeepFor2(query: Query, orderedRelations: List<Relation>, dataCh
     }
 
     // Now the rest needs to become children of the root node
-    val reminder = orderedRelations.subList(i, orderedRelations.lastIndex+1).map { matSource(it, dataCharacteristics, optimizationParameters, noPartitioning()) }
+    val reminder = orderedRelations.subList(i, orderedRelations.lastIndex + 1).map { matSource(it, dataCharacteristics, optimizationParameters, noPartitioning()) }
     return binaryNonMatGeneralized(currentTree, reminder, dataCharacteristics, optimizationParameters, binaryPredicates)
 }
 

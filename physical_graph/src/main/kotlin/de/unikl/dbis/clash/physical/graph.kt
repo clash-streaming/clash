@@ -39,8 +39,8 @@ open class PhysicalGraph {
      * @throws RuntimeException if no or more than one Store was registered
      */
     fun getRelationStore(relation: Relation): Store {
-        return relationStores[relation] ?: throw RuntimeException("Wanted to access a store for relation '" + relation
-                + "' but no Store is associated.")
+        return relationStores[relation] ?: throw RuntimeException("Wanted to access a store for relation '" + relation +
+                "' but no Store is associated.")
     }
 
     /**
@@ -95,7 +95,6 @@ open class PhysicalGraph {
     }
 }
 
-
 /**
  * Adds an edge into the graph.
  *
@@ -122,9 +121,10 @@ fun addEdge(from: Node, to: Node, type: EdgeType): EdgeLabel {
  * @return a freshly created edge label
  */
 fun addGroupedEdge(
-        from: Node,
-        to: Node,
-        group: String): GroupedEdgeLabel {
+    from: Node,
+    to: Node,
+    group: String
+): GroupedEdgeLabel {
     val edgeLabel = GroupedEdgeLabel(from, to, group)
 
     from.outgoingEdges[edgeLabel] = to

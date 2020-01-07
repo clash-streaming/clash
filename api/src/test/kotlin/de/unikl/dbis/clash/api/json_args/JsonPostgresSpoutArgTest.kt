@@ -33,5 +33,4 @@ class JsonPostgresSpoutArgTest {
         assertThat(pgResult.databaseUser).isEqualTo(databaseUser)
         assertThat(pgResult.databasePassword).isEqualTo(databasePassword)
     }
-
 }

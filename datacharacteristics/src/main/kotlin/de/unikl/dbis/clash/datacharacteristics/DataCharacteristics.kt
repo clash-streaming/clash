@@ -4,7 +4,6 @@ import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.query.RelationAlias
 
-
 interface DataCharacteristics {
 
     /**

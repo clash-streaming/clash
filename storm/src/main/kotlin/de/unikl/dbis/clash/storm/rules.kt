@@ -1,10 +1,19 @@
 package de.unikl.dbis.clash.storm
 
-import de.unikl.dbis.clash.physical.*
+import de.unikl.dbis.clash.physical.BinaryPredicateEvaluation
+import de.unikl.dbis.clash.physical.ControlInRule
+import de.unikl.dbis.clash.physical.ControlOutRule
+import de.unikl.dbis.clash.physical.IntermediateJoinRule
+import de.unikl.dbis.clash.physical.JoinResultRule
+import de.unikl.dbis.clash.physical.RelationReceiveRule
+import de.unikl.dbis.clash.physical.RelationSendRule
+import de.unikl.dbis.clash.physical.Rule
+import de.unikl.dbis.clash.physical.StoreAndJoinRule
+import de.unikl.dbis.clash.physical.TickInRule
+import de.unikl.dbis.clash.physical.TickOutRule
 import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Relation
 import java.io.Serializable
-
 
 /**
  * Common properties of all rules.
@@ -33,7 +42,6 @@ interface StormRule : Serializable {
             }
         }
     }
-
 }
 
 /**
@@ -44,7 +52,6 @@ interface StormInRule : StormRule {
     val incomingEdgeLabel: StormEdgeLabel
 }
 
-
 /**
  * An OutRule is a rule which provides an output stream label.
  */
@@ -52,7 +59,6 @@ interface StormOutRule : StormRule {
 
     val outgoingEdgeLabel: StormEdgeLabel
 }
-
 
 /**
  * A OldJoinRule is a rule which provides an output stream label.
@@ -66,7 +72,6 @@ internal interface OldStormJoinRule : StormRule {
         get() = MessageVariant.DataPath
 }
 
-
 /**
  * A OldJoinRule is a rule which provides an output stream label.
  */
@@ -77,7 +82,6 @@ internal interface StormJoinRule : StormRule {
     override val messageVariant: MessageVariant
         get() = MessageVariant.DataPath
 }
-
 
 /**
  * This rule indicates that if a tuple arrives at Storm stream incomingStreamName, it is a part of
@@ -102,14 +106,13 @@ class StormRelationReceiveRule : StormInRule, StormDataPathRule {
     }
 
     constructor(
-            relation: Relation,
-            incomingEdgeLabel: StormEdgeLabel) {
+        relation: Relation,
+        incomingEdgeLabel: StormEdgeLabel
+    ) {
         this.relation = relation
         this.incomingEdgeLabel = incomingEdgeLabel
     }
-
 }
-
 
 /**
  * This rule indicates that if a tuple of streamed Relation relation gets known (e.g. by a
@@ -140,18 +143,18 @@ class StormRelationSendRule : StormOutRule, StormDataPathRule {
      * @param outgoingEdgeLabel the label the relation should be sent to
      */
     constructor(
-            relation: Relation,
-            outgoingEdgeLabel: StormEdgeLabel) {
+        relation: Relation,
+        outgoingEdgeLabel: StormEdgeLabel
+    ) {
         this.relation = relation
         this.outgoingEdgeLabel = outgoingEdgeLabel
     }
 
     override fun toString(): String {
-        return ("StreamSendRule: send result for " + this.relation
-                + " to " + this.outgoingEdgeLabel)
+        return ("StreamSendRule: send result for " + this.relation +
+                " to " + this.outgoingEdgeLabel)
     }
 }
-
 
 class StormStoreAndJoinRule : StormInRule, StormDataPathRule {
 
@@ -173,18 +176,20 @@ class StormStoreAndJoinRule : StormInRule, StormDataPathRule {
         this.incomingEdgeLabel = StormEdgeLabel(rule.incomingEdgeLabel)
     }
 
-    constructor(relationName: String,
-                predicates: Set<BinaryPredicate>,
-                incomingEdgeLabel: StormEdgeLabel) {
+    constructor(
+        relationName: String,
+        predicates: Set<BinaryPredicate>,
+        incomingEdgeLabel: StormEdgeLabel
+    ) {
         this.relationName = relationName
         this.predicates = predicates
         this.incomingEdgeLabel = incomingEdgeLabel
     }
 
     override fun toString(): String {
-        return ("StoreAndJoinRule: store document of relation " + this.relationName
-                + " coming on stream " + this.incomingEdgeLabel + " and join with others if "
-                + this.predicates.size + " predicates match")
+        return ("StoreAndJoinRule: store document of relation " + this.relationName +
+                " coming on stream " + this.incomingEdgeLabel + " and join with others if " +
+                this.predicates.size + " predicates match")
     }
 }
 
@@ -229,9 +234,9 @@ class StormIntermediateJoinRule : StormInRule, StormJoinRule, StormOutRule, Stor
     }
 
     override fun toString(): String {
-        return ("OldJoinRule: join from " + incomingEdgeLabel + " and send to " + outgoingEdgeLabel
-                + " if " + predicates.size + " predicates match:"
-                + predicates.joinToString(" ∧ "))
+        return ("OldJoinRule: join from " + incomingEdgeLabel + " and send to " + outgoingEdgeLabel +
+                " if " + predicates.size + " predicates match:" +
+                predicates.joinToString(" ∧ "))
     }
 }
 
@@ -239,7 +244,6 @@ class StormIntermediateJoinRule : StormInRule, StormJoinRule, StormOutRule, Stor
  * MarkerInterface for all StormRules that influence behaviour on the ControlPath
  */
 interface StormControlRule : StormRule
-
 
 class StormControlInRule : StormInRule, StormControlRule {
 
@@ -266,7 +270,6 @@ class StormControlInRule : StormInRule, StormControlRule {
     }
 }
 
-
 class StormControlOutRule : StormOutRule, StormControlRule {
 
     override val outgoingEdgeLabel: StormEdgeLabel
@@ -291,7 +294,6 @@ class StormControlOutRule : StormOutRule, StormControlRule {
  * MarkerInterface for all StormRules that influence behaviour on the ControlPath
  */
 interface StormTickRule : StormRule
-
 
 class StormTickInRule : StormInRule, StormTickRule {
 
@@ -318,8 +320,7 @@ class StormTickInRule : StormInRule, StormTickRule {
     }
 }
 
-
-class StormTickOutRule: StormOutRule, StormTickRule {
+class StormTickOutRule : StormOutRule, StormTickRule {
 
     override val outgoingEdgeLabel: StormEdgeLabel
 
@@ -338,7 +339,6 @@ class StormTickOutRule: StormOutRule, StormTickRule {
         return "TickRule: send to $outgoingEdgeLabel"
     }
 }
-
 
 /**
  * MarkerInterface for all StormRules that influence behaviour on the DataPath

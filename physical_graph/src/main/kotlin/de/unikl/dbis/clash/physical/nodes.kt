@@ -2,9 +2,8 @@ package de.unikl.dbis.clash.physical
 
 import de.unikl.dbis.clash.query.AttributeAccessList
 import de.unikl.dbis.clash.query.Relation
-import org.slf4j.LoggerFactory
 import java.io.Serializable
-
+import org.slf4j.LoggerFactory
 
 /**
  * Core abstraction for Nodes in the Physical Graph. Every other node type descends of this one.
@@ -31,7 +30,6 @@ interface Node : Serializable {
     }
 }
 
-
 data class Controller(override val label: String) : Node by CommonNode(label, 1)
 data class ControllerInput(override val label: String) : Node by CommonNode(label, 1)
 data class Dispatcher(override val label: String, override val parallelism: Long) : Node by CommonNode(label, parallelism)
@@ -39,41 +37,46 @@ data class Reporter(override val label: String, override val parallelism: Long) 
 data class TickSpout(override val label: String) : Node by CommonNode(label, 1)
 
 data class Spout(override val label: String, val relation: Relation, override val parallelism: Long) : Node by CommonNode(label, parallelism)
-data class Sink(override val label: String,
-                val relation: Relation,
-                override val parallelism: Long) : Node by CommonNode(label, parallelism)
+data class Sink(
+    override val label: String,
+    val relation: Relation,
+    override val parallelism: Long
+) : Node by CommonNode(label, parallelism)
 
 interface Store : Node {
     val relation: Relation
 }
 
 data class PartitionedStore(
-        override val label: String,
-        val partitionAttributes: AttributeAccessList,
-        override val relation: Relation,
-        override val parallelism: Long) : Store, Node by CommonNode(label, parallelism)
+    override val label: String,
+    val partitionAttributes: AttributeAccessList,
+    override val relation: Relation,
+    override val parallelism: Long
+) : Store, Node by CommonNode(label, parallelism)
 
 data class InputStub(override val label: String, val relation: Relation) : Node by CommonNode(label, 1)
-data class OutputStub(override val label: String,
-                      val relation: Relation) : Node by CommonNode(label, 1)
-data class ThetaStore (
-        override val label: String,
-        override val relation: Relation,
-        override val parallelism: Long
+data class OutputStub(
+    override val label: String,
+    val relation: Relation
+) : Node by CommonNode(label, 1)
+data class ThetaStore(
+    override val label: String,
+    override val relation: Relation,
+    override val parallelism: Long
 ) : Store, Node by CommonNode(label, parallelism)
-data class SimilarityStore (
-        override val label: String,
-        override val relation: Relation,
-        override val parallelism: Long
+data class SimilarityStore(
+    override val label: String,
+    override val relation: Relation,
+    override val parallelism: Long
 ) : Store, Node by CommonNode(label, parallelism)
 
 class CommonNode(
-        override val label: String,
-        override val parallelism: Long,
-        override val rules: MutableList<Rule> = mutableListOf(),
-        override val incomingEdges: MutableMap<EdgeLabel, Node> = mutableMapOf(),
-        override val outgoingEdges: MutableMap<EdgeLabel, Node> = mutableMapOf()) : Node {
-
+    override val label: String,
+    override val parallelism: Long,
+    override val rules: MutableList<Rule> = mutableListOf(),
+    override val incomingEdges: MutableMap<EdgeLabel, Node> = mutableMapOf(),
+    override val outgoingEdges: MutableMap<EdgeLabel, Node> = mutableMapOf()
+) : Node {
 
     /**
      * Adds a rule to this node.
@@ -88,7 +91,7 @@ class CommonNode(
                 .asSequence()
                 .plus(outgoingEdges.keys)
                 .any {
-                    when(rule) {
+                    when (rule) {
                         is InRule -> rule.incomingEdgeLabel == it
                         is OutRule -> rule.outgoingEdgeLabel == it
                         else -> { throw java.lang.RuntimeException("trying to add a Rule that is neither InRule nor OutRule") }
@@ -121,7 +124,6 @@ class CommonNode(
             }
         }
     }
-
 
     override fun replaceOutgoingEdge(oldEdge: EdgeLabel, newEdge: EdgeLabel) {
         if (!this.outgoingEdges.containsKey(oldEdge)) {

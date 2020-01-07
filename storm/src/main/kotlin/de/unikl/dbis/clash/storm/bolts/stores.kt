@@ -3,16 +3,21 @@ package de.unikl.dbis.clash.storm.bolts
 import com.codahale.metrics.Counter
 import com.codahale.metrics.Timer
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluation
-import de.unikl.dbis.clash.storm.*
+import de.unikl.dbis.clash.storm.DocumentsMessage
+import de.unikl.dbis.clash.storm.StormEdgeLabel
+import de.unikl.dbis.clash.storm.StormInRule
+import de.unikl.dbis.clash.storm.StormIntermediateJoinRule
+import de.unikl.dbis.clash.storm.StormJoinResultRule
+import de.unikl.dbis.clash.storm.StormRelationReceiveRule
 import de.unikl.dbis.clash.workers.stores.ActualStore
+import java.io.Serializable
 import org.apache.storm.task.OutputCollector
 import org.apache.storm.task.TopologyContext
 import org.slf4j.LoggerFactory
-import java.io.Serializable
 
 class GeneralStore(
-        name: String,
-        val innerStore: ActualStore<StormEdgeLabel>
+    name: String,
+    val innerStore: ActualStore<StormEdgeLabel>
 ) : AbstractBolt(name), IStoreStats by StoreStats() {
 
     override fun prepare(conf: MutableMap<String, Any>?, topologyContext: TopologyContext?, outputCollector: OutputCollector?) {
@@ -20,8 +25,10 @@ class GeneralStore(
         registerMetrics(topologyContext!!)
     }
 
-    override fun executeDocuments(message: DocumentsMessage,
-                                  stormInRule: StormInRule) {
+    override fun executeDocuments(
+        message: DocumentsMessage,
+        stormInRule: StormInRule
+    ) {
         when (stormInRule) {
             is StormRelationReceiveRule -> this.store(message)
             is StormIntermediateJoinRule -> {
@@ -40,7 +47,6 @@ class GeneralStore(
             }
         }
     }
-
 
     fun store(message: DocumentsMessage) {
         LOG.debug("Storing tuple {}", message)
@@ -67,9 +73,10 @@ class GeneralStore(
      * prefix and compute the concatenated documents. Send all the produced documents to all targets.
      */
     fun probe(
-            message: DocumentsMessage,
-            predicates: Set<BinaryPredicateEvaluation>,
-            targets: Collection<StormEdgeLabel>) {
+        message: DocumentsMessage,
+        predicates: Set<BinaryPredicateEvaluation>,
+        targets: Collection<StormEdgeLabel>
+    ) {
 
         probeTuplesReadCounter.inc(message.documents.size.toLong())
         probeMessagesReadCounter.inc()
@@ -86,7 +93,7 @@ class GeneralStore(
         }
 
         val edgeLabels = targets
-                .map  { it.toString() }
+                .map { it.toString() }
         LOG.debug("successfulJoinTo {}", edgeLabels)
 
         val outputMessage = DocumentsMessage(message.ats,
@@ -131,7 +138,7 @@ interface IStoreStats : Serializable {
     var storeTimer: Timer
 }
 
-class StoreStats: IStoreStats {
+class StoreStats : IStoreStats {
     override lateinit var probeTuplesReadCounter: Counter
     override lateinit var probeMessagesReadCounter: Counter
     override lateinit var storeTuplesReadCounter: Counter

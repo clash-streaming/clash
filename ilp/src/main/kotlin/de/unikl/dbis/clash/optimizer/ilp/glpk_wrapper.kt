@@ -5,22 +5,22 @@ import kotlin.math.absoluteValue
 fun Ilp.toCplex(sb: StringBuilder) {
     sb.append("Minimize\n")
     sb.append("goal: ")
-    this.goal.forEach { it.toCplex(sb); sb.append(" ")}
+    this.goal.forEach { it.toCplex(sb); sb.append(" ") }
     sb.append("\n\n")
     sb.append("Subject To\n")
-    for(row in rows) {
+    for (row in rows) {
         row.toCplex(sb)
         sb.append("\n")
     }
     sb.append("\nBINARY\n")
-    for(variable in list) {
+    for (variable in list) {
 //        sb.append("0 <= $variable <= 1\n")
         sb.append("$variable\n")
     }
 }
 
 fun IlpRow.toCplex(sb: StringBuilder) {
-    for(entry in entries) {
+    for (entry in entries) {
         sb.append("  ")
         entry.toCplex(sb)
         sb.append(" ")
@@ -31,11 +31,11 @@ fun IlpRow.toCplex(sb: StringBuilder) {
 }
 
 fun IlpEntry.toCplex(sb: StringBuilder) {
-    if(multiplier == 0) return
-    if(multiplier.toDouble() < 0.0) {
+    if (multiplier == 0) return
+    if (multiplier.toDouble() < 0.0) {
         sb.append("- ")
     }
-    if(multiplier.toDouble() > 0.0) {
+    if (multiplier.toDouble() > 0.0) {
         sb.append("+ ")
     }
     sb.append(multiplier.toInt().absoluteValue)
@@ -44,7 +44,7 @@ fun IlpEntry.toCplex(sb: StringBuilder) {
 }
 
 fun IlpCompare.toCplex(sb: StringBuilder) {
-    when(this) {
+    when (this) {
         IlpCompare.EQUAL -> sb.append("=")
         IlpCompare.GREATER_THAN -> sb.append(">")
     }
@@ -58,7 +58,7 @@ fun computeIlpSolution(ilp: Ilp, useGlpsol: Boolean = false): List<String> {
 
     val solutionFile = createTempFile("clash_ilp", ".sol")
 
-    val command = if(useGlpsol) {
+    val command = if (useGlpsol) {
         arrayOf("glpsol", "--lp", "--binarize", "--interior", problemFile.absolutePath.toString(), "--output", solutionFile.absoluteFile.toString())
     } else {
         arrayOf("gurobi_cl", "ResultFile=${solutionFile.absolutePath}", problemFile.absolutePath.toString())
@@ -76,7 +76,7 @@ fun computeIlpSolution(ilp: Ilp, useGlpsol: Boolean = false): List<String> {
     // parse text
     val lines = text.split("\n")
     val satisfiedVariables = mutableListOf<String>()
-    if(useGlpsol) {
+    if (useGlpsol) {
         var found = false
         for (line in lines) {
             if (!found) {
@@ -88,13 +88,13 @@ fun computeIlpSolution(ilp: Ilp, useGlpsol: Boolean = false): List<String> {
             if (c[4] == "1") satisfiedVariables += c[2]
         }
     } else {
-        for(line in lines) {
-            if(line.startsWith("#") || line.isEmpty()) continue
+        for (line in lines) {
+            if (line.startsWith("#") || line.isEmpty()) continue
             val c = line.split(" ")
-            if(c.size != 2) {
+            if (c.size != 2) {
                 continue
             }
-            if(c[1] == "1") satisfiedVariables += c[0]
+            if (c[1] == "1") satisfiedVariables += c[0]
         }
     }
 

@@ -9,7 +9,6 @@ import de.unikl.dbis.clash.query.relationOf
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-
 internal class LeastIntermediatesProbeOrderTest {
 
     @Test

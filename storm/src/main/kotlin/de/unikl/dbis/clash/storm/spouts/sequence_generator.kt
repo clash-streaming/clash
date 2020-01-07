@@ -2,10 +2,9 @@ package de.unikl.dbis.clash.storm.spouts
 
 import de.unikl.dbis.clash.documents.Document
 import de.unikl.dbis.clash.query.RelationAlias
-import org.apache.storm.utils.Utils
 import java.io.Serializable
 import java.util.HashMap
-
+import org.apache.storm.utils.Utils
 
 class SequenceGeneratorSpout(val baseRelation: RelationAlias, val delay: Long, val fields: Map<String, SequenceGeneratorField>) : CommonSpout(delay.toInt()) {
 

@@ -9,10 +9,9 @@ import de.unikl.dbis.clash.query.AttributeAccess
 import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.RelationAlias
 
-
 fun globalTuplesMaterialized(dataCharacteristics: DataCharacteristics, node: MtNode): Double {
     val nodeSize = if (node.parallelism == 0L) 0.0 else storageCostFor(node.relation, dataCharacteristics)
-    return  nodeSize +
+    return nodeSize +
             node.children.sumByDouble { globalTuplesMaterialized(dataCharacteristics, it) }
 }
 
@@ -63,7 +62,7 @@ fun probeTuplesSentForProbeOrder(dataCharacteristics: DataCharacteristics, probe
         seenAttributeAccesses.addAll(step.first.relation.attributeAccesses)
 
         val targetsPartitioning = probeOrderWithJoinSize.steps[index + 1].first.partitioning
-        if(seenAttributeAccesses.any { targetsPartitioning.map { it.attribute }.contains(it.attribute) }) {
+        if (seenAttributeAccesses.any { targetsPartitioning.map { it.attribute }.contains(it.attribute) }) {
             result[step.first] = step.third
         } else {
             result[step.first] = step.third * probeOrderWithJoinSize.steps[index + 1].first.parallelism
@@ -71,7 +70,6 @@ fun probeTuplesSentForProbeOrder(dataCharacteristics: DataCharacteristics, probe
     }
     return result
 }
-
 
 /**
  * For a join node computes for all direct children the number of probe tuples they receive.
@@ -88,7 +86,6 @@ fun probeTuplesReceivedByStore(dataCharacteristics: DataCharacteristics, node: M
 //            .fold(collector) { acc, other -> acc.combine(other)}
 //            .mapValues { it.value.sum() }
 }
-
 
 /**
  *

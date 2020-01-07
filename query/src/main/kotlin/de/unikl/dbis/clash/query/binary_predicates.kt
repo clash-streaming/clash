@@ -3,8 +3,8 @@ package de.unikl.dbis.clash.query
 import org.apache.logging.log4j.LogManager
 
 data class BinaryEquality(
-        override val leftAttributeAccess: AttributeAccess,
-        override val rightAttributeAccess: AttributeAccess
+    override val leftAttributeAccess: AttributeAccess,
+    override val rightAttributeAccess: AttributeAccess
 ) : BinaryAttributePredicate {
     override fun joinable(left: Tuple, right: Tuple): Boolean {
         return if (left[leftAttributeAccess] != null) left[leftAttributeAccess] == right[rightAttributeAccess]
@@ -17,8 +17,8 @@ data class BinaryEquality(
 }
 
 data class BinaryLessThan(
-        override val leftAttributeAccess: AttributeAccess,
-        override val rightAttributeAccess: AttributeAccess
+    override val leftAttributeAccess: AttributeAccess,
+    override val rightAttributeAccess: AttributeAccess
 ) : BinaryAttributePredicate {
     override fun joinable(left: Tuple, right: Tuple): Boolean {
         return left[leftAttributeAccess] != null &&
@@ -31,9 +31,9 @@ data class BinaryLessThan(
     }
 }
 
-data class BinaryLessThanOrEqual (
-        override val leftAttributeAccess: AttributeAccess,
-        override val rightAttributeAccess: AttributeAccess
+data class BinaryLessThanOrEqual(
+    override val leftAttributeAccess: AttributeAccess,
+    override val rightAttributeAccess: AttributeAccess
 ) : BinaryAttributePredicate {
     override fun joinable(left: Tuple, right: Tuple): Boolean {
         return left[leftAttributeAccess] != null &&
@@ -49,12 +49,15 @@ data class BinaryLessThanOrEqual (
 data class AttributePairEquality
 /**
  * Performs equality test on values of leftAttr of left and rightAttr right.
- */
-(override val leftAttributeAccess: AttributeAccess,
- override val rightAttributeAccess: AttributeAccess) : BinaryAttributePredicate {
+ */(
+     override val leftAttributeAccess: AttributeAccess,
+     override val rightAttributeAccess: AttributeAccess
+ ) : BinaryAttributePredicate {
 
-    override fun joinable(left: Tuple,
-                          right: Tuple): Boolean {
+    override fun joinable(
+        left: Tuple,
+        right: Tuple
+    ): Boolean {
         LOG.debug("Evaluating {}", this)
         if (!(left[leftAttributeAccess] != null && right[rightAttributeAccess] != null)) {
             // attribute not present in both documents
@@ -71,7 +74,6 @@ data class AttributePairEquality
     override fun toString(): String {
         return "$leftAttributeAccess = $rightAttributeAccess"
     }
-
 
     companion object {
         private val LOG = LogManager.getLogger()

@@ -43,17 +43,16 @@ fun main() {
         results += res
     }
     println("Average runtime ${results.average()}")
-
 }
 
 class NaiveHashMeasurement(
-        val initialStores: Int,
-        val repeat: Int,
-        val stores: Int,
-        val probes: Int,
-        val storeLength: Int,
-        val probeLength: Int,
-        val config: ClashConfig
+    val initialStores: Int,
+    val repeat: Int,
+    val stores: Int,
+    val probes: Int,
+    val storeLength: Int,
+    val probeLength: Int,
+    val config: ClashConfig
 ) {
     var currentAts = 0L
 

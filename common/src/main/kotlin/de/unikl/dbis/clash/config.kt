@@ -1,12 +1,15 @@
 package de.unikl.dbis.clash
 
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.SafeConstructor
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.net.URL
 import java.util.ArrayList
 import java.util.HashSet
-
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.constructor.SafeConstructor
 
 class ClashConfig : HashMap<String, Any>() {
 
@@ -136,7 +139,6 @@ class ClashConfig : HashMap<String, Any>() {
      */
     val controllerTopic get() = getOrDefaultString(CLASH_CONTROLLER_TOPIC, DEFAULT_CONTROLLER_TOPIC)
 
-
     /**
      * @return whether to enable the probe log for handling delayed probe tuples
      */
@@ -174,7 +176,6 @@ class ClashConfig : HashMap<String, Any>() {
                 e.printStackTrace()
                 defaultValue
             }
-
         } else {
             defaultValue
         }
@@ -192,7 +193,6 @@ class ClashConfig : HashMap<String, Any>() {
                 e.printStackTrace()
                 defaultValue
             }
-
         } else {
             defaultValue
         }
@@ -240,11 +240,10 @@ fun readConfig(configFilePath: String): ClashConfig {
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
-
         }
     }
 
-    if(configMap == null || configMap.isEmpty())
+    if (configMap == null || configMap.isEmpty())
         return ClashConfig()
 
     val conf = ClashConfig()
@@ -261,15 +260,14 @@ fun getConfigFileInputStream(configFilePath: String): InputStream? {
         }
     } else if (resources.size > 1) {
         throw IOException(
-                "Found multiple " + configFilePath
-                        + " resources. You're probably bundling the Storm jars with your topology jar. "
-                        + resources)
+                "Found multiple " + configFilePath +
+                        " resources. You're probably bundling the Storm jars with your topology jar. " +
+                        resources)
     } else {
         val resource = resources.iterator().next()
         return resource.openStream()
     }
     return null
-
 }
 
 fun findResources(name: String): List<URL> {

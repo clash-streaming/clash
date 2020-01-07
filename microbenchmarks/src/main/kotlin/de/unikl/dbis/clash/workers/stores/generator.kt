@@ -23,13 +23,12 @@ const val PROBE_TUPLE = true
  * In general this generator tries to be as uniform as possible.
  */
 class Generator(
-        val storeFraction: Double,
-        val windowSize: Long,
-        val selectivity: Double,
-        val totalTuples: Long
+    val storeFraction: Double,
+    val windowSize: Long,
+    val selectivity: Double,
+    val totalTuples: Long
 ) {
     val internalSelectivity = selectivity * 2.0
-
 
     /**
      * The Booleans of the output are flags.
@@ -50,14 +49,13 @@ class Generator(
         var (stores0, probes) = generateTwoRelationKeys(windowSize, probesPerWindow(), internalSelectivity)
         stores0.forEach { result.add(Pair(STORE_TUPLE, Tuple(it.toString(), tsCounter++, Object()))) }
 
-
-        for(i in 1 until numberOfWindows()) {
+        for (i in 1 until numberOfWindows()) {
             val (stores, probesNext) = generateTwoRelationKeys(storesPerWindow(), probesPerWindow(), internalSelectivity)
 
             val (storeStepSize, probeStepSize) = if (storeFraction < 0.5) {
-                Pair(1.0, 1.0 / (1.0/storeFraction - 1))
+                Pair(1.0, 1.0 / (1.0 / storeFraction - 1))
             } else {
-                Pair((1.0/storeFraction - 1), 1.0)
+                Pair((1.0 / storeFraction - 1), 1.0)
             }
             var currentStoreStep = 0.0
             var currentStoreFullStep = 1
@@ -66,18 +64,18 @@ class Generator(
 
             val sit = stores.iterator()
             val pit = probes.iterator()
-            while(sit.hasNext() || pit.hasNext()) {
-                while(currentStoreStep < currentStoreFullStep) {
+            while (sit.hasNext() || pit.hasNext()) {
+                while (currentStoreStep < currentStoreFullStep) {
                     currentStoreStep += storeStepSize
-                    if(sit.hasNext()) {
+                    if (sit.hasNext()) {
                         val key = sit.next()
                         result.add(Pair(STORE_TUPLE, Tuple(key.toString(), tsCounter++, Object())))
                     }
                 }
                 currentStoreFullStep += 1
-                while(currentProbeStep < currentProbeFullStep) {
+                while (currentProbeStep < currentProbeFullStep) {
                     currentProbeStep += probeStepSize
-                    if(pit.hasNext()) {
+                    if (pit.hasNext()) {
                         val key = pit.next()
                         result.add(Pair(PROBE_TUPLE, Tuple(key.toString(), tsCounter++, Object())))
                     }
@@ -87,7 +85,6 @@ class Generator(
 
             probes = probesNext
         }
-
 
         return result
     }
@@ -101,21 +98,20 @@ fun main() {
     val x = Generator(0.7, 10000, 0.001, 20000)
 
     val generatedTuples = x.generate()
-    val storeTuples = generatedTuples.filter { it.first == STORE_TUPLE}
+    val storeTuples = generatedTuples.filter { it.first == STORE_TUPLE }
     val probeTuples = generatedTuples.filter { it.first == PROBE_TUPLE }
 
     println("Genrated ${generatedTuples.size} tuples, ${storeTuples.size} for storing and ${probeTuples.size} for probing.")
     var joinResults = 0
 
-
-    for((_, s) in storeTuples) {
-        for((_, p) in probeTuples) {
-            if(p.key1 == s.key1 && p.ts - x.windowSize >= s.ts) {
+    for ((_, s) in storeTuples) {
+        for ((_, p) in probeTuples) {
+            if (p.key1 == s.key1 && p.ts - x.windowSize >= s.ts) {
                 joinResults += 1
             }
         }
     }
     val actualSelectivity = joinResults.toDouble() / (storeTuples.size.toDouble() * probeTuples.size.toDouble())
 
-    println("The join selectivity should be ${x.selectivity} and is actually ${actualSelectivity}")
+    println("The join selectivity should be ${x.selectivity} and is actually $actualSelectivity")
 }

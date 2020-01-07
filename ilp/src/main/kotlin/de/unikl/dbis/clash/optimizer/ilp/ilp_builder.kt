@@ -16,7 +16,7 @@ class IlpBuilder {
      */
     fun addProbeOrderChoice(probeOrders: Collection<ProbeOrder>) {
         val entries = mutableListOf<IlpEntry>()
-        for(probeOrder in probeOrders) {
+        for (probeOrder in probeOrders) {
             val variable = newVariable()
             probeOrderVariables[probeOrder] = variable
             entries.add(IlpEntry(1, variable))
@@ -33,10 +33,11 @@ class IlpBuilder {
      * - 11 * x1 + 4 * z1 + 7 * z3 >= 0
      */
     fun addProbeOrderCost(
-            probeOrder: ProbeOrder,
-            query: IlpQuery,
-            statistics: Statistics,
-            configuration: Configuration) {
+        probeOrder: ProbeOrder,
+        query: IlpQuery,
+        statistics: Statistics,
+        configuration: Configuration
+    ) {
         fun mustBroadcast(seen: List<String>, other: String): Boolean {
             return !seen.contains(other)
         }
@@ -47,7 +48,7 @@ class IlpBuilder {
 
         for (relation in probeOrder.order.subList(1, probeOrder.order.size)) {
             val tuplesSentFromPreviousRelation = statistics.joinSize(seenRelations)
-            val routingDuplicationFactor = if(mustBroadcast(seenVariables, relation.partAttr)) configuration.getParallelism(relation.name) else 1
+            val routingDuplicationFactor = if (mustBroadcast(seenVariables, relation.partAttr)) configuration.getParallelism(relation.name) else 1
             entries += IlpEntry((tuplesSentFromPreviousRelation * routingDuplicationFactor).roundToInt(), newVariable())
             totalCost += tuplesSentFromPreviousRelation * routingDuplicationFactor
             seenRelations += relation.name
@@ -63,15 +64,13 @@ class IlpBuilder {
         TODO()
 //        return Ilp(rows)
     }
-
 }
-
 
 class CostCache {
     val probeOrderCost: MutableMap<ProbeOrder, Double> = mutableMapOf()
 
     fun add(probeOrder: ProbeOrder, cost: Double) {
-        if(probeOrderCost.containsKey(probeOrder) && probeOrderCost[probeOrder] != cost) {
+        if (probeOrderCost.containsKey(probeOrder) && probeOrderCost[probeOrder] != cost) {
             throw RuntimeException("Probe Order $probeOrder was earlier recorded with cost ${probeOrderCost[probeOrder]} and now with $cost")
         }
         probeOrderCost[probeOrder] = cost

@@ -9,9 +9,8 @@ import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.query.WindowDefinition
 import de.unikl.dbis.clash.support.ceil
-import java.util.*
+import java.util.ArrayDeque
 import java.util.function.Consumer
-
 
 /**
  * The MaterializationTree represents a query plan in form of a tree where the inner nodes denote
@@ -68,35 +67,35 @@ interface MultiStream {
 }
 
 data class MultiStreamImpl(
-        override val probeOrders: ProbeOrders,
-        override val probeCost: Double
-): MultiStream
+    override val probeOrders: ProbeOrders,
+    override val probeCost: Double
+) : MultiStream
 
 data class MatMultiStream(
-        override val relation: Relation,
-        override val children: List<MtNode>,
-        override val parallelism: Long,
-        override var partitioning: AttributeAccessList,
-        override val storageCost: Double,
-        val multiStreamImpl: MultiStreamImpl
-): MtNode, MultiStream by multiStreamImpl
+    override val relation: Relation,
+    override val children: List<MtNode>,
+    override val parallelism: Long,
+    override var partitioning: AttributeAccessList,
+    override val storageCost: Double,
+    val multiStreamImpl: MultiStreamImpl
+) : MtNode, MultiStream by multiStreamImpl
 
 data class NonMatMultiStream(
-        override val relation: Relation,
-        override val children: List<MtNode>,
-        val multiStreamImpl: MultiStreamImpl
-): MtNode, MultiStream by multiStreamImpl {
+    override val relation: Relation,
+    override val children: List<MtNode>,
+    val multiStreamImpl: MultiStreamImpl
+) : MtNode, MultiStream by multiStreamImpl {
     override val parallelism: Long = 0
     override var partitioning: AttributeAccessList = listOf()
     override val storageCost: Double = 0.0
 }
 
 data class MatSource(
-        override val relation: Relation,
-        override val parallelism: Long,
-        override var partitioning: AttributeAccessList,
-        override val storageCost: Double
-): MtNode {
+    override val relation: Relation,
+    override val parallelism: Long,
+    override var partitioning: AttributeAccessList,
+    override val storageCost: Double
+) : MtNode {
     override val children: List<MtNode> = listOf()
 }
 
@@ -106,22 +105,24 @@ fun parallelismFor(relation: Relation, dataCharacteristics: DataCharacteristics,
 
 fun storageCostFor(relation: Relation, dataCharacteristics: DataCharacteristics): Double {
     val size = estimateSize(relation, dataCharacteristics)
-    val multiplier = relation.windowDefinition.values.minBy { if(it.variant == WindowDefinition.Variant.None) Long.MAX_VALUE else it.amount  }!!.amount
+    val multiplier = relation.windowDefinition.values.minBy { if (it.variant == WindowDefinition.Variant.None) Long.MAX_VALUE else it.amount }!!.amount
 
-    return if(multiplier == 0L) size else size * multiplier
+    return if (multiplier == 0L) size else size * multiplier
 }
 
-fun createMultiStreamImpl(children: Collection<MtNode>,
-                          predicates: Collection<BinaryPredicate>,
-                          probeOrderOptimizationStrategy: ProbeOrderOptimizationStrategy,
-                          dataCharacteristics: DataCharacteristics): MultiStreamImpl {
+fun createMultiStreamImpl(
+    children: Collection<MtNode>,
+    predicates: Collection<BinaryPredicate>,
+    probeOrderOptimizationStrategy: ProbeOrderOptimizationStrategy,
+    dataCharacteristics: DataCharacteristics
+): MultiStreamImpl {
     val probeOrders = probeOrderOptimizationStrategy.optimize(dataCharacteristics, predicates, children)
     return MultiStreamImpl(probeOrders.first, probeOrders.second)
 }
 
 fun MaterializationTree.printParenthesis() {
     fun MtNode.ppstr(): String {
-        return if(children.isEmpty()) {
+        return if (children.isEmpty()) {
             relation.aliases.joinToString(",")
         } else {
             this.children.joinToString(",", "(", ")") { it.ppstr() }
@@ -130,4 +131,3 @@ fun MaterializationTree.printParenthesis() {
 
     println(root.ppstr())
 }
-

@@ -54,13 +54,13 @@ fun main() {
 }
 
 class RandomDocMeasurement(
-        val initialStores: Int,
-        val repeat: Int,
-        val stores: Int,
-        val probes: Int,
-        val storeLength: Int,
-        val probeLength: Int,
-        val store: ActualStore<EmptyReceiver>
+    val initialStores: Int,
+    val repeat: Int,
+    val stores: Int,
+    val probes: Int,
+    val storeLength: Int,
+    val probeLength: Int,
+    val store: ActualStore<EmptyReceiver>
 ) {
     var currentAts = 0L
 

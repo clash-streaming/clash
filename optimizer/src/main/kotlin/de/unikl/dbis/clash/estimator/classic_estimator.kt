@@ -7,22 +7,22 @@ import de.unikl.dbis.clash.support.subsetsOfSize
 
 class ClassicEstimator(val dataCharacteristics: DataCharacteristics) {
     fun estimateSize(relation: Relation): Double {
-        val rate = relation.aliases.map { dataCharacteristics.getRate(it) }.reduce { acc, rate -> acc*rate }
+        val rate = relation.aliases.map { dataCharacteristics.getRate(it) }.reduce { acc, rate -> acc * rate }
         val relationPairs = relation.aliases.toList().subsetsOfSize(2)
-        val joinSelectivity = relation.binaryPredicates.map { dataCharacteristics.getSelectivity(it) }.fold(1.0) { acc, rate -> acc*rate }
+        val joinSelectivity = relation.binaryPredicates.map { dataCharacteristics.getSelectivity(it) }.fold(1.0) { acc, rate -> acc * rate }
 
         return rate * joinSelectivity
     }
 
     fun estimateSize(relationAliases: List<RelationAlias>): Double {
-        val rate = relationAliases.map { dataCharacteristics.getRate(it) }.reduce { acc, rate -> acc*rate }
+        val rate = relationAliases.map { dataCharacteristics.getRate(it) }.reduce { acc, rate -> acc * rate }
         val relationPairs = relationAliases.toList().subsetsOfSize(2)
         val joinSelectivity = relationPairs.map {
             val asList = it.toList()
             val x1 = asList.get(0)
             val x2 = asList.get(1)
             dataCharacteristics.getSelectivity(x1, x2)
-        }.fold(1.0) { acc, rate -> acc*rate }
+        }.fold(1.0) { acc, rate -> acc * rate }
 
         return rate * joinSelectivity
     }

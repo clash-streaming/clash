@@ -1,17 +1,15 @@
 package de.unikl.dbis.clash.support
 
+import java.io.Serializable
+import java.util.Properties
+import java.util.concurrent.ExecutionException
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.ListTopicsOptions
 import org.apache.kafka.clients.admin.NewTopic
-import java.io.Serializable
-import java.util.*
-import java.util.concurrent.ExecutionException
-
 
 data class KafkaConfig(
-        val kafkaBootstrapServers: String
-): Serializable
-
+    val kafkaBootstrapServers: String
+) : Serializable
 
 // TODO this does not work before execution of main program
 // TODO it seems like handling futures more then only at listTopics command
@@ -58,10 +56,10 @@ fun createTopic(config: KafkaConfig, topic: String) {
     adminClient.close()
 }
 //  TODO
-///**
+// /**
 // * Add Kafka sources and sinks for TPC-H Q2
 // */
-//fun wireKafkaQ2(clash: Clash, config: ClashConfig) {
+// fun wireKafkaQ2(clash: Clash, config: ClashConfig) {
 //    clash.registerSource(relationOf("part"), KafkaSpout(InputName("p"), RelationAlias("p"),"part", config))
 //    clash.registerSource(relationOf("partsupp"), KafkaSpout(InputName("ps"), RelationAlias("ps"), "partsupp", config))
 //    clash.registerSource(relationOf("supplier"), KafkaSpout(InputName("s"), RelationAlias("s"), "supplier", config))
@@ -70,24 +68,24 @@ fun createTopic(config: KafkaConfig, topic: String) {
 //
 //    // TODO
 //    //clash.registerSink(relationOf("part", "partsupp", "supplier", "nation", "region"), KafkaSinkBolt("joinResult", "joinResult", config))
-//}
+// }
 //
-///**
+// /**
 // * Add Kafka sources and sinks for TPC-H Q3
 // */
-//fun wireKafkaQ3(clash: Clash, config: ClashConfig) {
+// fun wireKafkaQ3(clash: Clash, config: ClashConfig) {
 //    clash.registerSource(relationOf("customer"), KafkaSpout(InputName("c"), RelationAlias("c"),"customer", config))
 //    clash.registerSource(relationOf("orders"), KafkaSpout(InputName("o"), RelationAlias("o"),"orders", config))
 //    clash.registerSource(relationOf("lineitem"), KafkaSpout(InputName("l"), RelationAlias("l"), "lineitem", config))
 //
 //    // TODO
 //    // clash.registerSink(relationOf("customer", "orders", "lineitem"), KafkaSinkBolt("joinResult", "joinResult", config))
-//}
+// }
 //
-///**
+// /**
 // * Add Kafka sources and sinks for TPC-H Q5
 // */
-//fun wireKafkaQ5(clash: Clash, config: ClashConfig) {
+// fun wireKafkaQ5(clash: Clash, config: ClashConfig) {
 //    clash.registerSource(relationOf("customer"), KafkaSpout(InputName("c"), RelationAlias("c"),"customer", config))
 //    clash.registerSource(relationOf("orders"), KafkaSpout(InputName("o"), RelationAlias("o"),"orders", config))
 //    clash.registerSource(relationOf("lineitem"), KafkaSpout(InputName("l"), RelationAlias("l"),"lineitem", config))
@@ -96,4 +94,4 @@ fun createTopic(config: KafkaConfig, topic: String) {
 //    clash.registerSource(relationOf("region"), KafkaSpout(InputName("r"), RelationAlias("r"), "region", config))
 //
 //    clash.registerSink(relationOf("result"), KafkaSinkBolt("joinResult", "joinResult", config))
-//}
+// }

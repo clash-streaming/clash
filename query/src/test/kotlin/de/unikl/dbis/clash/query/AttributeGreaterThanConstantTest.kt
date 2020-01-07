@@ -40,4 +40,3 @@ internal class AttributeGreaterThanConstantTest {
         Assertions.assertThat(predicate.evaluate(d4)).isFalse()
     }
 }
-

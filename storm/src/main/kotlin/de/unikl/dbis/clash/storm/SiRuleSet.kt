@@ -5,7 +5,6 @@ import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.storm.StormRule.Companion.stormRuleFromRule
 import java.io.Serializable
 
-
 /**
  * The SI (Single-Input)-Rule-Set assumes, that for every stream there is a single rule defining
  * what happens with the input tuple.
@@ -29,8 +28,8 @@ class SiRuleSet : Serializable {
             found = true
         }
         if (!found) {
-            throw RuntimeException("Trying to process a rule that is neither StormInRule nor"
-                    + "StormOutRule: " + stormRule)
+            throw RuntimeException("Trying to process a rule that is neither StormInRule nor" +
+                    "StormOutRule: " + stormRule)
         }
     }
 
@@ -54,7 +53,6 @@ class SiRuleSet : Serializable {
     fun inRuleFor(streamName: String): StormInRule {
         return this.inRules[streamName] ?: TODO("This should not happen!")
     }
-
 
     /**
      * @return a stream of all registered ReportInRules

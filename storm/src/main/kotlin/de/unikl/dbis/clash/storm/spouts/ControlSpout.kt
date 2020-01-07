@@ -6,7 +6,6 @@ import de.unikl.dbis.clash.storm.ControlMessage
 import de.unikl.dbis.clash.storm.ControlMessageCommandException
 import de.unikl.dbis.clash.support.KafkaConfig
 
-
 class ControlSpout(topicName: String, config: KafkaConfig) : KafkaSpout(InputName("NONE"), RelationAlias("NONE"), topicName, config) {
 
     override fun nextTuple() {
@@ -18,7 +17,7 @@ class ControlSpout(topicName: String, config: KafkaConfig) : KafkaSpout(InputNam
             try {
                 val message = ControlMessage(instruction)
                 super.emit(message)
-            } catch(e: ControlMessageCommandException) {
+            } catch (e: ControlMessageCommandException) {
                 System.err.println(e)
             }
         }

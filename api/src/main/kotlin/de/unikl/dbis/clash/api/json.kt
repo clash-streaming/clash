@@ -13,12 +13,15 @@ import de.unikl.dbis.clash.api.json_args.JsonArg
 import de.unikl.dbis.clash.api.json_args.JsonLocalCluster
 import de.unikl.dbis.clash.api.json_args.JsonRemoteCluster
 import de.unikl.dbis.clash.datacharacteristics.AllCross
-import de.unikl.dbis.clash.optimizer.*
+import de.unikl.dbis.clash.optimizer.GlobalStrategy
+import de.unikl.dbis.clash.optimizer.GlobalStrategyRegistry
+import de.unikl.dbis.clash.optimizer.OptimizationParameters
+import de.unikl.dbis.clash.optimizer.OptimizationResult
+import de.unikl.dbis.clash.optimizer.ProbeOrderStrategyRegistry
 import de.unikl.dbis.clash.optimizer.materializationtree.OptimizationError
 import de.unikl.dbis.clash.optimizer.probeorder.ProbeOrderOptimizationStrategy
 import de.unikl.dbis.clash.physical.PhysicalGraph
 import de.unikl.dbis.clash.physical.toJson
-import de.unikl.dbis.clash.query.InputMap
 import de.unikl.dbis.clash.query.InputName
 import de.unikl.dbis.clash.query.Query
 import de.unikl.dbis.clash.query.parser.parseQuery
@@ -26,14 +29,13 @@ import de.unikl.dbis.clash.readConfig
 import de.unikl.dbis.clash.storm.bolts.CommonSinkI
 import de.unikl.dbis.clash.storm.builder.StormTopologyBuilder
 import de.unikl.dbis.clash.storm.spouts.CommonSpoutI
+import java.io.File
 import org.apache.storm.LocalCluster
 import org.apache.storm.StormSubmitter
 import org.apache.storm.generated.StormTopology
 import org.apache.storm.utils.Utils
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
-
 
 /**
  * Accepts a single json document as input of following format:
@@ -51,7 +53,7 @@ import java.io.File
  * }
  */
 class Json : CliktCommand() {
-    val config by option("--config", "-c").convert { readConfig(it) }.default( ClashConfig() ) // TODO
+    val config by option("--config", "-c").convert { readConfig(it) }.default(ClashConfig()) // TODO
     val params by argument().convert {
         val rawJson = if (File(it).exists()) {
             File(it).readText()
@@ -67,8 +69,7 @@ class Json : CliktCommand() {
             null
         }
 
-        if(result == null) { fail("Input was empty.") }
-        else {
+        if (result == null) { fail("Input was empty.") } else {
             result
         }
     }
@@ -82,7 +83,7 @@ class Json : CliktCommand() {
         val query = parseQuery(params.query)
         var optimizationResult: OptimizationResult? = null
 
-        if(params.optimizationParameters == null) {
+        if (params.optimizationParameters == null) {
             runQueryParse(params.query)
         } else {
             val optimizationParameters = params.optimizationParameters!!.get()
@@ -109,7 +110,7 @@ class Json : CliktCommand() {
             }
         }
 
-        if(params.cluster != null && optimizationResult != null) {
+        if (params.cluster != null && optimizationResult != null) {
             if (params.cluster!! is JsonLocalCluster) {
                 runLocalCluster(query, optimizationResult.physicalGraph, params.cluster!! as JsonLocalCluster)
             } else {
@@ -159,7 +160,7 @@ class Json : CliktCommand() {
         try {
             val parsedQuery = parseQuery(query)
             success(parsedQuery)
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             failure(e)
         }
     }
@@ -195,14 +196,15 @@ class Json : CliktCommand() {
 //        config.setNumWorkers(16)
 //        config.setMaxSpoutPending(5000)
         StormSubmitter.submitTopology("test", config, stormTopology)
-
     }
 
-    fun buildTopology(query: Query,
-                      config: ClashConfig,
-                      physicalGraph: PhysicalGraph,
-                      sources: Map<InputName, CommonSpoutI>,
-                      sink: CommonSinkI): StormTopology {
+    fun buildTopology(
+        query: Query,
+        config: ClashConfig,
+        physicalGraph: PhysicalGraph,
+        sources: Map<InputName, CommonSpoutI>,
+        sink: CommonSinkI
+    ): StormTopology {
         val builder = StormTopologyBuilder(
                 physicalGraph,
                 sources,
@@ -241,4 +243,3 @@ fun parseOptimizationParameters(raw: JSONObject): OptimizationParameters {
             parseProbeOrderOptimizationStrategy(raw.getJSONObject("probeOrderOptimizationStrategy"))
     )
 }
-

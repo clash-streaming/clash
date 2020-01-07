@@ -3,9 +3,8 @@ package de.unikl.dbis.clash.documents
 import de.unikl.dbis.clash.query.AttributeAccess
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.query.Tuple
+import java.util.Arrays
 import org.json.JSONObject
-import java.util.*
-
 
 class Document : HashMap<AttributeAccess, String>, Tuple {
 
@@ -38,7 +37,7 @@ class Document : HashMap<AttributeAccess, String>, Tuple {
 
     operator fun get(expression: String): String? {
         val tokens = expression.split(".")
-        return when(tokens.size) {
+        return when (tokens.size) {
             1 -> {
                 get(getAccessPathForAttribute(tokens[0]))
             }
@@ -65,7 +64,6 @@ class Document : HashMap<AttributeAccess, String>, Tuple {
                 .joinToString(", ", "<", ">") { "${it.key}: ${it.value}" }
     }
 }
-
 
 fun fromKVList(vararg list: String): Document {
     val iterator = Arrays.stream(list).iterator()

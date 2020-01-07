@@ -3,7 +3,6 @@ package de.unikl.dbis.clash
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-
 class ClashConfigTest {
 
     @Test

@@ -1,6 +1,5 @@
 package de.unikl.dbis.clash.query
 
-
 object TpcHConstants {
     const val part = "part"
     const val supplier = "supplier"
@@ -106,7 +105,6 @@ object TpcHJoinsAndFilters {
         return queryBuilder.build()
     }
 }
-
 
 object TpcHOnlyJoins {
 

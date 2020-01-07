@@ -5,7 +5,6 @@ import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.query.RelationAlias
 import org.json.JSONObject
 
-
 /**
  * Parses a JSON Object like
  *
@@ -17,8 +16,9 @@ import org.json.JSONObject
  * }
  */
 data class SymmetricJSONCharacteristics(
-        val rates: Map<RelationAlias, Double>,
-        val selectivities: Map<Pair<RelationAlias, RelationAlias>, Double>) : DataCharacteristics {
+    val rates: Map<RelationAlias, Double>,
+    val selectivities: Map<Pair<RelationAlias, RelationAlias>, Double>
+) : DataCharacteristics {
 
     constructor(json: JSONObject) : this(ratesFromJson(json), selectivitiesFromJson(json))
 
@@ -42,7 +42,6 @@ data class SymmetricJSONCharacteristics(
 
     override fun setSelectivity(predicate: BinaryPredicate, selectivity: Double): Unit =
             throw NotImplementedError("No need of explicitly setting properties")
-
 }
 
 /**
@@ -64,20 +63,19 @@ private fun ratesFromJson(json: JSONObject): Map<RelationAlias, Double> {
     val ratesKey = "rates"
     val ratesObject = json[ratesKey]
     val result = mutableMapOf<RelationAlias, Double>()
-    when(ratesObject) {
+    when (ratesObject) {
         is JSONObject -> {
             ratesObject.toMap().forEach { rel, rate -> run {
-                when(rate) {
+                when (rate) {
                     is Double -> { result[RelationAlias(rel)] = rate }
                     is Number -> { result[RelationAlias(rel)] = rate.toDouble() }
                     is String -> { result[RelationAlias(rel)] = rate.toDouble() }
                 }
-            }}
+            } }
         }
     }
     return result
 }
-
 
 /**
  * From a json object with the format
@@ -101,24 +99,24 @@ private fun selectivitiesFromJson(json: JSONObject): Map<Pair<RelationAlias, Rel
     val selectivitiesKey = "selectivities"
     val selectivitiesObject = json[selectivitiesKey]
     val result = mutableMapOf<Pair<RelationAlias, RelationAlias>, Double>()
-    when(selectivitiesObject) {
+    when (selectivitiesObject) {
         is JSONObject -> {
             selectivitiesObject.toMap().forEach { rel_a, inner -> run {
                 if (inner is HashMap<*, *>) {
                     inner.forEach { rel_b, selectivity -> run {
-                        if(rel_b is String && selectivity is Number) {
+                        if (rel_b is String && selectivity is Number) {
                             val aliasA = RelationAlias(rel_a)
                             val aliasB = RelationAlias(rel_b)
                             result[ordered(aliasA, aliasB)] = selectivity.toDouble()
                         }
-                        if(rel_b is String && selectivity is String) {
+                        if (rel_b is String && selectivity is String) {
                             val aliasA = RelationAlias(rel_a)
                             val aliasB = RelationAlias(rel_b)
                             result[ordered(aliasA, aliasB)] = selectivity.toDouble()
                         }
-                    }}
+                    } }
                 }
-            }}
+            } }
         }
     }
     return result

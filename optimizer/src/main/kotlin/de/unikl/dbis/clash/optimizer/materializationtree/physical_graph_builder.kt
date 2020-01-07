@@ -1,16 +1,30 @@
 package de.unikl.dbis.clash.optimizer.materializationtree
 
 import de.unikl.dbis.clash.optimizer.probeorder.ProbeOrder
-import de.unikl.dbis.clash.physical.*
+import de.unikl.dbis.clash.physical.BinaryPredicateEvaluation
+import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationLeftStored
+import de.unikl.dbis.clash.physical.BinaryPredicateEvaluationRightStored
+import de.unikl.dbis.clash.physical.EdgeLabel
+import de.unikl.dbis.clash.physical.EdgeType
+import de.unikl.dbis.clash.physical.IntermediateJoinRule
+import de.unikl.dbis.clash.physical.JoinResultRule
+import de.unikl.dbis.clash.physical.Node
+import de.unikl.dbis.clash.physical.OutputStub
+import de.unikl.dbis.clash.physical.PartitionedStore
+import de.unikl.dbis.clash.physical.PhysicalGraph
+import de.unikl.dbis.clash.physical.RelationReceiveRule
+import de.unikl.dbis.clash.physical.RelationSendRule
+import de.unikl.dbis.clash.physical.Store
+import de.unikl.dbis.clash.physical.addEdge
+import de.unikl.dbis.clash.physical.label
 import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Relation
-
 
 fun build(tree: MaterializationTree): PhysicalGraph {
     val physicalGraph = PhysicalGraph()
     val builders = mutableListOf<NodeBuilder>()
     tree.walkNodes().forEach {
-        when(it) {
+        when (it) {
             is MatMultiStream -> builders.add(MatMultiStreamBuilder(it))
             is NonMatMultiStream -> builders.add(NonMatMultiStreamBuilder(it))
             is MatSource -> builders.add(MatSourceBuilder(it))
@@ -39,18 +53,18 @@ class MatMultiStreamBuilder(val multiStream: MatMultiStream) : NodeBuilder {
     }
 
     override fun markStores(physicalGraph: PhysicalGraph) {
-        for((probeOrder, _) in multiStream.probeOrders.inner.values) {
+        for ((probeOrder, _) in multiStream.probeOrders.inner.values) {
             val last = probeOrder.steps.last()
             physicalGraph.addRelationProducer(multiStream.relation, physicalGraph.getRelationStore(last.first.relation))
         }
     }
 
     override fun wireStores(physicalGraph: PhysicalGraph) {
-        for((probeOrder, _) in multiStream.probeOrders.inner.values) {
+        for ((probeOrder, _) in multiStream.probeOrders.inner.values) {
             val lc = LinearConnector(probeOrder, physicalGraph, multiStream.relation)
             lc.connectAll()
         }
-        for(node in physicalGraph.relationProducers[multiStream.relation]!!) {
+        for (node in physicalGraph.relationProducers[multiStream.relation]!!) {
             val store = physicalGraph.relationStores[multiStream.relation]!!
             val sourceEdge = addEdge(node, store, EdgeType.SHUFFLE)
             val sendRule = RelationSendRule(multiStream.relation, sourceEdge)
@@ -75,19 +89,19 @@ class NonMatMultiStreamBuilder(val multiStream: NonMatMultiStream) : NodeBuilder
     }
 
     override fun markStores(physicalGraph: PhysicalGraph) {
-        for((probeOrder, _)in multiStream.probeOrders.inner.values) {
+        for ((probeOrder, _)in multiStream.probeOrders.inner.values) {
             val last = probeOrder.steps.last()
             physicalGraph.addRelationProducer(multiStream.relation, physicalGraph.getRelationStore(last.first.relation))
         }
     }
 
     override fun wireStores(physicalGraph: PhysicalGraph) {
-        for((probeOrder, _) in multiStream.probeOrders.inner.values) {
+        for ((probeOrder, _) in multiStream.probeOrders.inner.values) {
             val lc = LinearConnector(probeOrder, physicalGraph, multiStream.relation)
             lc.connectAll()
         }
 
-        for(producer in physicalGraph.relationProducers.getOrDefault(multiStream.relation, emptyList<Node>())) {
+        for (producer in physicalGraph.relationProducers.getOrDefault(multiStream.relation, emptyList<Node>())) {
             val edge = addEdge(producer, outputStub, EdgeType.SHUFFLE)
             val sendRule = RelationSendRule(multiStream.relation, edge)
             producer.addRule(sendRule)
@@ -117,7 +131,6 @@ class MatSourceBuilder(val matSource: MatSource) : NodeBuilder {
     override fun markStores(physicalGraph: PhysicalGraph) {
     }
 }
-
 
 /**
  * The LinearConnector is responsible for building a single intra-operator join order.
@@ -173,7 +186,8 @@ class LinearConnector(val probeOrder: ProbeOrder, val graph: PhysicalGraph, val 
         val outgoingStreamName = addEdge(currentStore, nextStore, EdgeType.ALL)
         currentStore.outgoingEdges[outgoingStreamName] = nextStore
         for (incomingStreamName in streamsToCurrent) {
-            currentStore.addRule(IntermediateJoinRule(
+            currentStore.addRule(
+                IntermediateJoinRule(
                     incomingStreamName,
                     outgoingStreamName,
                     predicateEvaluationsForCurrent)
@@ -189,7 +203,8 @@ class LinearConnector(val probeOrder: ProbeOrder, val graph: PhysicalGraph, val 
         val predicateEvaluationsForCurrent = getPredicateEvaluation(currentStore, predicatesForCurrent)
 
         for (incomingStreamName in streamsToCurrent) {
-            currentStore.addRule(JoinResultRule(
+            currentStore.addRule(
+                JoinResultRule(
                     incomingStreamName,
                     predicateEvaluationsForCurrent,
                     producedRelation)
@@ -211,7 +226,7 @@ class LinearConnector(val probeOrder: ProbeOrder, val graph: PhysicalGraph, val 
 
     fun getPredicateEvaluation(store: Store, predicates: Set<BinaryPredicate>): Set<BinaryPredicateEvaluation> {
         return predicates.map { predicate ->
-            if(store.relation.aliases.contains(predicate.leftRelationAlias))
+            if (store.relation.aliases.contains(predicate.leftRelationAlias))
                 BinaryPredicateEvaluationLeftStored(predicate)
             else BinaryPredicateEvaluationRightStored(predicate)
         }.toSet()

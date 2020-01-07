@@ -6,7 +6,6 @@ import de.unikl.dbis.clash.optimizer.materializationtree.TreeOptimizationResult
 import de.unikl.dbis.clash.optimizer.materializationtree.TreeStrategy
 import de.unikl.dbis.clash.query.Query
 
-
 /**
  * This strategy investigates potential subtrees in a bottom-up manner
  * and prunes the ones with highest cost during processing.

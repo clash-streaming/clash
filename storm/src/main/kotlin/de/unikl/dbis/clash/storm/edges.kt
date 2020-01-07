@@ -5,7 +5,6 @@ import de.unikl.dbis.clash.physical.EdgeType
 import de.unikl.dbis.clash.physical.GroupedEdgeLabel
 import java.io.Serializable
 
-
 class StormEdgeLabel : Serializable {
 
     val streamName: String
@@ -32,10 +31,10 @@ class StormEdgeLabel : Serializable {
     }
 
     override fun equals(other: Any?): Boolean {
-        return (other is StormEdgeLabel
-                && other.streamName == this.streamName
-                && other.groupingAttribute == this.groupingAttribute
-                && other.stormEdgeType == this.stormEdgeType)
+        return (other is StormEdgeLabel &&
+                other.streamName == this.streamName &&
+                other.groupingAttribute == this.groupingAttribute &&
+                other.stormEdgeType == this.stormEdgeType)
     }
 
     override fun hashCode(): Int {
@@ -48,7 +47,6 @@ class StormEdgeLabel : Serializable {
         return this.streamName + "[" + this.groupingAttribute + "][" + this.stormEdgeType + "]"
     }
 }
-
 
 class StormEdgeType : Serializable {
 
@@ -75,10 +73,10 @@ class StormEdgeType : Serializable {
     }
 
     override fun equals(other: Any?): Boolean {
-        return (other is StormEdgeType
-                && other.isAll == this.isAll
-                && other.isShuffle == this.isShuffle
-                && other.isGrouping == this.isGrouping)
+        return (other is StormEdgeType &&
+                other.isAll == this.isAll &&
+                other.isShuffle == this.isShuffle &&
+                other.isGrouping == this.isGrouping)
     }
 
     override fun hashCode(): Int {

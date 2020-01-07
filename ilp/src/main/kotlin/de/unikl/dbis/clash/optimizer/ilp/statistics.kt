@@ -9,7 +9,7 @@ open class Statistics(
 
     open fun getSelectivity(s1: String, s2: String): Double {
         val (ss1, ss2) = listOf(s1, s2).sorted()
-        return selectivity[Pair(ss1, ss2)]?: 1.0
+        return selectivity[Pair(ss1, ss2)] ?: 1.0
     }
 
     open fun setSelectivity(s1: String, s2: String, sel: Double) {
@@ -25,7 +25,7 @@ open class Statistics(
         return relations.asSequence()
                         .map { getRate(it) }.product() *
                 relations.times(relations)
-                        .filter { (s1, s2) ->  s1 < s2}
+                        .filter { (s1, s2) -> s1 < s2 }
                         .map { (s1, s2) -> getSelectivity(s1, s2) }
                         .product()
     }
@@ -39,12 +39,11 @@ class ConstantStatistics(val rate: Double, val selectivity: Double) : Statistics
     override fun getRate(str: String): Double {
         return rate
     }
-
 }
 
 fun Sequence<Double>.product(): Double {
     var result = 1.0
-    for(x in this) {
+    for (x in this) {
         result *= x
     }
     return result
@@ -62,10 +61,10 @@ fun Sequence<Double>.product(): Double {
  * If, the query would be R(a, c), we must broadcast to all S-instances.
  */
 fun communicationCostFor(
-        probeOrder: ProbeOrder,
-        query: IlpQuery,
-        statistics: Statistics,
-        configuration: Configuration
+    probeOrder: ProbeOrder,
+    query: IlpQuery,
+    statistics: Statistics,
+    configuration: Configuration
 ): Double {
     fun mustBroadcast(seen: List<String>, other: String): Boolean {
         return !seen.contains(other)
@@ -76,7 +75,7 @@ fun communicationCostFor(
 
     for (relation in probeOrder.order.subList(1, probeOrder.order.size)) {
         val tuplesSentFromPreviousRelation = statistics.joinSize(seenRelations)
-        val routingDuplicationFactor = if(mustBroadcast(seenVariables, relation.partAttr)) configuration.getParallelism(relation.name) else 1
+        val routingDuplicationFactor = if (mustBroadcast(seenVariables, relation.partAttr)) configuration.getParallelism(relation.name) else 1
         println("Cost for sending to $relation is $tuplesSentFromPreviousRelation * $routingDuplicationFactor")
         cost += tuplesSentFromPreviousRelation * routingDuplicationFactor
         seenRelations += relation.name

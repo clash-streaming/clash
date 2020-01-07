@@ -3,12 +3,11 @@ package de.unikl.dbis.clash.query
 import de.unikl.dbis.clash.support.times
 import java.io.Serializable
 
-
 data class Relation(
-        val windowDefinition: Map<RelationAlias, WindowDefinition>,
-        val predicates: Collection<Predicate>,
-        val attributeAccesses: Collection<AttributeAccess>  // TODO
-): Serializable {
+    val windowDefinition: Map<RelationAlias, WindowDefinition>,
+    val predicates: Collection<Predicate>,
+    val attributeAccesses: Collection<AttributeAccess> // TODO
+) : Serializable {
     val aliases: Collection<RelationAlias> get() = windowDefinition.keys
     val unaryPredicates: Collection<UnaryPredicate> get() = predicates.filterIsInstance<UnaryPredicate>()
     val binaryPredicates: Collection<BinaryPredicate> get() = predicates.filterIsInstance<BinaryPredicate>()
@@ -57,14 +56,13 @@ data class Relation(
     }
 
     override fun equals(other: Any?): Boolean {
-        if(!(other is Relation))
+        if (!(other is Relation))
             return false
-        return windowDefinition.equals(other.windowDefinition)
-                && predicates.equals(other.predicates)
-                && attributeAccesses.equals(other.attributeAccesses)
+        return windowDefinition.equals(other.windowDefinition) &&
+                predicates.equals(other.predicates) &&
+                attributeAccesses.equals(other.attributeAccesses)
     }
 }
-
 
 fun isCrossProductAlias(binaryPredicates: Collection<BinaryPredicate>, relationAliases: Collection<RelationAlias>, relationAlias: RelationAlias): Boolean {
     return isCrossProductAlias(binaryPredicates, relationAliases, listOf(relationAlias))
@@ -73,8 +71,8 @@ fun isCrossProductAlias(binaryPredicates: Collection<BinaryPredicate>, relationA
 fun isCrossProductAlias(binaryPredicates: Collection<BinaryPredicate>, relationAliases1: Collection<RelationAlias>, relationAliases2: Collection<RelationAlias>): Boolean {
     return binaryPredicates.none {
         predicate -> relationAliases1.times(relationAliases2).any {
-        predicate.leftRelationAlias == it.first && predicate.rightRelationAlias == it.second
-                || predicate.rightRelationAlias == it.first && predicate.leftRelationAlias == it.second
+        predicate.leftRelationAlias == it.first && predicate.rightRelationAlias == it.second ||
+                predicate.rightRelationAlias == it.first && predicate.leftRelationAlias == it.second
     }
     }
 }

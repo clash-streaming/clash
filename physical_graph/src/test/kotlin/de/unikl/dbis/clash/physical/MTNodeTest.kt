@@ -1,6 +1,5 @@
 package de.unikl.dbis.clash.physical
 
-
 class MTNodeTest {
     // TODO
 //    val nodeFrom: Node = Store("myOrigin", emptySet(), relationOf("myOrigin"), 1)

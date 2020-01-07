@@ -4,12 +4,10 @@ import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Relation
 import java.io.Serializable
 
-
 /**
  * Common properties of all rules.
  */
 interface Rule : Serializable
-
 
 /**
  * An InRule is a rule which provides an input stream label.
@@ -20,7 +18,6 @@ interface InRule : Rule {
 
     fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule
 }
-
 
 /**
  * A OldJoinRule is a rule which provides an output stream label.
@@ -49,7 +46,6 @@ interface OutRule : Rule {
     fun replaceOutgoingEdgeLabel(newLabel: EdgeLabel): OutRule
 }
 
-
 class ReportInRule(override val incomingEdgeLabel: EdgeLabel) : InRule {
 
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
@@ -75,13 +71,11 @@ class ReportOutRule(override val outgoingEdgeLabel: EdgeLabel) : OutRule {
     }
 }
 
-
 class ControlInRule(override val incomingEdgeLabel: EdgeLabel) : InRule {
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
         return ControlInRule(newLabel)
     }
 }
-
 
 class ControlOutRule(override val outgoingEdgeLabel: EdgeLabel) : OutRule {
     override fun replaceOutgoingEdgeLabel(newLabel: EdgeLabel): OutRule {
@@ -89,13 +83,11 @@ class ControlOutRule(override val outgoingEdgeLabel: EdgeLabel) : OutRule {
     }
 }
 
-
 class TickInRule(override val incomingEdgeLabel: EdgeLabel) : InRule {
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
         return TickInRule(newLabel)
     }
 }
-
 
 class TickOutRule(override val outgoingEdgeLabel: EdgeLabel) : OutRule {
     override fun replaceOutgoingEdgeLabel(newLabel: EdgeLabel): OutRule {
@@ -103,13 +95,14 @@ class TickOutRule(override val outgoingEdgeLabel: EdgeLabel) : OutRule {
     }
 }
 
-
 /**
  * This rule indicates that if a tuple arrives at Storm stream incomingStreamName, it is a part of
  * the streamed relation relation.
  */
-class RelationReceiveRule(val relation: Relation,
-                          override val incomingEdgeLabel: EdgeLabel) : InRule {
+class RelationReceiveRule(
+    val relation: Relation,
+    override val incomingEdgeLabel: EdgeLabel
+) : InRule {
 
     override fun toString(): String {
         return "RelationReceiveRule: receive tuples for " + this.relation
@@ -118,7 +111,6 @@ class RelationReceiveRule(val relation: Relation,
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
         return RelationReceiveRule(this.relation, newLabel)
     }
-
 }
 
 /**
@@ -129,13 +121,14 @@ class RelationSendRule
 /**
  * @param relation Name of the streamed relation the generated result belongs to (e.g. "ab")
  * @param outgoingEdgeLabel Name of the stream the tuple is sent over (e.g. "s_167")
- */
-(val relation: Relation,
- override val outgoingEdgeLabel: EdgeLabel) : OutRule {
+ */(
+     val relation: Relation,
+     override val outgoingEdgeLabel: EdgeLabel
+ ) : OutRule {
 
     override fun toString(): String {
-        return ("RelationSendRule: send result for " + this.relation
-                + " to " + this.outgoingEdgeLabel)
+        return ("RelationSendRule: send result for " + this.relation +
+                " to " + this.outgoingEdgeLabel)
     }
 
     override fun replaceOutgoingEdgeLabel(newLabel: EdgeLabel): OutRule {
@@ -150,16 +143,16 @@ class IntermediateJoinRule
  * @param incomingEdgeLabel label of the incoming stream
  * @param outgoingEdgeLabel label of the outgoing stream
  * @param predicates predicates that have to hold
- */
-(
-        override val incomingEdgeLabel: EdgeLabel,
-        override val outgoingEdgeLabel: EdgeLabel,
-        override val predicates: Set<BinaryPredicateEvaluation>) : InRule, JoinRule, OutRule {
+ */(
+     override val incomingEdgeLabel: EdgeLabel,
+     override val outgoingEdgeLabel: EdgeLabel,
+     override val predicates: Set<BinaryPredicateEvaluation>
+ ) : InRule, JoinRule, OutRule {
 
     override fun toString(): String {
-        return ("OldJoinRule: join from " + incomingEdgeLabel + " and send to " + outgoingEdgeLabel
-                + " if " + predicates.size + " predicates match:"
-                + predicates.joinToString { " ∧ " })
+        return ("OldJoinRule: join from " + incomingEdgeLabel + " and send to " + outgoingEdgeLabel +
+                " if " + predicates.size + " predicates match:" +
+                predicates.joinToString { " ∧ " })
     }
 
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
@@ -178,9 +171,11 @@ class IntermediateJoinRule
  * @param predicates Predicates that have to be satisfied
  * @param relation The relation that is produced with all successful joins
  */
-class JoinResultRule(override val incomingEdgeLabel: EdgeLabel,
-                     override val predicates: Set<BinaryPredicateEvaluation>,
-                     val relation: Relation) : InRule, JoinRule {
+class JoinResultRule(
+    override val incomingEdgeLabel: EdgeLabel,
+    override val predicates: Set<BinaryPredicateEvaluation>,
+    val relation: Relation
+) : InRule, JoinRule {
     override fun toString(): String {
         return "JoinResultRule: join from $incomingEdgeLabel and use as result if " + predicates
                 .size + " predicates match: " + predicates.map { it.predicate }
@@ -197,22 +192,22 @@ class StoreAndJoinRule
  * @param relationName Name of the relation that should be stored
  * @param incomingEdgeLabel Name of the stream whose tuples should be stored
  * @param predicates Predicates that have to be satisfied
- */
-(val relationName: String,
- override val incomingEdgeLabel: EdgeLabel,
- override val predicates: Set<BinaryPredicate>) : InRule, OldJoinRule {
+ */(
+     val relationName: String,
+     override val incomingEdgeLabel: EdgeLabel,
+     override val predicates: Set<BinaryPredicate>
+ ) : InRule, OldJoinRule {
 
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
         return StoreAndJoinRule(this.relationName, newLabel, this.predicates)
     }
 
     override fun toString(): String {
-        return ("StoreAndJoinRule: store document of relation " + this.relationName
-                + " coming on stream " + this.incomingEdgeLabel + " and join with others if "
-                + this.predicates.size + " predicates match")
+        return ("StoreAndJoinRule: store document of relation " + this.relationName +
+                " coming on stream " + this.incomingEdgeLabel + " and join with others if " +
+                this.predicates.size + " predicates match")
     }
 }
-
 
 /**
  * A BinaryPredicate has a left and a right AttributeAccess.
@@ -228,9 +223,9 @@ class StoreAndJoinRule
  * go to the stored tuples and the right AttributeAccess to the arriving tuple.
  * Vice-versa, the BinaryPredicateEvaluationRightStored is used at the y-store.
  */
-interface BinaryPredicateEvaluation: Serializable {
+interface BinaryPredicateEvaluation : Serializable {
     val predicate: BinaryPredicate
 }
-data class GenericBinaryPredicateEvaluation(override val predicate: BinaryPredicate): BinaryPredicateEvaluation
-data class BinaryPredicateEvaluationLeftStored(override val predicate: BinaryPredicate): BinaryPredicateEvaluation
-data class BinaryPredicateEvaluationRightStored(override val predicate: BinaryPredicate): BinaryPredicateEvaluation
+data class GenericBinaryPredicateEvaluation(override val predicate: BinaryPredicate) : BinaryPredicateEvaluation
+data class BinaryPredicateEvaluationLeftStored(override val predicate: BinaryPredicate) : BinaryPredicateEvaluation
+data class BinaryPredicateEvaluationRightStored(override val predicate: BinaryPredicate) : BinaryPredicateEvaluation

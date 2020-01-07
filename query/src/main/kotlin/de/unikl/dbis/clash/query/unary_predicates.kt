@@ -1,9 +1,9 @@
 package de.unikl.dbis.clash.query
 
-
 data class ConstantEquality<T>(
-        override val attributeAccess: AttributeAccess,
-        val constant: T) : UnaryAttributePredicate {
+    override val attributeAccess: AttributeAccess,
+    val constant: T
+) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         return tuple[attributeAccess] == constant
     }
@@ -14,26 +14,26 @@ data class ConstantEquality<T>(
 }
 
 data class UnaryLike(
-        override val attributeAccess: AttributeAccess,
-        val likeExpr: String
+    override val attributeAccess: AttributeAccess,
+    val likeExpr: String
 ) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
         val subject = tuple[attributeAccess]!!
 
         // LIKE '%foo%'
-        if(likeExpr.startsWith("$") && likeExpr.endsWith("$")) {
+        if (likeExpr.startsWith("$") && likeExpr.endsWith("$")) {
             val term = likeExpr.subSequence(1, likeExpr.length - 1)
             return subject.contains(term)
         }
 
         // LIKE '%foo'
-        if(likeExpr.startsWith("$") && !likeExpr.endsWith("$")) {
+        if (likeExpr.startsWith("$") && !likeExpr.endsWith("$")) {
             val term = likeExpr.subSequence(1, likeExpr.length).toString()
             return subject.indexOf(term) == subject.length - term.length
         }
 
         // LIKE 'foo%'
-        if(!likeExpr.startsWith("$") && likeExpr.endsWith("$")) {
+        if (!likeExpr.startsWith("$") && likeExpr.endsWith("$")) {
             val term = likeExpr.subSequence(0, likeExpr.length - 1).toString()
             return subject.indexOf(term) == 0
         }
@@ -47,10 +47,11 @@ data class UnaryLike(
 }
 
 data class AttributeLessThanConstant<T>(
-        override val attributeAccess: AttributeAccess,
-        val constant: T): UnaryAttributePredicate {
+    override val attributeAccess: AttributeAccess,
+    val constant: T
+) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
-        return when(constant) {
+        return when (constant) {
             is Int -> tuple[attributeAccess]!!.toInt() < constant
             is Long -> tuple[attributeAccess]!!.toLong() < constant
             is Double -> tuple[attributeAccess]!!.toDouble() < constant
@@ -64,10 +65,11 @@ data class AttributeLessThanConstant<T>(
 }
 
 data class AttributeGreaterThanConstant<T>(
-        override val attributeAccess: AttributeAccess,
-        val constant: T): UnaryAttributePredicate {
+    override val attributeAccess: AttributeAccess,
+    val constant: T
+) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
-        return when(constant) {
+        return when (constant) {
             is Int -> tuple[attributeAccess]!!.toInt() > constant
             is Long -> tuple[attributeAccess]!!.toLong() > constant
             is Double -> tuple[attributeAccess]!!.toDouble() > constant
@@ -80,12 +82,12 @@ data class AttributeGreaterThanConstant<T>(
     }
 }
 
-
 data class AttributeLessThanOrEqualConstant<T>(
-        override val attributeAccess: AttributeAccess,
-        val constant: T): UnaryAttributePredicate {
+    override val attributeAccess: AttributeAccess,
+    val constant: T
+) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
-        return when(constant) {
+        return when (constant) {
             is Int -> tuple[attributeAccess]!!.toInt() <= constant
             is Long -> tuple[attributeAccess]!!.toLong() <= constant
             is Double -> tuple[attributeAccess]!!.toDouble() <= constant
@@ -99,10 +101,11 @@ data class AttributeLessThanOrEqualConstant<T>(
 }
 
 data class AttributeGreaterThanOrEqualConstant<T>(
-        override val attributeAccess: AttributeAccess,
-        val constant: T): UnaryAttributePredicate {
+    override val attributeAccess: AttributeAccess,
+    val constant: T
+) : UnaryAttributePredicate {
     override fun evaluate(tuple: Tuple): Boolean {
-        return when(constant) {
+        return when (constant) {
             is Int -> tuple[attributeAccess]!!.toInt() >= constant
             is Long -> tuple[attributeAccess]!!.toLong() >= constant
             is Double -> tuple[attributeAccess]!!.toDouble() >= constant

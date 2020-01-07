@@ -36,7 +36,7 @@ interface BinaryPredicate : Predicate, Serializable {
         fun fromString(joinPredicate: String): BinaryPredicate {
             val attributePairEqualityRegex = "(\\w+)\\.(\\w+)\\s*=\\s*(\\w+)\\.(\\w+)".toRegex()
 
-            if(joinPredicate.matches(attributePairEqualityRegex)) {
+            if (joinPredicate.matches(attributePairEqualityRegex)) {
                 val matchResult = attributePairEqualityRegex.find(joinPredicate)!!
                 val (leftRelation, leftAttr, rightRelation, rightAttr) = matchResult.destructured
                 return BinaryEquality(AttributeAccess(leftRelation, leftAttr), AttributeAccess(rightRelation, rightAttr))
@@ -62,8 +62,8 @@ interface BinaryAttributePredicate : BinaryPredicate {
 fun extractAttributeAccesses(predicates: List<Predicate>): Collection<AttributeAccess> {
     val result = mutableListOf<AttributeAccess>()
 
-    for(predicate in predicates) {
-        when(predicate) {
+    for (predicate in predicates) {
+        when (predicate) {
             is UnaryAttributePredicate -> result.add(predicate.attributeAccess)
             is BinaryAttributePredicate -> {
                 result.add(predicate.leftAttributeAccess)

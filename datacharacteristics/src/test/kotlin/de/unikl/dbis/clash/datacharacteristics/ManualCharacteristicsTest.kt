@@ -4,7 +4,6 @@ import de.unikl.dbis.clash.query.RelationAlias
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-
 internal class ManualCharacteristicsTest {
     @Test
     fun `SetRate works`() {
@@ -53,7 +52,6 @@ internal class ManualCharacteristicsTest {
 
         assertThat(dc.computeJoinSize(RelationAlias("a"), RelationAlias("b"))).isEqualTo(600.0)
     }
-
 
     @Test
     fun `computeJoinSize works for chain`() {

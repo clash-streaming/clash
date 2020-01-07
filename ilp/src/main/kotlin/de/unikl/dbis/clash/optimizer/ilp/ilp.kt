@@ -8,7 +8,7 @@ enum class IlpCompare {
     GREATER_THAN;
 
     override fun toString(): String {
-        return when(this) {
+        return when (this) {
             EQUAL -> "="
             GREATER_THAN -> ">"
         }
@@ -29,7 +29,6 @@ data class IlpRow(val entries: List<IlpEntry>, val compare: IlpCompare, val valu
 
 data class Ilp(val rows: List<IlpRow>, val goal: List<IlpEntry>, val list: List<String>) {
     override fun toString(): String {
-        return "min ${goal.joinToString(" ")} s.t.\n" +  rows.joinToString("\n")
+        return "min ${goal.joinToString(" ")} s.t.\n" + rows.joinToString("\n")
     }
 }
-

@@ -6,7 +6,17 @@ import de.unikl.dbis.clash.physical.ControlOutRule
 import de.unikl.dbis.clash.physical.OutRule
 import de.unikl.dbis.clash.physical.RelationSendRule
 import de.unikl.dbis.clash.physical.TickOutRule
-import de.unikl.dbis.clash.storm.*
+import de.unikl.dbis.clash.storm.ControlMessage
+import de.unikl.dbis.clash.storm.DataPathMessage
+import de.unikl.dbis.clash.storm.DocumentsMessage
+import de.unikl.dbis.clash.storm.EdgySpoutOutputCollector
+import de.unikl.dbis.clash.storm.FinishedMessage
+import de.unikl.dbis.clash.storm.StormControlOutRule
+import de.unikl.dbis.clash.storm.StormOutRule
+import de.unikl.dbis.clash.storm.StormRelationSendRule
+import de.unikl.dbis.clash.storm.StormTickOutRule
+import de.unikl.dbis.clash.storm.TickMessage
+import java.util.Collections
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.IRichSpout
@@ -14,8 +24,6 @@ import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichSpout
 import org.apache.storm.utils.Utils
 import org.slf4j.LoggerFactory
-import java.util.*
-
 
 interface CommonSpoutI : IRichSpout {
     fun addRule(rule: OutRule)
@@ -64,7 +72,6 @@ abstract class CommonSpout constructor(millisDelay: Int = 0) : BaseRichSpout(), 
                 this.delayCounter = 0
             }
         }
-
     }
 
     internal fun emit(message: ControlMessage) {
@@ -113,7 +120,7 @@ abstract class CommonSpout constructor(millisDelay: Int = 0) : BaseRichSpout(), 
 
     override fun addRule(rule: OutRule) {
         LOG.info("Registering rule to spout $this: $rule")
-        when(rule) {
+        when (rule) {
             is RelationSendRule -> this.rules.add(StormRelationSendRule(rule))
             is ControlOutRule -> this.rules.add(StormControlOutRule(rule))
             is TickOutRule -> this.rules.add(StormTickOutRule(rule))

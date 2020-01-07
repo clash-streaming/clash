@@ -1,15 +1,10 @@
 package de.unikl.dbis.clash.datagenerator.joins
 
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.params.ParameterizedTest;
-
-import org.assertj.core.api.Assertions.*
-import org.assertj.core.data.Percentage
-
-
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.data.Percentage
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 
 internal class Join_keysKtTest {
 
@@ -25,9 +20,9 @@ internal class Join_keysKtTest {
 
     fun joinSize(rel1: List<Long>, rel2: List<Long>): Long {
         var joinResults = 0L
-        for(store in rel1) {
-            for(probe in rel2) {
-                if(store == probe) {
+        for (store in rel1) {
+            for (probe in rel2) {
+                if (store == probe) {
                     joinResults++
                 }
             }

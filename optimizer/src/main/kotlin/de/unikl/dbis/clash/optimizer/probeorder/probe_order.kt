@@ -8,7 +8,6 @@ import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.support.permutations
 
-
 typealias ProbeCost = Double
 
 /**
@@ -34,17 +33,19 @@ data class ProbeOrders(val inner: Map<MtNode, Pair<ProbeOrder, Double>>)
  *
  * Finds the best Probe order according to the cost model.
  */
-fun exhaustiveProbeOrderScan(dataCharacteristics: DataCharacteristics,
-                             predicates: Collection<BinaryPredicate>,
-                             joinInputs: Collection<MtNode>,
-                             costFunction: (DataCharacteristics, ProbeOrder) -> (Double)): ProbeOrders {
+fun exhaustiveProbeOrderScan(
+    dataCharacteristics: DataCharacteristics,
+    predicates: Collection<BinaryPredicate>,
+    joinInputs: Collection<MtNode>,
+    costFunction: (DataCharacteristics, ProbeOrder) -> (Double)
+): ProbeOrders {
     val result = mutableMapOf<MtNode, Pair<ProbeOrder, Double>>()
     joinInputs.toList().permutations().forEach {
         val probeOrder = listToProbeOrder(it, predicates)
         val cost = costFunction(dataCharacteristics, probeOrder)
         val startNode = it.first()
-        if(result.containsKey(startNode)) {
-            if(cost < result[startNode]!!.second) {
+        if (result.containsKey(startNode)) {
+            if (cost < result[startNode]!!.second) {
                 result[startNode] = Pair(probeOrder, cost)
             }
         } else {
@@ -54,18 +55,21 @@ fun exhaustiveProbeOrderScan(dataCharacteristics: DataCharacteristics,
     return ProbeOrders(result)
 }
 
-fun exhaustiveLeastIntermediates(dataCharacteristics: DataCharacteristics,
-                                 predicates: Collection<BinaryPredicate>,
-                                 children: Collection<MtNode>): ProbeOrders {
+fun exhaustiveLeastIntermediates(
+    dataCharacteristics: DataCharacteristics,
+    predicates: Collection<BinaryPredicate>,
+    children: Collection<MtNode>
+): ProbeOrders {
     return exhaustiveProbeOrderScan(dataCharacteristics, predicates, children, ::globalIntermediateTuplesGeneratedForProbeOrder)
 }
 
-fun exhaustiveLeastSent(dataCharacteristics: DataCharacteristics,
-                        predicates: Collection<BinaryPredicate>,
-                        children: Collection<MtNode>): ProbeOrders {
+fun exhaustiveLeastSent(
+    dataCharacteristics: DataCharacteristics,
+    predicates: Collection<BinaryPredicate>,
+    children: Collection<MtNode>
+): ProbeOrders {
     return exhaustiveProbeOrderScan(dataCharacteristics, predicates, children, ::globalProbeTuplesSentForProbeOrder)
 }
-
 
 /**
  * Helper function that generates a probe order from a list of nodes.
@@ -73,7 +77,7 @@ fun exhaustiveLeastSent(dataCharacteristics: DataCharacteristics,
  */
 fun listToProbeOrder(list: List<MtNode>, predicates: Collection<BinaryPredicate>): ProbeOrder {
     val result = mutableListOf<Pair<MtNode, Set<BinaryPredicate>>>()
-    for(node in list) {
+    for (node in list) {
         result.add(Pair(node, predicatesForJoin(predicates, result.map { it.first.relation.aliases }.flatten(), node.relation.aliases)))
     }
     return ProbeOrder(result)
@@ -87,5 +91,5 @@ fun listToProbeOrder(list: List<MtNode>, predicates: Collection<BinaryPredicate>
  */
 fun predicatesForJoin(predicates: Collection<BinaryPredicate>, from: Collection<RelationAlias>, to: Collection<RelationAlias>): Set<BinaryPredicate> {
     return predicates.filter { from.contains(it.leftRelationAlias) && to.contains(it.rightRelationAlias) ||
-            from.contains(it.rightRelationAlias) && to.contains(it.leftRelationAlias)}.toSet()
+            from.contains(it.rightRelationAlias) && to.contains(it.leftRelationAlias) }.toSet()
 }

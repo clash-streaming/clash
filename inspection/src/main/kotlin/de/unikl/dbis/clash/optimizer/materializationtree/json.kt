@@ -8,7 +8,6 @@ fun MaterializationTree.toJson(): JSONObject {
     return root.toJson()
 }
 
-
 /**
  * Returns an object for each type of MtNode.
  *
@@ -47,7 +46,7 @@ fun MaterializationTree.toJson(): JSONObject {
 fun MtNode.toJson(): JSONObject {
     val result = JSONObject()
 
-    return when(this) {
+    return when (this) {
         is NonMatMultiStream -> nonMatMultiStreamToJson(this)
         is MatMultiStream -> matMultiStreamToJson(this)
         is MatSource -> matSourceToJson(this)
@@ -64,7 +63,6 @@ fun nonMatMultiStreamToJson(nonMatMultiStream: NonMatMultiStream): JSONObject {
     result.put("probeCost", nonMatMultiStream.multiStreamImpl.probeCost)
     return result
 }
-
 
 fun matMultiStreamToJson(matMultiStream: MatMultiStream): JSONObject {
     val result = JSONObject()
@@ -88,7 +86,6 @@ fun matSourceToJson(matSource: MatSource): JSONObject {
     result.put("storageCost", matSource.storageCost)
     return result
 }
-
 
 fun probeOrderToJson(probeOrders: ProbeOrders): Array<Array<String>> {
     return probeOrders.inner.values.map { it.first.steps.map { step -> step.first.relation.aliases.joinToString("-") }.toTypedArray() }.toTypedArray()

@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 
-
 internal class SymmetricJSONCharacteristicsTest {
     @Test
     fun `parse json object`() {

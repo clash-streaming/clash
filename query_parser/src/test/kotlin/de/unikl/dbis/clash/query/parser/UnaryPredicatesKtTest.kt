@@ -1,6 +1,10 @@
 package de.unikl.dbis.clash.query.parser
 
-import de.unikl.dbis.clash.query.*
+import de.unikl.dbis.clash.query.AttributeAccess
+import de.unikl.dbis.clash.query.AttributeGreaterThanConstant
+import de.unikl.dbis.clash.query.AttributeGreaterThanOrEqualConstant
+import de.unikl.dbis.clash.query.AttributeLessThanConstant
+import de.unikl.dbis.clash.query.AttributeLessThanOrEqualConstant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

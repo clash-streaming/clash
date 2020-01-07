@@ -14,10 +14,8 @@ import de.unikl.dbis.clash.query.AttributeAccess
 import de.unikl.dbis.clash.query.BinaryEquality
 import de.unikl.dbis.clash.query.RelationAlias
 import java.lang.RuntimeException
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.TreeMap
 import kotlin.collections.HashMap
-import kotlin.math.roundToInt
 import kotlin.random.Random
 
 val rAttr = AttributeAccess("r.a")
@@ -54,7 +52,6 @@ class HashPerformance : CliktCommand() {
     ).required()
     val verbose by option("-v", "--verbose").flag()
 
-
     override fun run() {
         printv("Experiment:")
         printv("- windowSize is $windowSize:")
@@ -70,8 +67,8 @@ class HashPerformance : CliktCommand() {
 
         val timeBefore = System.currentTimeMillis()
         var resultCounter = 0L
-        for(document in documents) {
-            if(document.first == STORE_TUPLE) {
+        for (document in documents) {
+            if (document.first == STORE_TUPLE) {
                 wrapper.store(document.second)
             } else {
                 resultCounter += wrapper.probe(document.second).size
@@ -99,12 +96,12 @@ class HashPerformance : CliktCommand() {
     }
 
     fun printv(string: String) {
-        if(verbose)
+        if (verbose)
             println(string)
     }
 
     fun getWrapper(): Wrapper {
-        return when(method) {
+        return when (method) {
             "LibraryTreeMapKeyedByTimeStamp" -> LibraryTreeMapKeyedByTimeStampWrapper()
             "LibraryHashMapKeyedByAttribute" -> LibraryHashMapKeyedByAttributeWrapper()
             else -> throw RuntimeException("No method with name `$method' is available.")
@@ -112,11 +109,12 @@ class HashPerformance : CliktCommand() {
     }
 }
 
-
-fun prepare(storeFraction: Double,
-            windowSize: Long,
-            selectivity: Double,
-            totalTuples: Long): List<Pair<Boolean, Tuple>> {
+fun prepare(
+    storeFraction: Double,
+    windowSize: Long,
+    selectivity: Double,
+    totalTuples: Long
+): List<Pair<Boolean, Tuple>> {
     val generator = Generator(storeFraction, windowSize, selectivity, totalTuples)
     return generator.generate()
 }
@@ -137,8 +135,8 @@ fun main2(initialStores: Int, rounds: Int, stores: Int, probes: Int, storeDocume
 }
 
 interface Wrapper {
-    fun store(tuple: Tuple);
-    fun probe(tuple: Tuple): List<Tuple>;
+    fun store(tuple: Tuple)
+    fun probe(tuple: Tuple): List<Tuple>
 }
 
 /**

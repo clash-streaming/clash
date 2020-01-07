@@ -1,19 +1,44 @@
 package de.unikl.dbis.clash.query.parser
 
-import de.unikl.dbis.clash.query.*
-import net.sf.jsqlparser.expression.*
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression
-import net.sf.jsqlparser.expression.operators.relational.*
-import net.sf.jsqlparser.schema.Column
+import de.unikl.dbis.clash.query.AttributeGreaterThanConstant
+import de.unikl.dbis.clash.query.AttributeGreaterThanOrEqualConstant
+import de.unikl.dbis.clash.query.AttributeLessThanConstant
+import de.unikl.dbis.clash.query.AttributeLessThanOrEqualConstant
+import de.unikl.dbis.clash.query.BinaryEquality
+import de.unikl.dbis.clash.query.BinaryLessThan
+import de.unikl.dbis.clash.query.BinaryLessThanOrEqual
+import de.unikl.dbis.clash.query.ConstantEquality
+import de.unikl.dbis.clash.query.Predicate
+import de.unikl.dbis.clash.query.RelationAlias
+import de.unikl.dbis.clash.query.Similarity
+import de.unikl.dbis.clash.query.UnaryLike
+import net.sf.jsqlparser.expression.DateTimeLiteralExpression
+import net.sf.jsqlparser.expression.DoubleValue
+import net.sf.jsqlparser.expression.Expression
+import net.sf.jsqlparser.expression.ExpressionVisitorAdapter
 import net.sf.jsqlparser.expression.Function
-
+import net.sf.jsqlparser.expression.LongValue
+import net.sf.jsqlparser.expression.StringValue
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression
+import net.sf.jsqlparser.expression.operators.relational.Between
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals
+import net.sf.jsqlparser.expression.operators.relational.InExpression
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression
+import net.sf.jsqlparser.expression.operators.relational.MinorThan
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo
+import net.sf.jsqlparser.schema.Column
 
 /**
  * This file contains functions for handling the WHERE part of a query
  */
 
 fun extractPredicates(where: Expression?): List<Predicate> {
-    if(where == null) {
+    if (where == null) {
         return listOf()
     }
     val result = mutableListOf<Predicate>()
@@ -28,7 +53,7 @@ fun extractPredicates(where: Expression?): List<Predicate> {
         }
 
         override fun visit(expr: EqualsTo) {
-            result += when(isUnary(expr)) {
+            result += when (isUnary(expr)) {
                 true -> interpretUnaryEquals(expr)
                 false -> interpretBinaryEquals(expr)
             }
@@ -39,28 +64,28 @@ fun extractPredicates(where: Expression?): List<Predicate> {
         }
 
         override fun visit(expr: GreaterThan) {
-            result += when(isUnary(expr)) {
+            result += when (isUnary(expr)) {
                 true -> interpretUnaryGreaterThan(expr)
                 false -> interpretBinaryGreaterThan(expr)
             }
         }
 
         override fun visit(expr: GreaterThanEquals) {
-            result += when(isUnary(expr)) {
+            result += when (isUnary(expr)) {
                 true -> interpretUnaryGreaterThanOrEqual(expr)
                 false -> interpretBinaryGreaterThanOrEqual(expr)
             }
         }
 
         override fun visit(expr: MinorThan) {
-            result += when(isUnary(expr)) {
+            result += when (isUnary(expr)) {
                 true -> interpretUnaryLessThan(expr)
                 false -> interpretBinaryLessThan(expr)
             }
         }
 
         override fun visit(expr: MinorThanEquals) {
-            result += when(isUnary(expr)) {
+            result += when (isUnary(expr)) {
                 true -> interpretUnaryLessThanOrEqual(expr)
                 false -> interpretBinaryLessThanOrEqual(expr)
             }
@@ -95,7 +120,7 @@ fun interpretUnaryEquals(expr: EqualsTo): ConstantEquality<Any> {
         Pair(expr.rightExpression as Column, expr.leftExpression)
     }
     val attributeAccess = toAttributeAccess(col)
-    return when(constant) {
+    return when (constant) {
         is StringValue -> ConstantEquality(attributeAccess, constant.value)
         is LongValue -> ConstantEquality(attributeAccess, constant.value)
         else -> throw QueryParseException("Equality with type ${constant::class.java} is not implemented.")
@@ -113,7 +138,7 @@ fun interpretBinaryEquals(expr: EqualsTo): Predicate {
 }
 
 fun interpretLike(expr: LikeExpression): UnaryLike {
-    val (col, like) = when(expr.leftExpression is Column && expr.rightExpression is StringValue) {
+    val (col, like) = when (expr.leftExpression is Column && expr.rightExpression is StringValue) {
         true -> Pair(expr.leftExpression as Column, expr.rightExpression as StringValue)
         else -> throw QueryParseException("LIKE statement should be: [column] LIKE [string]")
     }
@@ -130,7 +155,7 @@ fun interpretUnaryGreaterThan(expr: GreaterThan): AttributeGreaterThanConstant<A
         Pair(expr.rightExpression as Column, expr.leftExpression)
     }
     val attributeAccess = toAttributeAccess(col)
-    return when(constant) {
+    return when (constant) {
         is StringValue -> AttributeGreaterThanConstant(attributeAccess, constant.value)
         is LongValue -> AttributeGreaterThanConstant(attributeAccess, constant.value)
         is DoubleValue -> AttributeGreaterThanConstant(attributeAccess, constant.value)
@@ -146,7 +171,7 @@ fun interpretUnaryGreaterThanOrEqual(expr: GreaterThanEquals): AttributeGreaterT
         Pair(expr.rightExpression as Column, expr.leftExpression)
     }
     val attributeAccess = toAttributeAccess(col)
-    return when(constant) {
+    return when (constant) {
         is StringValue -> AttributeGreaterThanOrEqualConstant(attributeAccess, constant.value)
         is LongValue -> AttributeGreaterThanOrEqualConstant(attributeAccess, constant.value)
         is DoubleValue -> AttributeGreaterThanOrEqualConstant(attributeAccess, constant.value)
@@ -184,7 +209,7 @@ fun interpretUnaryLessThan(expr: MinorThan): AttributeLessThanConstant<Any> {
         Pair(expr.rightExpression as Column, expr.leftExpression)
     }
     val attributeAccess = toAttributeAccess(col)
-    return when(constant) {
+    return when (constant) {
         is StringValue -> AttributeLessThanConstant(attributeAccess, constant.value)
         is LongValue -> AttributeLessThanConstant(attributeAccess, constant.value)
         is DoubleValue -> AttributeLessThanConstant(attributeAccess, constant.value)
@@ -193,7 +218,6 @@ fun interpretUnaryLessThan(expr: MinorThan): AttributeLessThanConstant<Any> {
     }
 }
 
-
 fun interpretUnaryLessThanOrEqual(expr: MinorThanEquals): AttributeLessThanOrEqualConstant<Any> {
     val (col, constant) = if (isColumn(expr.leftExpression)) {
         Pair(expr.leftExpression as Column, expr.rightExpression)
@@ -201,7 +225,7 @@ fun interpretUnaryLessThanOrEqual(expr: MinorThanEquals): AttributeLessThanOrEqu
         Pair(expr.rightExpression as Column, expr.leftExpression)
     }
     val attributeAccess = toAttributeAccess(col)
-    return when(constant) {
+    return when (constant) {
         is StringValue -> AttributeLessThanOrEqualConstant(attributeAccess, constant.value)
         is LongValue -> AttributeLessThanOrEqualConstant(attributeAccess, constant.value)
         is DoubleValue -> AttributeLessThanOrEqualConstant(attributeAccess, constant.value)
@@ -237,14 +261,14 @@ fun interpretFunction(expr: Function): Predicate {
         return Similarity(RelationAlias(leftRelationName), RelationAlias(rightRelationName))
     }
 
-    return when(expr.name) {
+    return when (expr.name) {
         "similar" -> parseSimilarity(expr)
         else -> throw QueryParseException("Function with name ${expr.name} is not implemented.")
     }
 }
 
 fun extractParameters(expressionList: ExpressionList): List<String> {
-    if(expressionList.expressions.any { e -> e !is StringValue }) {
+    if (expressionList.expressions.any { e -> e !is StringValue }) {
         throw QueryParseException("Parameters of table functions must be Strings!")
     }
 

@@ -3,22 +3,22 @@ package de.unikl.dbis.clash.storm.spouts
 import de.unikl.dbis.clash.documents.Document
 import de.unikl.dbis.clash.query.InputName
 import de.unikl.dbis.clash.query.RelationAlias
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.utils.Utils
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
 
 class JsonFileSpout constructor(
-        val inputName: InputName,
-        val relationAlias: RelationAlias,
-        private val filePath: String,
-        millisDelay: Int = 0) : CommonSpout(millisDelay) {
+    val inputName: InputName,
+    val relationAlias: RelationAlias,
+    private val filePath: String,
+    millisDelay: Int = 0
+) : CommonSpout(millisDelay) {
     var iterator: Iterator<String>? = null
-
 
     override fun open(conf: MutableMap<String, Any>?, topologyContext: TopologyContext?, spoutOutputCollector: SpoutOutputCollector?) {
         super.open(conf, topologyContext, spoutOutputCollector)
@@ -29,9 +29,7 @@ class JsonFileSpout constructor(
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
     }
-
 
     override fun nextTuple() {
         if (iterator != null && iterator!!.hasNext()) {
@@ -72,17 +70,15 @@ class JsonFileSpout constructor(
     }
 }
 
-
-
 class LinewiseFileSpout constructor(
-        val inputName: InputName,
-        val relationAlias: RelationAlias,
-        val filePath: String,
-        millisDelay: Int = 0,
-        val lineTransformer: (RelationAlias, String) -> Document) : CommonSpout(millisDelay) {
+    val inputName: InputName,
+    val relationAlias: RelationAlias,
+    val filePath: String,
+    millisDelay: Int = 0,
+    val lineTransformer: (RelationAlias, String) -> Document
+) : CommonSpout(millisDelay) {
 
     var iterator: Iterator<String>? = null
-
 
     override fun open(conf: MutableMap<String, Any>?, topologyContext: TopologyContext?, spoutOutputCollector: SpoutOutputCollector?) {
         super.open(conf, topologyContext, spoutOutputCollector)
@@ -94,7 +90,6 @@ class LinewiseFileSpout constructor(
             e.printStackTrace()
         }
     }
-
 
     override fun nextTuple() {
         if (iterator != null && iterator!!.hasNext()) {

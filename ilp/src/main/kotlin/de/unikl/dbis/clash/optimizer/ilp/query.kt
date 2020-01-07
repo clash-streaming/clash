@@ -16,17 +16,17 @@ data class IlpQuery(val relations: List<QueriedRelation>, val statistics: Statis
     /**
      * All variables occurring in the query
      */
-    val bindings  get() = relations.map { it.bindings }.flatten().distinct()
+    val bindings get() = relations.map { it.bindings }.flatten().distinct()
 
     fun getBindingsFor(relationName: String) = relations.first { it.name == relationName }.bindings
 
     fun toIlp(builder: IlpBuilder): Ilp {
         // exactly one probe order for each starting relation
-        for(relation in relations) {
+        for (relation in relations) {
             val probeOrders = probeOrdersFor(listOf(relation), this)
             builder.addProbeOrderChoice(probeOrders)
 
-            for(probeOrder in probeOrders) {
+            for (probeOrder in probeOrders) {
                 builder.addProbeOrderCost(probeOrder, this, statistics, configuration)
             }
         }
@@ -62,7 +62,7 @@ fun main() {
     println("\nNext:\n")
 
     println("Probe order cost:")
-    val somePo = allProbeOrders(q1).toList()[1] //.random()
+    val somePo = allProbeOrders(q1).toList()[1] // .random()
 
     val builder = IlpBuilder()
     val ilp = q1.toIlp(builder)

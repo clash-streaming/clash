@@ -42,12 +42,12 @@ fun main(args: Array<String>) {
 }
 
 class NaiveNestedLoopMeasurement(
-        val initialStores: Int,
-        val repeat: Int,
-        val stores: Int,
-        val probes: Int,
-        val storeLength: Int,
-        val probeLength: Int
+    val initialStores: Int,
+    val repeat: Int,
+    val stores: Int,
+    val probes: Int,
+    val storeLength: Int,
+    val probeLength: Int
 ) {
     var currentAts = 0L
 

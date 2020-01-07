@@ -1,22 +1,20 @@
 package de.unikl.dbis.clash.optimizer.ilp
 
 data class ProbeOrderEntry(
-        val fromRelation: List<QueriedRelation>,
-        val toPartitionedStore: PartitionedRelation,
-        val broadcast: Boolean,
-        val sendCost: Number
+    val fromRelation: List<QueriedRelation>,
+    val toPartitionedStore: PartitionedRelation,
+    val broadcast: Boolean,
+    val sendCost: Number
 )
 
 data class ProbeOrder2(
-        val startingRelation: String,
-        val entries: List<ProbeOrderEntry>,
-        val totalCost: Number)
-
-
-
+    val startingRelation: String,
+    val entries: List<ProbeOrderEntry>,
+    val totalCost: Number
+)
 
 //
-//fun explode2(probeOrder: ProbeOrder, partitioningOptions: Map<String, Set<String>>): List<ProbeOrder> {
+// fun explode2(probeOrder: ProbeOrder, partitioningOptions: Map<String, Set<String>>): List<ProbeOrder> {
 //    fun _explode_rec(prefix: List<Pair<QueriedRelation, List<PartitionedRelation>>>, reminder: List<QueriedRelation>): List<Pair<QueriedRelation, List<PartitionedRelation>>> {
 //        if(reminder.isEmpty()) {
 //            return prefix
@@ -28,17 +26,15 @@ data class ProbeOrder2(
 //    }
 //    val current = boundRelations.first()
 //    val seed = listOf(Pair<QueriedRelation, List<PartitionedRelation>>(current, listOf()))
-////        val seed = current.bindings.map { listOf(PartitionedRelation(current.name, it)) }
+// //        val seed = current.bindings.map { listOf(PartitionedRelation(current.name, it)) }
 //    val rest = boundRelations.subList(1, boundRelations.size)
 //    return _explode_rec(seed, rest)
-//}
-
-
+// }
 
 fun partitioningOptions(queries: Set<IlpQuery>): Map<String, Set<String>> {
     val result = mutableMapOf<String, MutableSet<String>>()
-    for(q in queries) {
-        for(qr in q.relations)  {
+    for (q in queries) {
+        for (qr in q.relations) {
             val attrs = result.getOrDefault(qr.name, mutableSetOf())
             attrs.addAll(qr.bindings)
             result[qr.name] = attrs
@@ -47,7 +43,7 @@ fun partitioningOptions(queries: Set<IlpQuery>): Map<String, Set<String>> {
     return result
 }
 
-//fun potentialProbeOrders(
+// fun potentialProbeOrders(
 //        partitioningOptions: Map<String, Set<String>>,
 //        query: IlpQuery,
 //        startingRelation: QueriedRelation): List<ProbeOrder2> {
@@ -78,10 +74,9 @@ fun partitioningOptions(queries: Set<IlpQuery>): Map<String, Set<String>> {
 //                    .filter { it != startingRelation }
 //                    .map { it.name }
 //                    .toSet())
-//}
+// }
 
-
-//fun construct_ilp(queries: Set<IlpQuery>) {
+// fun construct_ilp(queries: Set<IlpQuery>) {
 //    val partitioningOptions = partitioningOptions(queries)
 //    val builder = IlpBuilder2()
 //    for(query in queries) {
@@ -94,7 +89,7 @@ fun partitioningOptions(queries: Set<IlpQuery>): Map<String, Set<String>> {
 //            builder.addProbeOrderChoice(probeOrders)
 //        }
 //    }
-//}
+// }
 
 class IlpBuilder2() {
     var probeOrderVariableCounter = 0
@@ -114,27 +109,26 @@ class IlpBuilder2() {
 
     fun addProbeOrderChoice(probeOrders: List<ProbeOrder2>) {
         val entries = mutableListOf<IlpEntry>()
-        for(probeOrder in probeOrders) {
+        for (probeOrder in probeOrders) {
             entries += IlpEntry(1, getProbeOrderVariable(probeOrder))
         }
         rows += IlpRow(entries, IlpCompare.EQUAL, 1)
     }
 
     fun getProbeOrderVariable(probeOrder: ProbeOrder2): String {
-        if(!probeOrderVariables.containsKey(probeOrder)){
+        if (!probeOrderVariables.containsKey(probeOrder)) {
             probeOrderVariables[probeOrder] = "x${probeOrderVariableCounter++}"
         }
         return probeOrderVariables[probeOrder]!!
     }
 
     fun getProbeOrderTaskVariable(probeOrderEntry: ProbeOrderEntry): String {
-        if(!probeOrderTaskVariables.containsKey(probeOrderEntry)){
+        if (!probeOrderTaskVariables.containsKey(probeOrderEntry)) {
             probeOrderTaskVariables[probeOrderEntry] = "y${probeOrderTaskVariableCounter++}"
         }
         return probeOrderTaskVariables[probeOrderEntry]!!
     }
 }
-
 
 fun main() {
 //    val q1 = IlpQuery(listOf(
