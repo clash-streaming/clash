@@ -20,4 +20,4 @@ include 'microbenchmarks'
 include 'datagenerator'
 include 'similarityjoin'
 include 'ilp'
-
+include 'manager'
