@@ -42,7 +42,9 @@ subprojects {
             implementation(project(":common"))
         }
 
-        compile("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
+        if(projectName != "manager") {
+            compile("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
+        }
 
         testCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
         testCompile("io.mockk:mockk:1.9")
