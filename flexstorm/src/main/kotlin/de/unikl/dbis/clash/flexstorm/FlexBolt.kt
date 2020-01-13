@@ -32,6 +32,7 @@ class FlexBolt() : BaseRichBolt() {
             MessageType.SpoutOutput -> executeDispatch(input)
             MessageType.Store -> executeStore(input)
             MessageType.Probe -> executeProbe(input)
+            MessageType.Control -> executeControl(input)
         }
     }
 
@@ -86,6 +87,11 @@ class FlexBolt() : BaseRichBolt() {
             }
             println(">>> PROBE")
         }
+    }
+
+    fun executeControl(input: Tuple) {
+        val (timestamp, value) = getControlOutput(input)
+        println("$timestamp: received control message: $value")
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer) {

@@ -40,11 +40,11 @@ class ClashState: Serializable {
     fun getStoreTarget(
         timestamp: TimestampValue,
         payload: PayloadValue,
-        relation: RelationValue): Int {
+        relation: RelationValue
+    ): Int {
         val epoch = epochs.epochFor(timestamp)!!
         val partitioning = epoch.partitioning[relation]!!
         val groupingKey = payload[partitioning.attribute]!!
         return partitioning.forValue(groupingKey).first()
     }
-
 }

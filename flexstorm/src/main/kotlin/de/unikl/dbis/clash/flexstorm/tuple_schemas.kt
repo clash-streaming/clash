@@ -13,7 +13,8 @@ typealias RelationValue = String
 enum class MessageType {
     SpoutOutput,
     Store,
-    Probe
+    Probe,
+    Control
 }
 
 fun getMessageType(tuple: Tuple): MessageType = tuple.getValue(0) as MessageType
@@ -51,3 +52,7 @@ data class ProbeTuple(
     val relation: RelationValue,
     val offset: Int
 )
+
+val CONTROL_SCHEMA = Fields("type", "timestamp", "value")
+fun createControlOutput(timestamp: TimestampValue, value: String) = Values(MessageType.Control, timestamp, value)
+fun getControlOutput(tuple: Tuple) = Pair(tuple.getLong(1), tuple.getString(2))

@@ -22,6 +22,8 @@ fun main() {
     val bolt = FlexBolt()
     bolt.clashState.epochs = theEpoch()
 
+    builder.setSpout("ctrl", ControlSpout("http://localhost:8080/api/v1/collect-clash-spout-commands"))
+
     builder.setSpout("r", rSpout)
     builder.setSpout("s", sSpout)
     builder.setSpout("t", tSpout)
@@ -31,6 +33,7 @@ fun main() {
         .shuffleGrouping("t")
         .directGrouping(FLEX_BOLT_NAME, STORE_STREAM_ID)
         .directGrouping(FLEX_BOLT_NAME, PROBE_STREAM_ID)
+        .allGrouping("ctrl")
         .setNumTasks(3)
 
     val localCluster = LocalCluster()
