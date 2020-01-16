@@ -3,6 +3,8 @@
 val ktorVersion = "1.2.6"
 
 dependencies {
+    implementation(project(":manager_api_v1"))
+
     implementation("org.json:json:20180813")
     implementation("org.apache.storm:storm-client:2.1.0")
     implementation("org.apache.storm:storm-server:2.1.0")

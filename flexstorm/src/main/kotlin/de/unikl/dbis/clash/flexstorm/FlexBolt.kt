@@ -28,7 +28,7 @@ class FlexBolt() : BaseRichBolt() {
     }
 
     override fun execute(input: Tuple) {
-        when(getMessageType(input)) {
+        when (getMessageType(input)) {
             MessageType.SpoutOutput -> executeDispatch(input)
             MessageType.Store -> executeStore(input)
             MessageType.Probe -> executeProbe(input)
@@ -46,7 +46,7 @@ class FlexBolt() : BaseRichBolt() {
 
         // send for probing
         val probeTargets = clashState.getProbeOrderTarget(timestamp, payload, relation, 0)
-        for(probeTarget in probeTargets) {
+        for (probeTarget in probeTargets) {
             val probeTargetTaskId = actualFlexBoltTaskId(probeTarget, context)
             collector.emitDirect(probeTargetTaskId, PROBE_STREAM_ID, createProbeOutput(timestamp, payload, relation, 0))
         }

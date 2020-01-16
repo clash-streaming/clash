@@ -3,6 +3,8 @@
 val ktorVersion = "1.2.6"
 
 dependencies {
+    implementation(project(":manager_api_v1"))
+
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

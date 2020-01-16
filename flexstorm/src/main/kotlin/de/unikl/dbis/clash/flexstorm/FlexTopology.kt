@@ -1,5 +1,11 @@
 package de.unikl.dbis.clash.flexstorm
 
+import de.unikl.dbis.clash.flexstorm.control.CONTROL_BOLT_NAME
+import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_NAME
+import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_TO_ALL_STREAM_NAME
+import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME
+import de.unikl.dbis.clash.flexstorm.control.ControlBolt
+import de.unikl.dbis.clash.flexstorm.control.ControlSpout
 import org.apache.storm.Config
 import org.apache.storm.LocalCluster
 import org.apache.storm.topology.TopologyBuilder
@@ -22,7 +28,9 @@ fun main() {
     val bolt = FlexBolt()
     bolt.clashState.epochs = theEpoch()
 
-    builder.setSpout("ctrl", ControlSpout("http://localhost:8080/api/v1/collect-clash-spout-commands"))
+    builder.setSpout(CONTROL_SPOUT_NAME,
+        ControlSpout("http://localhost:8080")
+    )
 
     builder.setSpout("r", rSpout)
     builder.setSpout("s", sSpout)
@@ -33,8 +41,10 @@ fun main() {
         .shuffleGrouping("t")
         .directGrouping(FLEX_BOLT_NAME, STORE_STREAM_ID)
         .directGrouping(FLEX_BOLT_NAME, PROBE_STREAM_ID)
-        .allGrouping("ctrl")
+        .allGrouping(CONTROL_SPOUT_NAME, CONTROL_SPOUT_TO_ALL_STREAM_NAME)
         .setNumTasks(3)
+    builder.setBolt(CONTROL_BOLT_NAME, ControlBolt("http://localhost:8080"))
+        .allGrouping(CONTROL_SPOUT_NAME, CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME)
 
     val localCluster = LocalCluster()
     val conf = Config()

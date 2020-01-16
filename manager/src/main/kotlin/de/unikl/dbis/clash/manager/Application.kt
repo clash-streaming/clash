@@ -1,5 +1,7 @@
 package de.unikl.dbis.clash.manager
 
+import de.unikl.dbis.clash.manager.api.MANAGER_ANSWER_PATH
+import de.unikl.dbis.clash.manager.api.MANAGER_COMMAND_QUEUE_PATH
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -106,12 +108,13 @@ fun Application.module(testing: Boolean = false) {
             call.respond(ThymeleafContent("index", mapOf("user" to ThymeleafUser(1, "user1"))))
         }
 
-        get("/api/v1/collect-clash-spout-commands") {
-            call.respondText("[{\"instruction\": \"TEST RESPONSE\"}]", contentType = ContentType.Application.Json)
+        post(MANAGER_COMMAND_QUEUE_PATH) {
+            call.respondText("[{\"command\": \"TEST RESPONSE\"}]", contentType = ContentType.Application.Json)
         }
 
-        post("/api/v1/collect-clash-spout-commands") {
-            call.respondText("[{\"instruction\": \"TEST RESPONSE\"}]", contentType = ContentType.Application.Json)
+        post(MANAGER_ANSWER_PATH) {
+            call.respondText("Ok", contentType = ContentType.Text.Plain)
+            println("YEAH THE TOPOLOGY IS ALIVE!!!")
         }
 
         // Static feature. Try to access `/static/ktor_logo.svg`

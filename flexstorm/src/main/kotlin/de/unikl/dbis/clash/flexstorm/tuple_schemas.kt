@@ -4,7 +4,6 @@ import org.apache.storm.tuple.Fields
 import org.apache.storm.tuple.Tuple
 import org.apache.storm.tuple.Values
 import org.json.simple.JSONObject
-import org.json.simple.parser.JSONParser
 
 typealias TimestampValue = Long
 typealias PayloadValue = JSONObject
@@ -53,6 +52,7 @@ data class ProbeTuple(
     val offset: Int
 )
 
-val CONTROL_SCHEMA = Fields("type", "timestamp", "value")
-fun createControlOutput(timestamp: TimestampValue, value: String) = Values(MessageType.Control, timestamp, value)
-fun getControlOutput(tuple: Tuple) = Pair(tuple.getLong(1), tuple.getString(2))
+val CONTROL_SCHEMA = Fields("type", "timestamp", "command", "raw")
+fun createControlOutput(timestamp: TimestampValue, value: String, raw: JSONObject)
+    = Values(MessageType.Control, timestamp, value, raw)
+fun getControlOutput(tuple: Tuple) = Triple(tuple.getLong(1), tuple.getString(2), tuple.getValue(3) as JSONObject)
