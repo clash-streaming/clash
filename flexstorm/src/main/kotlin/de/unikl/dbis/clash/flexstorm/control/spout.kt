@@ -1,8 +1,15 @@
 package de.unikl.dbis.clash.flexstorm.control
 
+import com.google.gson.JsonObject
 import de.unikl.dbis.clash.flexstorm.CONTROL_SCHEMA
+import de.unikl.dbis.clash.flexstorm.MESSAGE_SCHEMA
 import de.unikl.dbis.clash.flexstorm.createControlOutput
+import de.unikl.dbis.clash.flexstorm.createMessageOutput
+import de.unikl.dbis.clash.manager.api.COMMAND_FIELD
+import de.unikl.dbis.clash.manager.api.COMMAND_PING
+import de.unikl.dbis.clash.manager.api.COMMAND_RESET
 import de.unikl.dbis.clash.manager.api.MANAGER_COMMAND_QUEUE_PATH
+import de.unikl.dbis.clash.manager.api.TopologyAliveMessage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.json.GsonSerializer
@@ -30,7 +37,6 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
 
     private var topologyAliveMessageSent = false
 
-
     @KtorExperimentalAPI
     override fun nextTuple() {
         if(!topologyAliveMessageSent) {
@@ -45,21 +51,16 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
         }
 
         runBlocking {
-            val message = client.post<List<JSONObject>> {
+            val message = client.post<List<JsonObject>> {
                 url(managerUrl + MANAGER_COMMAND_QUEUE_PATH)
                 // contentType(ContentType.Application.Json)
                 // body = listOf<JSONObject>()
             }
 
             for(command in message) {
-                collector.emit(
-                    CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME,
-                    createControlOutput(
-                        System.currentTimeMillis(),
-                        command["command"] as String,
-                        command
-                    )
-                )
+                when(command[COMMAND_FIELD].asString) {
+                    COMMAND_PING, COMMAND_RESET -> send(CONTROL_SPOUT_TO_ALL_STREAM_NAME, command)
+                }
             }
             client.close()
         }
@@ -69,11 +70,18 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
 
     private fun sendTopologyAliveMessage() {
         collector.emit(
-            CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME,
+            FORWARD_TO_CONTROL_BOLT_STREAM_NAME,
+            createMessageOutput(TopologyAliveMessage())
+        )
+    }
+
+    private fun send(targetStreamId: String, command: JsonObject) {
+        collector.emit(
+            targetStreamId,
             createControlOutput(
                 System.currentTimeMillis(),
-                "topology-alive",
-                JSONObject()
+                command["command"].asString,
+                command
             )
         )
     }
@@ -87,5 +95,6 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
         declarer.declareStream(CONTROL_SPOUT_TO_ALL_STREAM_NAME, CONTROL_SCHEMA)
         declarer.declareStream(CONTROL_SPOUT_TO_FLEX_BOLT_STREAM_NAME, CONTROL_SCHEMA)
         declarer.declareStream(CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, CONTROL_SCHEMA)
+        declarer.declareStream(FORWARD_TO_CONTROL_BOLT_STREAM_NAME, MESSAGE_SCHEMA)
     }
 }

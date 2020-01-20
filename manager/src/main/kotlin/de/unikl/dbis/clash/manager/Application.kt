@@ -2,6 +2,7 @@ package de.unikl.dbis.clash.manager
 
 import de.unikl.dbis.clash.manager.api.MANAGER_ANSWER_PATH
 import de.unikl.dbis.clash.manager.api.MANAGER_COMMAND_QUEUE_PATH
+import de.unikl.dbis.clash.manager.api.PingCommand
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -29,19 +30,11 @@ import io.ktor.thymeleaf.Thymeleaf
 import io.ktor.thymeleaf.ThymeleafContent
 import io.ktor.webjars.Webjars
 import io.ktor.websocket.webSocket
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import java.time.Duration
+import java.time.Instant
 import java.time.ZoneId
 
-// private val logger: Logger = LogManager.getLogger(Application::class.java)
-//
-// class TestApp {
-//     init {
-//         logger.warn("ICH BIN GESTARTET!")
-//     }
-// }
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -49,6 +42,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+    val commandQueue = CommandQueue()
 
     val client = HttpClient(Jetty) {
     }
@@ -109,7 +103,10 @@ fun Application.module(testing: Boolean = false) {
         }
 
         post(MANAGER_COMMAND_QUEUE_PATH) {
-            call.respondText("[{\"command\": \"TEST RESPONSE\"}]", contentType = ContentType.Application.Json)
+            val command = PingCommand(Instant.now())
+            commandQueue.add(command)
+
+            call.respondText(commandQueue.toJson().toString(), contentType = ContentType.Application.Json)
         }
 
         post(MANAGER_ANSWER_PATH) {

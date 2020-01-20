@@ -6,6 +6,7 @@ import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_TO_ALL_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.ControlBolt
 import de.unikl.dbis.clash.flexstorm.control.ControlSpout
+import de.unikl.dbis.clash.flexstorm.control.FORWARD_TO_CONTROL_BOLT_STREAM_NAME
 import org.apache.storm.Config
 import org.apache.storm.LocalCluster
 import org.apache.storm.topology.TopologyBuilder
@@ -45,6 +46,8 @@ fun main() {
         .setNumTasks(3)
     builder.setBolt(CONTROL_BOLT_NAME, ControlBolt("http://localhost:8080"))
         .allGrouping(CONTROL_SPOUT_NAME, CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME)
+        .allGrouping(FLEX_BOLT_NAME, FORWARD_TO_CONTROL_BOLT_STREAM_NAME)
+        .allGrouping(CONTROL_SPOUT_NAME, FORWARD_TO_CONTROL_BOLT_STREAM_NAME)
 
     val localCluster = LocalCluster()
     val conf = Config()

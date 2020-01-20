@@ -1,5 +1,7 @@
 starters/__clash_jar_path.sh
 
+manager.db
+
 logs
 target
 

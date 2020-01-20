@@ -1,5 +1,9 @@
 package de.unikl.dbis.clash.flexstorm
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
@@ -27,8 +31,7 @@ class TestSpout(val startTime: Instant, val relation: String, tuples: Map<Long, 
 
         val firstKey = sortedTuples.firstKey()
         val tuple = sortedTuples[firstKey]!!
-        val jsonParser = JSONParser()
-        val jsonTuple = jsonParser.parse(tuple) as JSONObject
+        val jsonTuple = JsonParser().parse(tuple).asJsonObject
         sortedTuples.remove(firstKey)
 
         val desiredTime = startTime.plusMillis(firstKey)

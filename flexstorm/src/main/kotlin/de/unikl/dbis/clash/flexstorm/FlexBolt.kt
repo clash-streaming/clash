@@ -1,11 +1,12 @@
 package de.unikl.dbis.clash.flexstorm
 
+import com.google.gson.JsonObject
+import de.unikl.dbis.clash.flexstorm.control.FORWARD_TO_CONTROL_BOLT_STREAM_NAME
 import org.apache.storm.task.OutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichBolt
 import org.apache.storm.tuple.Tuple
-import org.json.simple.JSONObject
 
 const val FLEX_BOLT_NAME = "boltyMcBoltface"
 
@@ -97,23 +98,24 @@ class FlexBolt() : BaseRichBolt() {
     override fun declareOutputFields(declarer: OutputFieldsDeclarer) {
         declarer.declareStream(STORE_STREAM_ID, true, STORE_SCHEMA)
         declarer.declareStream(PROBE_STREAM_ID, true, PROBE_SCHEMA)
+        declarer.declareStream(FORWARD_TO_CONTROL_BOLT_STREAM_NAME, MESSAGE_SCHEMA)
     }
 }
 
 fun actualFlexBoltTaskId(flexBoltId: Int, context: TopologyContext)
     = context.getComponentTasks(FLEX_BOLT_NAME)!![flexBoltId]
 
-fun join(probeObject: JSONObject, partners: List<JSONObject>): List<JSONObject> {
+fun join(probeObject: JsonObject, partners: List<JsonObject>): List<JsonObject> {
     return partners.map { jointObject(it, probeObject) }
 }
 
-fun jointObject(objectA: JSONObject, objectB: JSONObject): JSONObject {
-    val result = JSONObject()
-    for((key, value) in objectA) {
-        result[key] = value
+fun jointObject(objectA: JsonObject, objectB: JsonObject): JsonObject {
+    val result = JsonObject()
+    for((key, value) in objectA.entrySet()) {
+        result.add(key, value)
     }
-    for((key, value) in objectB) {
-        result[key] = value
+    for((key, value) in objectB.entrySet()) {
+        result.add(key, value)
     }
     return result
 }

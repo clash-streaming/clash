@@ -21,6 +21,7 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
 
     implementation("org.json:json:20180813")
+    implementation("org.xerial:sqlite-jdbc:3.30.1")
 }
 
 val test by tasks.getting(Test::class) {
