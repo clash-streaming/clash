@@ -1,8 +1,5 @@
 package de.unikl.dbis.clash.manager.db
 
-import java.sql.Connection
-import java.sql.DriverManager
-
 const val SCHEMA_VERSION = "schema_version"
 const val SQLITE_DB_PATH = "manager.db"
 
@@ -18,56 +15,41 @@ fun executeMigrations() {
 }
 
 fun executeMigration(version: Int, sqlString: String) {
-    connection {
-        val stmt = it.createStatement()
-        stmt.executeUpdate(sqlString)
+    statement {
+        it.executeUpdate(sqlString)
     }
     setSchemaVersionTo(version)
 }
 
 fun currentSchemaVersion(): Int {
-    return connection {
-        if(!schemaTableExists()) {
-            createSchemaTable()
-        }
+    if(!schemaTableExists()) {
+        createSchemaTable()
+    }
+    return statement {
 
-        val stmt = it.createStatement()
-        val result = stmt.executeQuery("SELECT MAX($SCHEMA_VERSION) FROM $SCHEMA_VERSION LIMIT 1")
+        val result = it.executeQuery("SELECT MAX($SCHEMA_VERSION) FROM $SCHEMA_VERSION LIMIT 1")
         result.next()
         val version = result.getInt(1)
         version
     }
 }
 
-fun<T>connection(block: (Connection) -> T): T {
-    try {
-        Class.forName("org.sqlite.JDBC")
-    } catch (e: ClassNotFoundException) {
-        error("Please install sqlite java drivers.")
-    }
-
-    return DriverManager.getConnection("jdbc:sqlite:$SQLITE_DB_PATH").use(block)
-}
-
 fun schemaTableExists(): Boolean {
-    return connection {
-        val stmt = it.createStatement()
-        val result = stmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$SCHEMA_VERSION';")
+    return statement {
+        val result = it.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$SCHEMA_VERSION';")
         result.next()
     }
 }
 
 fun createSchemaTable() {
-    connection {
-        val stmt = it.createStatement()
-        stmt.executeUpdate("CREATE TABLE $SCHEMA_VERSION ($SCHEMA_VERSION int primary key);")
+    statement {
+        it.executeUpdate("CREATE TABLE $SCHEMA_VERSION ($SCHEMA_VERSION int primary key);")
         setSchemaVersionTo(-1)
     }
 }
 
 fun setSchemaVersionTo(version: Int) {
-    connection {
-        val stmt = it.createStatement()
-        stmt.executeUpdate("INSERT INTO $SCHEMA_VERSION($SCHEMA_VERSION) VALUES ($version)")
+    statement {
+        it.executeUpdate("INSERT INTO $SCHEMA_VERSION($SCHEMA_VERSION) VALUES ($version)")
     }
 }

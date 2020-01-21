@@ -3,6 +3,8 @@ package de.unikl.dbis.clash.manager
 import de.unikl.dbis.clash.manager.api.MANAGER_ANSWER_PATH
 import de.unikl.dbis.clash.manager.api.MANAGER_COMMAND_QUEUE_PATH
 import de.unikl.dbis.clash.manager.api.PingCommand
+import de.unikl.dbis.clash.manager.api.READ_COMMAND_HISTORY
+import de.unikl.dbis.clash.manager.db.commandsAndMessages
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -100,6 +102,10 @@ fun Application.module(testing: Boolean = false) {
 
         get("/html-thymeleaf") {
             call.respond(ThymeleafContent("index", mapOf("user" to ThymeleafUser(1, "user1"))))
+        }
+
+        get(READ_COMMAND_HISTORY) {
+            call.respondText(commandsAndMessages().toString(), contentType = ContentType.Application.Json)
         }
 
         post(MANAGER_COMMAND_QUEUE_PATH) {

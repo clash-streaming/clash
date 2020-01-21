@@ -7,8 +7,6 @@ import java.lang.RuntimeException
 import java.time.Instant
 
 const val COMMAND_FIELD = "command"
-
-
 const val COMMAND_RESET = "reset"
 
 interface Command {

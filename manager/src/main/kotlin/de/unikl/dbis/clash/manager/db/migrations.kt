@@ -6,7 +6,7 @@ fun main() {
 
 val migrations = sortedMapOf(
     1 to """
-        CREATE TABLE sent_commands(
+        CREATE TABLE sent_commands( 
             timestamp DATETIME NOT NULL,
             command TEXT NOT NULL,
             payload TEXT -- json object
