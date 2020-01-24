@@ -23,3 +23,9 @@ const val CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME = "_ctrl2ctrl"
  * prepared and the control bolt should send it to the manager.
  */
 const val FORWARD_TO_CONTROL_BOLT_STREAM_NAME = "_fwd2ctrl"
+
+
+/**
+ * This stream name is used for sending tick signals to the control bolt.
+ */
+const val TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME = "_tick2ctrl"

@@ -2,7 +2,8 @@ import React from "react";
 
 import styles from "./DashboardStyles.js";
 import { makeStyles } from "@material-ui/core/styles";
-import MessageViewerContainer from "../components/MessageViewer/MessageViewerContainer.js";
+import HistoryViewerContainer from "../components/HistoryViewer/HistoryViewerContainer.js";
+import MessageSenderContainer from "../components/MessageSender/MessageSenderContainer.js";
 
 const useStyles = makeStyles(styles);
 
@@ -10,8 +11,8 @@ function Message() {
   return (
     <div>
       <h1>Message</h1>
-      <button>Load from server</button>
-      <MessageViewerContainer></MessageViewerContainer>
+      <MessageSenderContainer></MessageSenderContainer>
+      <HistoryViewerContainer></HistoryViewerContainer>
     </div>
   );
 }

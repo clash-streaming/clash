@@ -23,6 +23,8 @@ import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichSpout
+import org.apache.storm.tuple.Fields
+import org.apache.storm.tuple.Values
 import org.json.simple.parser.JSONParser
 import org.apache.storm.utils.Utils
 import org.json.simple.JSONObject
@@ -96,5 +98,28 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
         declarer.declareStream(CONTROL_SPOUT_TO_FLEX_BOLT_STREAM_NAME, CONTROL_SCHEMA)
         declarer.declareStream(CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, CONTROL_SCHEMA)
         declarer.declareStream(FORWARD_TO_CONTROL_BOLT_STREAM_NAME, MESSAGE_SCHEMA)
+    }
+}
+
+
+class TickSpout() : BaseRichSpout() {
+    private lateinit var collector: SpoutOutputCollector
+    var nextTickAt = 0L
+
+    override fun nextTuple() {
+        val now = System.currentTimeMillis()
+        if(now > nextTickAt) {
+            nextTickAt = now + 1000
+            collector.emit(TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, Values(now))
+        }
+    }
+
+    override fun open(conf: MutableMap<String, Any>, context: TopologyContext, collector: SpoutOutputCollector) {
+        this.collector = collector
+        nextTickAt = System.currentTimeMillis()
+    }
+
+    override fun declareOutputFields(declarer: OutputFieldsDeclarer) {
+        declarer.declareStream(TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, Fields("ts"))
     }
 }

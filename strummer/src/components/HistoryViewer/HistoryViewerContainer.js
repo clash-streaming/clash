@@ -1,5 +1,5 @@
 import { connect } from "react-redux";
-import MessageViewer from "./MessageViewer";
+import HistoryViewer from "./HistoryViewer";
 import { fetchCommandHistory } from "../../store/history/actions";
 
 const mapStateToProps = state => {
@@ -14,6 +14,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-const MessageViewerContainer = connect(mapStateToProps, mapDispatchToProps)(MessageViewer);
+const HistoryViewerContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HistoryViewer);
 
-export default MessageViewerContainer;
+export default HistoryViewerContainer;

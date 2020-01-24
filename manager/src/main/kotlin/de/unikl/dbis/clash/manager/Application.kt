@@ -106,7 +106,7 @@ fun Application.module(testing: Boolean = false) {
         }
 
         post(MANAGER_COMMAND_SEND_PATH) {
-            
+
         }
 
         get(READ_COMMAND_HISTORY) {
