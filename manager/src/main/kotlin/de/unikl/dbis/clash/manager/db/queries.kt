@@ -1,6 +1,5 @@
 package de.unikl.dbis.clash.manager.db
 
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import de.unikl.dbis.clash.manager.model.ReceivedMessage
@@ -65,4 +64,8 @@ fun commandsAndMessages(): JsonObject {
         jsonResult.add(timestamp.toString(), entry.toJson())
     }
     return jsonResult
+}
+
+fun main() {
+    println(commandsAndMessages().toString())
 }

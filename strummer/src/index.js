@@ -8,11 +8,13 @@ import Layout from "./Layout";
 import { lightTheme } from "./Themes";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { Provider } from "react-redux";
-import { createStore } from "redux";
-import reducers from "reducers";
+import { createStore, applyMiddleware } from "redux";
+import rootReducer from "./store/rootReducer.js";
+import thunk from "redux-thunk";
+import { composeWithDevTools } from "redux-devtools-extension";
 
 const hist = createBrowserHistory();
-const store = createStore(reducers);
+const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)));
 
 ReactDOM.render(
   <MuiThemeProvider theme={lightTheme}>

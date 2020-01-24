@@ -5,11 +5,14 @@ import de.unikl.dbis.clash.manager.api.COMMAND_RESET
 import de.unikl.dbis.clash.manager.api.MESSAGE_PONG
 import de.unikl.dbis.clash.manager.api.MESSAGE_RESET
 import de.unikl.dbis.clash.manager.api.MESSAGE_TOPOLOGY_ALIVE
+import de.unikl.dbis.clash.manager.db.executeMigrations
 import de.unikl.dbis.clash.manager.model.ReceivedMessage
 import de.unikl.dbis.clash.manager.model.SentCommand
 import java.time.Instant
 
 fun main() {
+    executeMigrations()
+
     val t1 = Instant.now()
     val t2 = Instant.now().plusSeconds(20)
     val t3 = Instant.now().plusSeconds(30)
