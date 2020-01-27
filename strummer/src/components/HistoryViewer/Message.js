@@ -1,6 +1,7 @@
 import React from "react";
 import { ListItem, makeStyles, Typography } from "@material-ui/core";
 import ListItemText from "@material-ui/core/ListItemText";
+import { niceTime } from "../../helpers/time";
 
 const useStyles = makeStyles(theme => ({
   item: {
@@ -20,6 +21,8 @@ const Message = ({ message }) => {
   console.log(message);
   const classes = useStyles();
 
+  const time = niceTime(message.timestamp);
+
   return (
     <ListItem className={classes.item}>
       <ListItemText
@@ -27,7 +30,7 @@ const Message = ({ message }) => {
         secondary={
           <React.Fragment>
             <Typography component="span" className={classes.timestamp}>
-              {message.timestamp}
+              {time}
             </Typography>
             <Typography component="span" className={classes.message}>
               {message.message}
