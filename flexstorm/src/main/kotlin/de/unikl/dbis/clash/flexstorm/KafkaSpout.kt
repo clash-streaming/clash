@@ -1,7 +1,10 @@
 package de.unikl.dbis.clash.flexstorm
 
 import com.google.gson.JsonParser
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.TopicPartition
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
@@ -10,6 +13,15 @@ import java.time.Duration
 import java.time.Instant
 import java.util.Arrays
 import java.util.Properties
+
+class StartingFromEndListener<K, V>(private val consumer: Consumer<K, V>) : ConsumerRebalanceListener {
+
+    override fun onPartitionsAssigned(partitions: MutableCollection<TopicPartition>) {
+        consumer.seekToEnd(partitions)
+    }
+
+    override fun onPartitionsRevoked(partitions: MutableCollection<TopicPartition>) = Unit
+}
 
 class KafkaSpout(val topicName: String, val relation: String) : BaseRichSpout() {
     lateinit var collector: SpoutOutputCollector
@@ -20,6 +32,7 @@ class KafkaSpout(val topicName: String, val relation: String) : BaseRichSpout() 
     override fun nextTuple() {
         val records = this.consumer.poll(pollTimeout)
         for (record in records) {
+            println("Found tuple!")
             val rawTuple = record.value()
             val jsonTuple = JsonParser().parse(rawTuple).asJsonObject
 
@@ -32,7 +45,7 @@ class KafkaSpout(val topicName: String, val relation: String) : BaseRichSpout() 
         this.collector = collector!!
         val props = kafkaConsumerProperties()
         consumer = KafkaConsumer(props)
-        consumer.subscribe(Arrays.asList(this.topicName))
+        consumer.subscribe(Arrays.asList(this.topicName), StartingFromEndListener<String, String>(consumer))
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer?) {

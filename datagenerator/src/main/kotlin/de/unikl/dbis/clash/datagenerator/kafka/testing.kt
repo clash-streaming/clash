@@ -38,7 +38,7 @@ fun main() {
             createTopic(kafkaTopic)
 
             while (true) {
-                producer.send(ProducerRecord<String, String>(kafkaTopic, "dummy"))
+                producer.send(ProducerRecord<String, String>(kafkaTopic, it.outputGenerator.next()))
                 Thread.sleep(it.delay)
             }
         }

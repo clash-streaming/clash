@@ -32,7 +32,6 @@ fun main() {
     val sSpout = KafkaSpout("S", "S")
     val tSpout = KafkaSpout("T", "T")
 
-
     val clashState = ClashState()
     clashState.numberOfFlexBolts = NUMBER_OF_FLEX_BOLTS
     clashState.epochs = theEpoch()
@@ -62,9 +61,9 @@ fun main() {
     val localCluster = LocalCluster()
     val conf = Config()
     localCluster.submitTopology("testTopology", conf, builder.createTopology())
-    Utils.sleep(20_000)
-    localCluster.killTopology("testTopology")
-    localCluster.close()
+    // Utils.sleep(20_000)
+    // localCluster.killTopology("testTopology")
+    // localCluster.close()
 }
 
 fun createRSpout(startTime: Instant) = TestSpout(
