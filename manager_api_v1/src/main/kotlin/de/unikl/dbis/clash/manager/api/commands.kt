@@ -7,7 +7,6 @@ import java.lang.RuntimeException
 import java.time.Instant
 
 const val COMMAND_FIELD = "command"
-const val COMMAND_RESET = "reset"
 
 interface Command {
     fun id(): String
@@ -37,12 +36,35 @@ class PingCommand(val sent: Instant) : Command {
     }
 }
 
+const val COMMAND_RESET = "reset"
 class ResetCommand : Command {
     override fun id() = COMMAND_RESET
 
     override fun toJson(): JsonObject {
         val obj = JsonObject()
         obj.add(COMMAND_FIELD, JsonPrimitive(COMMAND_RESET))
+        return obj
+    }
+}
+
+const val COMMAND_STOP_ACCEPTING_TUPLES = "stop-accept"
+class StopAcceptingTuplesCommand : Command {
+    override fun id() = COMMAND_STOP_ACCEPTING_TUPLES
+
+    override fun toJson(): JsonObject {
+        val obj = JsonObject()
+        obj.add(COMMAND_FIELD, JsonPrimitive(COMMAND_STOP_ACCEPTING_TUPLES))
+        return obj
+    }
+}
+
+const val COMMAND_START_ACCEPTING_TUPLES = "start-accept"
+class StartAcceptingTuplesCommand : Command {
+    override fun id() = COMMAND_START_ACCEPTING_TUPLES
+
+    override fun toJson(): JsonObject {
+        val obj = JsonObject()
+        obj.add(COMMAND_FIELD, JsonPrimitive(COMMAND_START_ACCEPTING_TUPLES))
         return obj
     }
 }

@@ -7,6 +7,7 @@ import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_TO_CONTROL_BOLT_STREA
 import de.unikl.dbis.clash.flexstorm.control.ControlBolt
 import de.unikl.dbis.clash.flexstorm.control.ControlSpout
 import de.unikl.dbis.clash.flexstorm.control.FORWARD_TO_CONTROL_BOLT_STREAM_NAME
+import de.unikl.dbis.clash.flexstorm.partitioning.NaiveHashPartitioning
 import org.apache.storm.Config
 import org.apache.storm.LocalCluster
 import org.apache.storm.topology.TopologyBuilder
@@ -15,6 +16,7 @@ import java.time.Instant
 
 const val STORE_STREAM_ID = "store"
 const val PROBE_STREAM_ID = "probe"
+const val NUMBER_OF_FLEX_BOLTS = 3
 
 /**
  * Compute the join:
@@ -23,11 +25,19 @@ const val PROBE_STREAM_ID = "probe"
 fun main() {
     val builder = TopologyBuilder()
     val startTime = Instant.now().plusSeconds(5)
-    val rSpout = createRSpout(startTime)
-    val sSpout = createSSpout(startTime)
-    val tSpout = createTSpout(startTime)
-    val bolt = FlexBolt()
-    bolt.clashState.epochs = theEpoch()
+    // val rSpout = createRSpout(startTime)
+    // val sSpout = createSSpout(startTime)
+    // val tSpout = createTSpout(startTime)
+    val rSpout = KafkaSpout("R", "R")
+    val sSpout = KafkaSpout("S", "S")
+    val tSpout = KafkaSpout("T", "T")
+
+
+    val clashState = ClashState()
+    clashState.numberOfFlexBolts = NUMBER_OF_FLEX_BOLTS
+    clashState.epochs = theEpoch()
+
+    val bolt = FlexBolt(clashState)
 
     builder.setSpout(CONTROL_SPOUT_NAME,
         ControlSpout("http://localhost:8080")
@@ -43,8 +53,8 @@ fun main() {
         .directGrouping(FLEX_BOLT_NAME, STORE_STREAM_ID)
         .directGrouping(FLEX_BOLT_NAME, PROBE_STREAM_ID)
         .allGrouping(CONTROL_SPOUT_NAME, CONTROL_SPOUT_TO_ALL_STREAM_NAME)
-        .setNumTasks(3)
-    builder.setBolt(CONTROL_BOLT_NAME, ControlBolt("http://localhost:8080"))
+        .setNumTasks(NUMBER_OF_FLEX_BOLTS)
+    builder.setBolt(CONTROL_BOLT_NAME, ControlBolt("http://localhost:8080", clashState))
         .allGrouping(CONTROL_SPOUT_NAME, CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME)
         .allGrouping(FLEX_BOLT_NAME, FORWARD_TO_CONTROL_BOLT_STREAM_NAME)
         .allGrouping(CONTROL_SPOUT_NAME, FORWARD_TO_CONTROL_BOLT_STREAM_NAME)

@@ -1,9 +1,10 @@
 package de.unikl.dbis.clash.flexstorm
 
+import de.unikl.dbis.clash.flexstorm.partitioning.Partitioning
 import java.io.Serializable
 import java.util.TreeMap
 
-class Epochs: Serializable {
+class Epochs : Serializable {
     /**
      * if k and k' are adjacent keys in this map,
      * the epoch stored under k is valid from k til k'-1
@@ -26,6 +27,6 @@ data class Epoch(
     val probeOrders: Map<String, ProbeOrder>,
     val partitioning: Map<String, Partitioning>,
     val accessRules: Map<String, List<AccessRule>>
-): Serializable
+) : Serializable
 
-data class AccessRule(val attribute: String): Serializable
+data class AccessRule(val attribute: String) : Serializable

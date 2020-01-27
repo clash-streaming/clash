@@ -2,6 +2,8 @@ package de.unikl.dbis.clash.flexstorm
 
 import com.google.gson.JsonObject
 import de.unikl.dbis.clash.flexstorm.control.FORWARD_TO_CONTROL_BOLT_STREAM_NAME
+import de.unikl.dbis.clash.manager.api.COMMAND_START_ACCEPTING_TUPLES
+import de.unikl.dbis.clash.manager.api.COMMAND_STOP_ACCEPTING_TUPLES
 import org.apache.storm.task.OutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
@@ -10,12 +12,12 @@ import org.apache.storm.tuple.Tuple
 
 const val FLEX_BOLT_NAME = "boltyMcBoltface"
 
-class FlexBolt() : BaseRichBolt() {
+class FlexBolt(val clashState: ClashState) : BaseRichBolt() {
     lateinit var context: TopologyContext
     lateinit var collector: OutputCollector
 
-    val clashState = ClashState()
     val container = StoreContainer()
+    var acceptingTuples = false
 
     override fun prepare(topoConf: MutableMap<String, Any>, context: TopologyContext, collector: OutputCollector) {
         this.context = context
@@ -26,14 +28,18 @@ class FlexBolt() : BaseRichBolt() {
             "S" to listOf("c", "d"),
             "T" to listOf("e")
         ))
+
+        clashState.setup(context)
     }
 
     override fun execute(input: Tuple) {
+        if (!acceptingTuples) { return }
         when (getMessageType(input)) {
             MessageType.SpoutOutput -> executeDispatch(input)
             MessageType.Store -> executeStore(input)
             MessageType.Probe -> executeProbe(input)
             MessageType.Control -> executeControl(input)
+            MessageType.Message -> TODO()
         }
     }
 
@@ -91,8 +97,13 @@ class FlexBolt() : BaseRichBolt() {
     }
 
     fun executeControl(input: Tuple) {
-        val (timestamp, value) = getControlOutput(input)
+        val (timestamp, value, payload) = getControlOutput(input)
         println("$timestamp: received control message: $value")
+
+        when (value) {
+            COMMAND_STOP_ACCEPTING_TUPLES -> this.acceptingTuples = false
+            COMMAND_START_ACCEPTING_TUPLES -> this.acceptingTuples = true
+        }
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer) {
@@ -111,10 +122,10 @@ fun join(probeObject: JsonObject, partners: List<JsonObject>): List<JsonObject> 
 
 fun jointObject(objectA: JsonObject, objectB: JsonObject): JsonObject {
     val result = JsonObject()
-    for((key, value) in objectA.entrySet()) {
+    for ((key, value) in objectA.entrySet()) {
         result.add(key, value)
     }
-    for((key, value) in objectB.entrySet()) {
+    for ((key, value) in objectB.entrySet()) {
         result.add(key, value)
     }
     return result

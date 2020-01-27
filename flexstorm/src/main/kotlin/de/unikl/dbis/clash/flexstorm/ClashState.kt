@@ -1,9 +1,12 @@
 package de.unikl.dbis.clash.flexstorm
 
+import org.apache.storm.task.TopologyContext
 import java.io.Serializable
 
-class ClashState: Serializable {
+class ClashState : Serializable {
     var epochs = Epochs()
+    var numberOfFlexBolts = 1
+    var availableFlexBoltIds = listOf<Int>()
 
     /**
      * For the given timestamp, find the taskId where
@@ -46,5 +49,12 @@ class ClashState: Serializable {
         val partitioning = epoch.partitioning[relation]!!
         val groupingKey = payload[partitioning.attribute]!!
         return partitioning.forValue(groupingKey).first()
+    }
+
+    /**
+     * This function is called simultaneously on all bolts during the prepare phase.
+     */
+    fun setup(topologyContext: TopologyContext) {
+        availableFlexBoltIds = topologyContext.getComponentTasks(FLEX_BOLT_NAME)
     }
 }

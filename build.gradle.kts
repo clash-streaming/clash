@@ -42,7 +42,7 @@ subprojects {
             implementation(project(":common"))
         }
 
-        if(projectName != "manager") {
+        if (projectName != "manager") {
             compile("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
         }
 

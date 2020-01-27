@@ -225,7 +225,7 @@ class Json : CliktCommand() {
                 .location
                 .toURI()).absolutePath
         val name = fullName.subSequence(0, fullName.length - ".jar".length)
-       return "$name-stormCluster.jar"
+        return "$name-stormCluster.jar"
         // return "/Users/manuel/research/clash/clash/build/libs/clash-0.2.0-stormCluster.jar"
     }
 }

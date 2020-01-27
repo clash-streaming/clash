@@ -1,6 +1,6 @@
 package de.unikl.dbis.clash.flexstorm.control
 
-import de.unikl.dbis.clash.flexstorm.MESSAGE_SCHEMA
+import de.unikl.dbis.clash.flexstorm.ClashState
 import de.unikl.dbis.clash.flexstorm.getMessageOutput
 import de.unikl.dbis.clash.manager.api.MANAGER_ANSWER_PATH
 import de.unikl.dbis.clash.manager.api.TopologyAliveMessage
@@ -22,13 +22,16 @@ import org.apache.storm.tuple.Tuple
 
 const val CONTROL_BOLT_NAME = "control-bolt"
 
-class ControlBolt(val managerUrl: String): BaseRichBolt() {
+class ControlBolt(val managerUrl: String, val clashState: ClashState): BaseRichBolt() {
     lateinit var context: TopologyContext
     lateinit var collector: OutputCollector
+    var statisticsGatherer: StatisticsGatherer? = null
 
     override fun prepare(topoConf: MutableMap<String, Any>, context: TopologyContext, collector: OutputCollector) {
         this.context = context
         this.collector = collector
+
+        clashState.setup(context)
     }
 
     @KtorExperimentalAPI
@@ -63,6 +66,16 @@ class ControlBolt(val managerUrl: String): BaseRichBolt() {
             }
             client.close()
         }
+    }
+
+    private fun startGathering() {
+        val currentGatherer = statisticsGatherer
+        if(currentGatherer != null) {
+            println("Warning: previous StatisticsGatherer was not null and still waiting for ${currentGatherer.howManyLeft()} messages.")
+        }
+
+        statisticsGatherer = StatisticsGatherer(clashState.numberOfFlexBolts)
+
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer) {

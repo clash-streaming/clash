@@ -8,6 +8,7 @@ dependencies {
     implementation("org.json:json:20180813")
     implementation("org.apache.storm:storm-client:2.1.0")
     implementation("org.apache.storm:storm-server:2.1.0")
+    implementation("org.apache.kafka:kafka-clients:2.1.0")
 
     implementation("io.ktor:ktor-client-json:$ktorVersion")
     implementation("io.ktor:ktor-client-gson:$ktorVersion")

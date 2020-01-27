@@ -195,8 +195,8 @@ class StoreAndJoinRule
  */(
      val relationName: String,
      override val incomingEdgeLabel: EdgeLabel,
-     override val predicates: Set<BinaryPredicate>
- ) : InRule, OldJoinRule {
+     override val predicates: Set<BinaryPredicateEvaluation>
+ ) : InRule, JoinRule {
 
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
         return StoreAndJoinRule(this.relationName, newLabel, this.predicates)

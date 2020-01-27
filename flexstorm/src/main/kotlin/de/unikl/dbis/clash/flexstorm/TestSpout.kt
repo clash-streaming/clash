@@ -20,12 +20,12 @@ class TestSpout(val startTime: Instant, val relation: String, tuples: Map<Long, 
     var finished = false
 
     override fun nextTuple() {
-        if(finished) {
+        if (finished) {
             Utils.sleep(1000)
             return
         }
         val now = Instant.now()
-        if(startTime > now) {
+        if (startTime > now) {
             Utils.sleep(Duration.between(now, startTime).toMillis())
         }
 
@@ -38,7 +38,7 @@ class TestSpout(val startTime: Instant, val relation: String, tuples: Map<Long, 
         Utils.sleep(Duration.between(now, desiredTime).toMillis())
         collector.emit(createSpoutOutput(now.epochSecond, jsonTuple, relation))
 
-        if(sortedTuples.isEmpty()) {
+        if (sortedTuples.isEmpty()) {
             finished = true
         }
     }
