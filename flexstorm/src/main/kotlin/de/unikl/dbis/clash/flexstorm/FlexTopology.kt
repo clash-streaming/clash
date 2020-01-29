@@ -1,17 +1,21 @@
 package de.unikl.dbis.clash.flexstorm
 
 import de.unikl.dbis.clash.flexstorm.control.CONTROL_BOLT_NAME
+import de.unikl.dbis.clash.flexstorm.control.CONTROL_BOLT_TO_ALL_FLEX_BOLTS_STREAM_NAME
+import de.unikl.dbis.clash.flexstorm.control.CONTROL_BOLT_TO_FLEX_BOLT_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_NAME
 import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_TO_ALL_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.ControlBolt
 import de.unikl.dbis.clash.flexstorm.control.ControlSpout
+import de.unikl.dbis.clash.flexstorm.control.FLEX_BOLT_TO_CONTROL_BOLT_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.FORWARD_TO_CONTROL_BOLT_STREAM_NAME
+import de.unikl.dbis.clash.flexstorm.control.TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME
+import de.unikl.dbis.clash.flexstorm.kafka.KafkaTblSpout
 import de.unikl.dbis.clash.flexstorm.partitioning.NaiveHashPartitioning
 import org.apache.storm.Config
 import org.apache.storm.LocalCluster
 import org.apache.storm.topology.TopologyBuilder
-import org.apache.storm.utils.Utils
 import java.time.Instant
 
 const val STORE_STREAM_ID = "store"
@@ -28,9 +32,9 @@ fun main() {
     // val rSpout = createRSpout(startTime)
     // val sSpout = createSSpout(startTime)
     // val tSpout = createTSpout(startTime)
-    val rSpout = KafkaSpout("R", "R")
-    val sSpout = KafkaSpout("S", "S")
-    val tSpout = KafkaSpout("T", "T")
+    val rSpout = KafkaTblSpout("customer", "R")
+    val sSpout = KafkaTblSpout("orders", "S")
+    val tSpout = KafkaTblSpout("lineitem", "T")
 
     val clashState = ClashState()
     clashState.numberOfFlexBolts = NUMBER_OF_FLEX_BOLTS
@@ -52,11 +56,15 @@ fun main() {
         .directGrouping(FLEX_BOLT_NAME, STORE_STREAM_ID)
         .directGrouping(FLEX_BOLT_NAME, PROBE_STREAM_ID)
         .allGrouping(CONTROL_SPOUT_NAME, CONTROL_SPOUT_TO_ALL_STREAM_NAME)
+        .allGrouping(CONTROL_BOLT_NAME, CONTROL_BOLT_TO_ALL_FLEX_BOLTS_STREAM_NAME)
+        .directGrouping(CONTROL_BOLT_NAME, CONTROL_BOLT_TO_FLEX_BOLT_STREAM_NAME)
         .setNumTasks(NUMBER_OF_FLEX_BOLTS)
     builder.setBolt(CONTROL_BOLT_NAME, ControlBolt("http://localhost:8080", clashState))
         .allGrouping(CONTROL_SPOUT_NAME, CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME)
         .allGrouping(FLEX_BOLT_NAME, FORWARD_TO_CONTROL_BOLT_STREAM_NAME)
         .allGrouping(CONTROL_SPOUT_NAME, FORWARD_TO_CONTROL_BOLT_STREAM_NAME)
+        .allGrouping(CONTROL_SPOUT_NAME, TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME)
+        .allGrouping(FLEX_BOLT_NAME, FLEX_BOLT_TO_CONTROL_BOLT_STREAM_NAME)
 
     val localCluster = LocalCluster()
     val conf = Config()

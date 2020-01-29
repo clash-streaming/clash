@@ -21,4 +21,11 @@ class StoreContainer : Serializable {
             inner[relation] = map
         }
     }
+
+    fun totalTuples() = inner.values
+        .map { it.values }
+        .flatten()
+        .map { it.tupleCounter }
+        .sum()
+
 }

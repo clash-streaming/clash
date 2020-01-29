@@ -3,6 +3,7 @@ package de.unikl.dbis.clash.flexstorm
 import java.io.Serializable
 
 class Store(indexes: List<String>) : Serializable {
+    var tupleCounter = 0L
     val indexes: Map<String, MutableMap<Any, MutableList<PayloadValue>>>
 
     init {
@@ -14,6 +15,7 @@ class Store(indexes: List<String>) : Serializable {
             val value = payload[attribute]?: throw AttributeNotFound(attribute)
             index.getOrPut(value, { mutableListOf() }).add(payload)
         }
+        tupleCounter += 1
     }
 
     fun probe(key: String, value: Any): List<PayloadValue> {

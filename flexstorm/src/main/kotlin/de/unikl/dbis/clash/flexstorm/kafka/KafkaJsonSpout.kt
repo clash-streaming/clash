@@ -1,6 +1,8 @@
-package de.unikl.dbis.clash.flexstorm
+package de.unikl.dbis.clash.flexstorm.kafka
 
 import com.google.gson.JsonParser
+import de.unikl.dbis.clash.flexstorm.SPOUT_OUTPUT_SCHEMA
+import de.unikl.dbis.clash.flexstorm.createSpoutOutput
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -12,18 +14,8 @@ import org.apache.storm.topology.base.BaseRichSpout
 import java.time.Duration
 import java.time.Instant
 import java.util.Arrays
-import java.util.Properties
 
-class StartingFromEndListener<K, V>(private val consumer: Consumer<K, V>) : ConsumerRebalanceListener {
-
-    override fun onPartitionsAssigned(partitions: MutableCollection<TopicPartition>) {
-        consumer.seekToEnd(partitions)
-    }
-
-    override fun onPartitionsRevoked(partitions: MutableCollection<TopicPartition>) = Unit
-}
-
-class KafkaSpout(val topicName: String, val relation: String) : BaseRichSpout() {
+class KafkaJsonSpout(val topicName: String, val relation: String) : BaseRichSpout() {
     lateinit var collector: SpoutOutputCollector
     lateinit var consumer: KafkaConsumer<String, String>
 
@@ -32,12 +24,16 @@ class KafkaSpout(val topicName: String, val relation: String) : BaseRichSpout() 
     override fun nextTuple() {
         val records = this.consumer.poll(pollTimeout)
         for (record in records) {
-            println("Found tuple!")
             val rawTuple = record.value()
             val jsonTuple = JsonParser().parse(rawTuple).asJsonObject
-
             val now = Instant.now()
-            collector.emit(createSpoutOutput(now.epochSecond, jsonTuple, relation))
+            collector.emit(
+                createSpoutOutput(
+                    now.epochSecond,
+                    jsonTuple,
+                    relation
+                )
+            )
         }
     }
 
@@ -45,22 +41,12 @@ class KafkaSpout(val topicName: String, val relation: String) : BaseRichSpout() 
         this.collector = collector!!
         val props = kafkaConsumerProperties()
         consumer = KafkaConsumer(props)
-        consumer.subscribe(Arrays.asList(this.topicName), StartingFromEndListener<String, String>(consumer))
+        consumer.subscribe(Arrays.asList(this.topicName),
+            StartingFromEndListener<String, String>(consumer)
+        )
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer?) {
         declarer!!.declare(SPOUT_OUTPUT_SCHEMA)
     }
-}
-
-fun kafkaConsumerProperties(): Properties {
-    val props = Properties()
-    props["bootstrap.servers"] = "dbis-expsrv15:9094"
-    props["group.id"] = "test"
-    props["enable.auto.commit"] = "true"
-    props["auto.commit.interval.ms"] = "1000"
-    props["key.deserializer"] = "org.apache.kafka.common.serialization.StringDeserializer"
-    props["value.deserializer"] = "org.apache.kafka.common.serialization.StringDeserializer"
-
-    return props
 }

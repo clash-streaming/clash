@@ -68,3 +68,14 @@ class StartAcceptingTuplesCommand : Command {
         return obj
     }
 }
+
+const val COMMAND_GATHER_STATISTICS = "gather-statistics"
+class GatherStatistics : Command {
+    override fun id() = COMMAND_GATHER_STATISTICS
+
+    override fun toJson(): JsonObject {
+        val obj = JsonObject()
+        obj.addProperty(COMMAND_FIELD, COMMAND_GATHER_STATISTICS)
+        return obj
+    }
+}

@@ -1,6 +1,7 @@
 package de.unikl.dbis.clash.flexstorm
 
 import com.google.gson.JsonObject
+import de.unikl.dbis.clash.manager.api.Message
 import org.apache.storm.tuple.Fields
 import org.apache.storm.tuple.Tuple
 import org.apache.storm.tuple.Values

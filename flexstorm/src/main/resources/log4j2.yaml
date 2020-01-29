@@ -19,15 +19,15 @@ Configuration:
 
   Loggers:
     Root:
-      level: info
+      level: warn
       AppenderRef:
         ref: STDOUT
     Logger:
       - name: de.unikl.dbis.clash
-        level: info
+        level: debug
         additivity: false
         AppenderRef:
-          - level: info
+          - level: debug
             ref: STDOUT
           - level: info
             ref: File

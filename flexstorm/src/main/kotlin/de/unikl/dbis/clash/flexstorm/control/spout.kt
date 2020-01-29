@@ -14,7 +14,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.util.KtorExperimentalAPI
@@ -27,17 +26,16 @@ import org.apache.storm.tuple.Fields
 import org.apache.storm.tuple.Values
 import org.json.simple.parser.JSONParser
 import org.apache.storm.utils.Utils
-import org.json.simple.JSONObject
 
 const val CONTROL_SPOUT_NAME = "control-spout"
-
-// data class ControlMessage(val instruction: String)
 
 class ControlSpout(val managerUrl: String) : BaseRichSpout() {
     private lateinit var collector: SpoutOutputCollector
     lateinit var jsonParser: JSONParser
 
     private var topologyAliveMessageSent = false
+
+    private lateinit var client: HttpClient
 
     @KtorExperimentalAPI
     override fun nextTuple() {
@@ -46,17 +44,16 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
             topologyAliveMessageSent = true
         }
 
-        val client = HttpClient(CIO) {
-            install(JsonFeature) {
-                serializer = GsonSerializer()
-            }
-        }
+        forwardMessagesFromManager()
+        emitTickMessage()
 
+        Utils.sleep(5000)
+    }
+
+    private fun forwardMessagesFromManager() {
         runBlocking {
             val message = client.post<List<JsonObject>> {
                 url(managerUrl + MANAGER_COMMAND_QUEUE_PATH)
-                // contentType(ContentType.Application.Json)
-                // body = listOf<JSONObject>()
             }
 
             for(command in message) {
@@ -64,10 +61,14 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
                     COMMAND_PING, COMMAND_RESET -> send(CONTROL_SPOUT_TO_ALL_STREAM_NAME, command)
                 }
             }
-            client.close()
+            // client.close()
         }
+    }
 
-        Utils.sleep(1000)
+    private fun emitTickMessage() {
+        val now = System.currentTimeMillis()
+        collector.emit(TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, Values(now))
+        println("Emitting tick")
     }
 
     private fun sendTopologyAliveMessage() {
@@ -91,6 +92,12 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
     override fun open(conf: MutableMap<String, Any>?, context: TopologyContext?, collector: SpoutOutputCollector) {
         this.collector = collector
         this.jsonParser = JSONParser()
+
+        this.client = HttpClient(CIO) {
+            install(JsonFeature) {
+                serializer = GsonSerializer()
+            }
+        }
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer) {
@@ -98,28 +105,6 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
         declarer.declareStream(CONTROL_SPOUT_TO_FLEX_BOLT_STREAM_NAME, CONTROL_SCHEMA)
         declarer.declareStream(CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, CONTROL_SCHEMA)
         declarer.declareStream(FORWARD_TO_CONTROL_BOLT_STREAM_NAME, MESSAGE_SCHEMA)
-    }
-}
-
-
-class TickSpout() : BaseRichSpout() {
-    private lateinit var collector: SpoutOutputCollector
-    var nextTickAt = 0L
-
-    override fun nextTuple() {
-        val now = System.currentTimeMillis()
-        if(now > nextTickAt) {
-            nextTickAt = now + 1000
-            collector.emit(TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, Values(now))
-        }
-    }
-
-    override fun open(conf: MutableMap<String, Any>, context: TopologyContext, collector: SpoutOutputCollector) {
-        this.collector = collector
-        nextTickAt = System.currentTimeMillis()
-    }
-
-    override fun declareOutputFields(declarer: OutputFieldsDeclarer) {
         declarer.declareStream(TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME, Fields("ts"))
     }
 }

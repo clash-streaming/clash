@@ -29,3 +29,18 @@ const val FORWARD_TO_CONTROL_BOLT_STREAM_NAME = "_fwd2ctrl"
  * This stream name is used for sending tick signals to the control bolt.
  */
 const val TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME = "_tick2ctrl"
+
+/**
+ * This stream name is used for broadcasting control messages to all flex bolts.
+ */
+const val CONTROL_BOLT_TO_ALL_FLEX_BOLTS_STREAM_NAME = "_ctrlbolt2flexAll"
+
+/**
+ * This stream name is used for sending control messages to individual flex bolts.
+ */
+const val CONTROL_BOLT_TO_FLEX_BOLT_STREAM_NAME = "_ctrlbolt2flex"
+
+/**
+ * This stream name is used for sending messages to from flex bolts to the control bolt.
+ */
+const val FLEX_BOLT_TO_CONTROL_BOLT_STREAM_NAME = "_flex2ctrl"

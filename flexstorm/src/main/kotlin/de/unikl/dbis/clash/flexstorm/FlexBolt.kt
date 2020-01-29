@@ -1,9 +1,13 @@
 package de.unikl.dbis.clash.flexstorm
 
 import com.google.gson.JsonObject
+import de.unikl.dbis.clash.flexstorm.control.FLEX_BOLT_TO_CONTROL_BOLT_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.FORWARD_TO_CONTROL_BOLT_STREAM_NAME
+import de.unikl.dbis.clash.flexstorm.control.InternalStatisticsMessage
+import de.unikl.dbis.clash.manager.api.COMMAND_GATHER_STATISTICS
 import de.unikl.dbis.clash.manager.api.COMMAND_START_ACCEPTING_TUPLES
 import de.unikl.dbis.clash.manager.api.COMMAND_STOP_ACCEPTING_TUPLES
+import de.unikl.dbis.clash.manager.api.StatisticsMessage
 import org.apache.storm.task.OutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
@@ -33,12 +37,13 @@ class FlexBolt(val clashState: ClashState) : BaseRichBolt() {
     }
 
     override fun execute(input: Tuple) {
+        if (getMessageType(input) == MessageType.Control) executeControl(input)
+
         if (!acceptingTuples) { return }
         when (getMessageType(input)) {
             MessageType.SpoutOutput -> executeDispatch(input)
             MessageType.Store -> executeStore(input)
             MessageType.Probe -> executeProbe(input)
-            MessageType.Control -> executeControl(input)
             MessageType.Message -> TODO()
         }
     }
@@ -103,13 +108,22 @@ class FlexBolt(val clashState: ClashState) : BaseRichBolt() {
         when (value) {
             COMMAND_STOP_ACCEPTING_TUPLES -> this.acceptingTuples = false
             COMMAND_START_ACCEPTING_TUPLES -> this.acceptingTuples = true
+            COMMAND_GATHER_STATISTICS -> gatherStatistics()
         }
+    }
+
+    private fun gatherStatistics() {
+        val message = InternalStatisticsMessage(
+            totalNumberOfTuplesStored = this.container.totalTuples()
+        )
+        collector.emit(FLEX_BOLT_TO_CONTROL_BOLT_STREAM_NAME, createMessageOutput(message))
     }
 
     override fun declareOutputFields(declarer: OutputFieldsDeclarer) {
         declarer.declareStream(STORE_STREAM_ID, true, STORE_SCHEMA)
         declarer.declareStream(PROBE_STREAM_ID, true, PROBE_SCHEMA)
         declarer.declareStream(FORWARD_TO_CONTROL_BOLT_STREAM_NAME, MESSAGE_SCHEMA)
+        declarer.declareStream(FLEX_BOLT_TO_CONTROL_BOLT_STREAM_NAME, MESSAGE_SCHEMA)
     }
 }
 
