@@ -33,6 +33,7 @@ interface BinaryPredicate : Predicate, Serializable {
             return predicates.joinToString(", ")
         }
 
+        @Deprecated("Use fragment parser")
         fun fromString(joinPredicate: String): BinaryPredicate {
             val attributePairEqualityRegex = "(\\w+)\\.(\\w+)\\s*=\\s*(\\w+)\\.(\\w+)".toRegex()
 
@@ -73,4 +74,12 @@ fun extractAttributeAccesses(predicates: List<Predicate>): Collection<AttributeA
     }
 
     return result
+}
+
+class OrList(val inner: List<Predicate>) : Predicate, Serializable {
+
+}
+
+class Not(val inner: Predicate) : Predicate, Serializable {
+
 }

@@ -46,6 +46,39 @@ data class UnaryLike(
     }
 }
 
+data class UnaryNotLike(
+    override val attributeAccess: AttributeAccess,
+    val likeExpr: String
+) : UnaryAttributePredicate {
+    override fun evaluate(tuple: Tuple): Boolean {
+        val subject = tuple[attributeAccess]!!
+
+        // LIKE '%foo%'
+        if (likeExpr.startsWith("$") && likeExpr.endsWith("$")) {
+            val term = likeExpr.subSequence(1, likeExpr.length - 1)
+            return subject.contains(term)
+        }
+
+        // LIKE '%foo'
+        if (likeExpr.startsWith("$") && !likeExpr.endsWith("$")) {
+            val term = likeExpr.subSequence(1, likeExpr.length).toString()
+            return subject.indexOf(term) == subject.length - term.length
+        }
+
+        // LIKE 'foo%'
+        if (!likeExpr.startsWith("$") && likeExpr.endsWith("$")) {
+            val term = likeExpr.subSequence(0, likeExpr.length - 1).toString()
+            return subject.indexOf(term) == 0
+        }
+
+        throw RuntimeException("Do not understand NOT LIKE expression $likeExpr")
+    }
+
+    override fun toString(): String {
+        return "$attributeAccess NOT LIKE '$likeExpr'"
+    }
+}
+
 data class AttributeLessThanConstant<T>(
     override val attributeAccess: AttributeAccess,
     val constant: T
