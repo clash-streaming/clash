@@ -1,5 +1,6 @@
 import de.unikl.dbis.clash.query.Query
 import de.unikl.dbis.clash.query.QueryBuilder
+import de.unikl.dbis.clash.query.parser.parsePredicate
 
 // See https://github.com/gregrahn/join-order-benchmark
 
@@ -13,9 +14,7 @@ object JOBConstants {
 
 object JOBJoinsAndFilters {
     /**
-     * SELECT MIN(mc.note) AS production_note,
-              MIN(t.title) AS movie_title,
-              MIN(t.production_year) AS movie_year
+     * SELECT *
        FROM company_type AS ct,
             info_type AS it,
             movie_companies AS mc,
@@ -34,12 +33,20 @@ object JOBJoinsAndFilters {
      */
     fun q1a(): Query {
         val queryBuilder = QueryBuilder()
-        // queryBuilder.from(JOBConstants.COMPANY_TYPE, "ct")
-        //     .from(JOBConstants.INFO_TYPE, "it")
-        //     .from(JOBConstants.MOVIE_COMPANIES, "mc")
-        //     .from(JOBConstants.MOVIE_INFO_IDX, "mi_idx")
-        //     .from(JOBConstants.TITLE, "t")
-        //     .where()
-        TODO()
+        queryBuilder.from(JOBConstants.COMPANY_TYPE, "ct")
+            .from(JOBConstants.INFO_TYPE, "it")
+            .from(JOBConstants.MOVIE_COMPANIES, "mc")
+            .from(JOBConstants.MOVIE_INFO_IDX, "mi_idx")
+            .from(JOBConstants.TITLE, "t")
+            .where(parsePredicate("ct.kind = 'production companies'")!!)
+            .where(parsePredicate("it.info = 'top 250 rank'")!!)
+            .where(parsePredicate("mc.note NOT LIKE '%(as Metro-Goldwyn-Mayer Pictures)%'")!!)
+            .where(parsePredicate("(mc.note LIKE '%(co-production)% OR mc.note LIKE '%(presents)%')")!!)
+            .where(parsePredicate("ct.id = mc.company_type_id")!!)
+            .where(parsePredicate("t.id = mc.movie_id")!!)
+            .where(parsePredicate("t.id = mi_idx.movie_id")!!)
+            .where(parsePredicate("mc.movie_id = mi_idx.movie_id")!!)
+            .where(parsePredicate("it.id = mi_idx.info_type_id;")!!)
+        return queryBuilder.build()
     }
 }
