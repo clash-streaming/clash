@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.41"
-    id("org.jlleitschuh.gradle.ktlint") version "9.1.1"
-    id("io.gitlab.arturbosch.detekt") version "1.3.1"
+    id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
+    id("io.gitlab.arturbosch.detekt") version "1.6.0"
 }
 
 repositories {
@@ -70,11 +70,6 @@ subprojects {
     }
 
     apply(plugin = "org.jlleitschuh.gradle.ktlint") // Version should be inherited from parent
-
-    // Optionally configure plugin
-    ktlint {
-        debug.set(true)
-    }
 
 //    synchronizeSharedResources()
 
