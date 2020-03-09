@@ -33,14 +33,12 @@ import io.ktor.thymeleaf.Thymeleaf
 import io.ktor.thymeleaf.ThymeleafContent
 import io.ktor.webjars.Webjars
 import io.ktor.websocket.webSocket
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
-
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
-
 
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
@@ -78,8 +76,8 @@ fun Application.module(testing: Boolean = false) {
     }
 
     install(Webjars) {
-        path = "/webjars" //defaults to /webjars
-        zone = ZoneId.systemDefault() //defaults to ZoneId.systemDefault()
+        path = "/webjars" // defaults to /webjars
+        zone = ZoneId.systemDefault() // defaults to ZoneId.systemDefault()
     }
 
     install(ShutDownUrl.ApplicationCallFeature) {
@@ -105,9 +103,7 @@ fun Application.module(testing: Boolean = false) {
             call.respond(ThymeleafContent("index", mapOf("user" to ThymeleafUser(1, "user1"))))
         }
 
-        post(MANAGER_COMMAND_SEND_PATH) {
-
-        }
+        post(MANAGER_COMMAND_SEND_PATH) {}
 
         get(READ_COMMAND_HISTORY) {
             call.respondText(commandsAndMessages().toString(), contentType = ContentType.Application.Json)

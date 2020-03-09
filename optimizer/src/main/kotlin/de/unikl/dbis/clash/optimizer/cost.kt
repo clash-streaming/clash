@@ -59,7 +59,7 @@ fun probeTuplesSentForProbeOrder(dataCharacteristics: DataCharacteristics, probe
             .steps
             .subList(0, probeOrderWithJoinSize.steps.size - 1)
             .withIndex()) {
-        seenAttributeAccesses.addAll(step.first.relation.attributeAccesses)
+        // seenAttributeAccesses.addAll(step.first.relation.attributeAccesses) TODO i commented this out. what's going on here?
 
         val targetsPartitioning = probeOrderWithJoinSize.steps[index + 1].first.partitioning
         if (seenAttributeAccesses.any { targetsPartitioning.map { it.attribute }.contains(it.attribute) }) {
@@ -106,7 +106,7 @@ fun relationSizeForProbeOrder(dataCharacteristics: DataCharacteristics, probeOrd
     for ((index, step) in probeOrder
             .steps
             .withIndex()) {
-        relations.addAll(step.first.relation.aliases)
+        relations.addAll(step.first.relation.inputAliases)
 
         val currentNode = step.first
         val currentPredicates = step.second

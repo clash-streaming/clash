@@ -1,18 +1,13 @@
 package de.unikl.dbis.clash.flexstorm
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.google.gson.JsonPrimitive
+import java.time.Duration
+import java.time.Instant
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichSpout
 import org.apache.storm.utils.Utils
-import org.json.simple.JSONObject
-import org.json.simple.parser.JSONParser
-import java.time.Duration
-import java.time.Instant
 
 class TestSpout(val startTime: Instant, val relation: String, tuples: Map<Long, String>) : BaseRichSpout() {
     lateinit var collector: SpoutOutputCollector

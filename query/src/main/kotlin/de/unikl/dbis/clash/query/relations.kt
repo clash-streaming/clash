@@ -4,35 +4,53 @@ import de.unikl.dbis.clash.support.times
 import java.io.Serializable
 
 data class Relation(
-    val windowDefinition: Map<RelationAlias, WindowDefinition>,
-    val predicates: Collection<Predicate>,
-    val attributeAccesses: Collection<AttributeAccess> // TODO
+    val inputs: Map<RelationAlias, WindowDefinition>,
+    val filters: Collection<UnaryPredicate>,
+    val joinPredicates: Collection<BinaryPredicate>,
+    val aggregations: Collection<Aggregation>,
+    val projections: Collection<Projection>,
+    val alias: RelationAlias,
+    @Deprecated("Use filters or join predicates") val predicates: Collection<Predicate>
 ) : Serializable {
-    val aliases: Collection<RelationAlias> get() = windowDefinition.keys
-    val unaryPredicates: Collection<UnaryPredicate> get() = predicates.filterIsInstance<UnaryPredicate>()
-    val binaryPredicates: Collection<BinaryPredicate> get() = predicates.filterIsInstance<BinaryPredicate>()
+    val inputAliases: Collection<RelationAlias> get() = inputs.keys
+    @Deprecated("Use filters or join predicates") val unaryPredicates: Collection<UnaryPredicate> get() = predicates.filterIsInstance<UnaryPredicate>()
+    @Deprecated("Use filters or join predicates") val binaryPredicates: Collection<BinaryPredicate> get() = predicates.filterIsInstance<BinaryPredicate>()
 
     /**
      * Creates a new relation as restriction of this one to the given aliases.
      * The output will have all according windows and predicates.
      */
-    fun subRelation(vararg relationAliases: RelationAlias): Relation {
-        val newWindows = windowDefinition.filter { relationAliases.contains(it.key) }
-        val newPredicates: Collection<Predicate> = unaryPredicates.filter { relationAliases.contains(it.relationAlias) } +
-                binaryPredicates.filter { relationAliases.contains(it.leftRelationAlias) && relationAliases.contains(it.rightRelationAlias) }
-        val newAttributeAccesses = extractAttributeAccesses(unaryPredicates + binaryPredicates)
-        return Relation(newWindows, newPredicates, newAttributeAccesses)
+    fun subRelation(vararg relationAliases: RelationAlias, alias: RelationAlias = RelationAlias(relationAliases.joinToString(","))): Relation {
+        // val newWindows = inputs.filter { relationAliases.contains(it.key) }
+        // val newPredicates: Collection<Predicate> = unaryPredicates.filter { relationAliases.contains(it.relationAlias) } +
+        //         binaryPredicates.filter { relationAliases.contains(it.leftRelationAlias) && relationAliases.contains(it.rightRelationAlias) }
+        // val newAttributeAccesses = extractAttributeAccesses(unaryPredicates + binaryPredicates)
+        // return Relation(newWindows, newPredicates, newAttributeAccesses)
+        return Relation(
+            inputs.filter { relationAliases.contains(it.key) },
+            filters.filter { relationAliases.contains(it.relationAlias) },
+            joinPredicates.filter { relationAliases.contains(it.leftRelationAlias) && relationAliases.contains(it.rightRelationAlias) },
+            listOf(), // TODO: Think about that
+            projections.filter { relationAliases.contains(it.attributeAccess.relationAlias) },
+            alias,
+            listOf() // TODO delete me
+        )
     }
 
     /**
      * Creates all base relations from this relation, i.e., the relations that
      * consist only of a single window definition and unary predicates with the according relationAlias.
      */
-    fun baseRelations(): Collection<Relation> = windowDefinition.map {
+    fun baseRelations(): Collection<Relation> = inputs.map {
         Relation(
-                mapOf(it.key to it.value),
-                unaryPredicates.filter { predicate -> predicate.relationAlias == it.key },
-                attributeAccesses.filter { attributeAccess -> attributeAccess.relationAlias == it.key })
+            mapOf(it.key to it.value),
+            filters.filter { predicate -> predicate.relationAlias == it.key },
+            listOf(),
+            aggregations.filter { aggregation -> aggregation.attributeAccess.relationAlias == it.key },
+            projections.filter { projection -> projection.attributeAccess.relationAlias == it.key },
+            it.key,
+            listOf() // TODO delete me
+        )
     }
 
     /**
@@ -40,28 +58,24 @@ data class Relation(
      * Additionally all predicates that are valid join predicates (i.e., where one side has an relationAlias
      * of this relation and the other side as an relationAlias to the passed relations) are added.
      */
+    @Deprecated("use joinRelations instead")
     fun join(predicates: Collection<Predicate>, vararg relations: Relation): Relation {
-        val joinPredicates = predicates.filterIsInstance<BinaryPredicate>().filter {
-            !isCrossProduct(listOf(it), relations.toList(), this)
-        }
-        val relationsWindows = relations.flatMap { it.windowDefinition.entries }.associate { it.key to it.value }
-        val newAttributeAccesses = extractAttributeAccesses(this.predicates + joinPredicates)
-        return Relation(this.windowDefinition + relationsWindows, this.predicates + joinPredicates, newAttributeAccesses)
+        TODO()
     }
 
+    // TODO adjust to new data structure
     override fun toString(): String {
-        val windowPart = windowDefinition.map { "${it.key.inner}${it.value}" }.joinToString(", ", "{", "}")
+        val windowPart = inputs.map { "${it.key.inner}${it.value}" }.joinToString(", ", "{", "}")
         val predicatePart = predicates.joinToString(", ", "{", "}")
         return "<$windowPart, $predicatePart>"
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (!(other is Relation))
-            return false
-        return windowDefinition.equals(other.windowDefinition) &&
-                predicates.equals(other.predicates) &&
-                attributeAccesses.equals(other.attributeAccesses)
-    }
+    override fun equals(other: Any?): Boolean = other is Relation &&
+        inputs == other.inputs &&
+        filters == other.filters &&
+        joinPredicates == other.joinPredicates &&
+        aggregations == other.aggregations &&
+        projections == other.projections
 }
 
 fun isCrossProductAlias(binaryPredicates: Collection<BinaryPredicate>, relationAliases: Collection<RelationAlias>, relationAlias: RelationAlias): Boolean {
@@ -82,7 +96,9 @@ fun isCrossProduct(binaryPredicates: Collection<BinaryPredicate>, relations: Col
 }
 
 fun isCrossProduct(binaryPredicates: Collection<BinaryPredicate>, relations1: Collection<Relation>, relations2: Collection<Relation>): Boolean {
-    val relationAliases1 = relations1.flatMap { it.aliases }
-    val relationAliases2 = relations2.flatMap { it.aliases }
+    val relationAliases1 = relations1.flatMap { it.inputAliases }
+    val relationAliases2 = relations2.flatMap { it.inputAliases }
     return isCrossProductAlias(binaryPredicates, relationAliases1, relationAliases2)
 }
+
+data class Aggregation(val attributeAccess: AttributeAccess, val alias: String)

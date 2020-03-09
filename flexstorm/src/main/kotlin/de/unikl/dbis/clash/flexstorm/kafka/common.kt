@@ -1,10 +1,9 @@
 package de.unikl.dbis.clash.flexstorm.kafka
 
+import java.util.Properties
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener
 import org.apache.kafka.common.TopicPartition
-import java.util.Properties
-
 
 class StartingFromEndListener<K, V>(private val consumer: Consumer<K, V>) : ConsumerRebalanceListener {
 

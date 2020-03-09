@@ -226,7 +226,7 @@ class LinearConnector(val probeOrder: ProbeOrder, val graph: PhysicalGraph, val 
 
     fun getPredicateEvaluation(store: Store, predicates: Set<BinaryPredicate>): Set<BinaryPredicateEvaluation> {
         return predicates.map { predicate ->
-            if (store.relation.aliases.contains(predicate.leftRelationAlias))
+            if (store.relation.inputAliases.contains(predicate.leftRelationAlias))
                 BinaryPredicateEvaluationLeftStored(predicate)
             else BinaryPredicateEvaluationRightStored(predicate)
         }.toSet()

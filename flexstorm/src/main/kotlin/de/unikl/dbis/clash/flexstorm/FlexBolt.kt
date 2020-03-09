@@ -7,7 +7,6 @@ import de.unikl.dbis.clash.flexstorm.control.InternalStatisticsMessage
 import de.unikl.dbis.clash.manager.api.COMMAND_GATHER_STATISTICS
 import de.unikl.dbis.clash.manager.api.COMMAND_START_ACCEPTING_TUPLES
 import de.unikl.dbis.clash.manager.api.COMMAND_STOP_ACCEPTING_TUPLES
-import de.unikl.dbis.clash.manager.api.StatisticsMessage
 import org.apache.storm.task.OutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
@@ -78,24 +77,24 @@ class FlexBolt(val clashState: ClashState) : BaseRichBolt() {
         val entry = probeOrder.entries[offset]
         val store = container.getStore(timestamp, entry.targetStore)
         val probeResult = store.probe(entry.probingAttribute, payload[entry.sendingAttribute]!!)
-        if(probeResult.isEmpty()) {
+        if (probeResult.isEmpty()) {
             return
         }
 
         val joinResult = join(payload, probeResult)
 
-        if(offset == 1) {
+        if (offset == 1) {
             println("Final join result found at ${context.thisTaskId}: $joinResult")
             return
         }
 
         println("Joining got this probe result: $probeResult")
 
-        for(tuple in joinResult) {
-            val probeTargets = clashState.getProbeOrderTarget(timestamp, tuple, relation, offset+1)
-            for(probeTarget in probeTargets) {
+        for (tuple in joinResult) {
+            val probeTargets = clashState.getProbeOrderTarget(timestamp, tuple, relation, offset + 1)
+            for (probeTarget in probeTargets) {
                 val probeTargetTaskId = actualFlexBoltTaskId(probeTarget, context)
-                collector.emitDirect(probeTargetTaskId, PROBE_STREAM_ID, createProbeOutput(timestamp, tuple, relation, offset+1))
+                collector.emitDirect(probeTargetTaskId, PROBE_STREAM_ID, createProbeOutput(timestamp, tuple, relation, offset + 1))
             }
             println(">>> PROBE")
         }
@@ -127,8 +126,7 @@ class FlexBolt(val clashState: ClashState) : BaseRichBolt() {
     }
 }
 
-fun actualFlexBoltTaskId(flexBoltId: Int, context: TopologyContext)
-    = context.getComponentTasks(FLEX_BOLT_NAME)!![flexBoltId]
+fun actualFlexBoltTaskId(flexBoltId: Int, context: TopologyContext) = context.getComponentTasks(FLEX_BOLT_NAME)!![flexBoltId]
 
 fun join(probeObject: JsonObject, partners: List<JsonObject>): List<JsonObject> {
     return partners.map { jointObject(it, probeObject) }

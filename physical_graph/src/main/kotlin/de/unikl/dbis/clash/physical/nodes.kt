@@ -69,6 +69,16 @@ data class SimilarityStore(
     override val relation: Relation,
     override val parallelism: Long
 ) : Store, Node by CommonNode(label, parallelism)
+data class AggregationStore(
+    override val label: String,
+    override val relation: Relation,
+    override val parallelism: Long
+) : Store, Node by CommonNode(label, parallelism)
+data class SelectProjectNode(
+    override val label: String,
+    val relation: Relation,
+    override val parallelism: Long
+) : Node by CommonNode(label, parallelism)
 
 class CommonNode(
     override val label: String,

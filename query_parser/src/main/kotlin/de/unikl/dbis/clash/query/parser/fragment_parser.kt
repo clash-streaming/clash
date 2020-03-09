@@ -15,8 +15,7 @@ import de.unikl.dbis.clash.query.UnaryNotLike
 import de.unikl.dbis.clash.query.UnaryPredicate
 
 fun parsePredicate(s: String): Predicate? {
-    return (parseUnaryPredicate(s) ?: parseBinaryPredicate(s)) as Predicate? ?:
-           parseOrList(s)
+    return (parseUnaryPredicate(s) ?: parseBinaryPredicate(s)) as Predicate? ?: parseOrList(s)
 }
 
 fun parseUnaryPredicate(s: String): UnaryPredicate? {
@@ -44,7 +43,7 @@ fun parseUnaryPredicate(s: String): UnaryPredicate? {
      */
     val constantEqualityStringRegex = "('.*'|(.+\\.)?.+)\\s+=\\s+('.*'|(.+\\.)?.+)".toRegex()
     fun parseConstantEqualityString(s: String): ConstantEquality<Any>? {
-        if(s.matches(constantEqualityStringRegex)) {
+        if (s.matches(constantEqualityStringRegex)) {
             val matchResult = constantEqualityStringRegex.find(s)!!
             val groupA = matchResult.groupValues[1]
             val groupB = matchResult.groupValues[3]
@@ -64,7 +63,7 @@ fun parseUnaryPredicate(s: String): UnaryPredicate? {
 
     val unaryLikeRegex = "^\\s*(\\S+\\.?\\S+)\\s+LIKE\\s+('.*')".toRegex()
     fun parseUnaryLike(s: String): UnaryLike? {
-        if(s.matches(unaryLikeRegex)) {
+        if (s.matches(unaryLikeRegex)) {
             val matchResult = unaryLikeRegex.find(s)!!
             val groupA = matchResult.groupValues[1]
             val groupB = matchResult.groupValues[2]
@@ -77,7 +76,7 @@ fun parseUnaryPredicate(s: String): UnaryPredicate? {
 
     val unaryNotLikeRegex = "^\\s*(\\S+\\.?\\S+)\\s+NOT\\s+LIKE\\s+('.*')".toRegex()
     fun parseUnaryNotLike(s: String): UnaryNotLike? {
-        if(s.matches(unaryNotLikeRegex)) {
+        if (s.matches(unaryNotLikeRegex)) {
             val matchResult = unaryNotLikeRegex.find(s)!!
             val groupA = matchResult.groupValues[1]
             val groupB = matchResult.groupValues[2]
@@ -152,29 +151,28 @@ fun parseUnaryPredicate(s: String): UnaryPredicate? {
         return null
     }
 
-    return parseConstantEqualityInt(s) ?:
-        parseConstantEqualityLong(s) ?:
-        parseConstantEqualityDouble(s) ?:
-        parseConstantEqualityString(s) ?:
-        parseUnaryLike(s) ?:
-        parseUnaryNotLike(s) ?:
-        parseAttributeLessThanConstantInt(s) ?:
-        parseAttributeLessThanConstantLong(s) ?:
-        parseAttributeLessThanConstantDouble(s) ?:
-        parseAttributeLessThanConstantString(s) ?:
-        parseAttributeGreaterThanConstantInt(s) ?:
-        parseAttributeGreaterThanConstantLong(s) ?:
-        parseAttributeGreaterThanConstantDouble(s) ?:
-        parseAttributeGreaterThanConstantString(s) ?:
-        parseAttributeLessThanOrEqualConstantInt(s) ?:
-        parseAttributeLessThanOrEqualConstantLong(s) ?:
-        parseAttributeLessThanOrEqualConstantDouble(s) ?:
-        parseAttributeLessThanOrEqualConstantString(s) ?:
-        parseAttributeGreaterThanOrEqualConstantInt(s) ?:
-        parseAttributeGreaterThanOrEqualConstantLong(s) ?:
-        parseAttributeGreaterThanOrEqualConstantDouble(s) ?:
-        parseAttributeGreaterThanOrEqualConstantString(s)
-
+    return parseConstantEqualityInt(s)
+        ?: parseConstantEqualityLong(s)
+        ?: parseConstantEqualityDouble(s)
+        ?: parseConstantEqualityString(s)
+        ?: parseUnaryLike(s)
+        ?: parseUnaryNotLike(s)
+        ?: parseAttributeLessThanConstantInt(s)
+        ?: parseAttributeLessThanConstantLong(s)
+        ?: parseAttributeLessThanConstantDouble(s)
+        ?: parseAttributeLessThanConstantString(s)
+        ?: parseAttributeGreaterThanConstantInt(s)
+        ?: parseAttributeGreaterThanConstantLong(s)
+        ?: parseAttributeGreaterThanConstantDouble(s)
+        ?: parseAttributeGreaterThanConstantString(s)
+        ?: parseAttributeLessThanOrEqualConstantInt(s)
+        ?: parseAttributeLessThanOrEqualConstantLong(s)
+        ?: parseAttributeLessThanOrEqualConstantDouble(s)
+        ?: parseAttributeLessThanOrEqualConstantString(s)
+        ?: parseAttributeGreaterThanOrEqualConstantInt(s)
+        ?: parseAttributeGreaterThanOrEqualConstantLong(s)
+        ?: parseAttributeGreaterThanOrEqualConstantDouble(s)
+        ?: parseAttributeGreaterThanOrEqualConstantString(s)
 }
 
 fun parseBinaryPredicate(s: String): BinaryPredicate? {
@@ -192,12 +190,12 @@ fun parseBinaryPredicate(s: String): BinaryPredicate? {
 }
 
 fun parseOrList(s: String): OrList? {
-    if(s.startsWith("(") && s.endsWith(")")) {
-        val predicates = s.substring(1, s.length-1).split("OR")
+    if (s.startsWith("(") && s.endsWith(")")) {
+        val predicates = s.substring(1, s.length - 1).split("OR")
             .map { it.trim() }
             .map { parsePredicate(it) }
         val notNull = predicates.filterNotNull()
-        if(predicates.size != notNull.size) {
+        if (predicates.size != notNull.size) {
             return null
         }
         return OrList(notNull)

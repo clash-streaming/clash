@@ -105,7 +105,7 @@ fun parallelismFor(relation: Relation, dataCharacteristics: DataCharacteristics,
 
 fun storageCostFor(relation: Relation, dataCharacteristics: DataCharacteristics): Double {
     val size = estimateSize(relation, dataCharacteristics)
-    val multiplier = relation.windowDefinition.values.minBy { if (it.variant == WindowDefinition.Variant.None) Long.MAX_VALUE else it.amount }!!.amount
+    val multiplier = relation.inputs.values.minBy { if (it.variant == WindowDefinition.Variant.None) Long.MAX_VALUE else it.amount }!!.amount
 
     return if (multiplier == 0L) size else size * multiplier
 }
@@ -123,7 +123,7 @@ fun createMultiStreamImpl(
 fun MaterializationTree.printParenthesis() {
     fun MtNode.ppstr(): String {
         return if (children.isEmpty()) {
-            relation.aliases.joinToString(",")
+            relation.inputAliases.joinToString(",")
         } else {
             this.children.joinToString(",", "(", ")") { it.ppstr() }
         }

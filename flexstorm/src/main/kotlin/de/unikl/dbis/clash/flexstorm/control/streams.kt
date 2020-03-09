@@ -24,7 +24,6 @@ const val CONTROL_SPOUT_TO_CONTROL_BOLT_STREAM_NAME = "_ctrl2ctrl"
  */
 const val FORWARD_TO_CONTROL_BOLT_STREAM_NAME = "_fwd2ctrl"
 
-
 /**
  * This stream name is used for sending tick signals to the control bolt.
  */

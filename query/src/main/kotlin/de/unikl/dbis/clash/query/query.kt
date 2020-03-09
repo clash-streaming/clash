@@ -28,5 +28,13 @@ typealias ProjectionList = List<Projection>
 data class Projection(val attributeAccess: AttributeAccess, val alias: String)
 
 fun relationOf(string: String): Relation {
-    return Relation(mapOf(RelationAlias(string) to WindowDefinition.infinite()), listOf(), listOf())
+    return Relation(
+        mapOf(RelationAlias(string) to WindowDefinition.infinite()),
+        listOf(),
+        listOf(),
+        listOf(),
+        listOf(),
+        RelationAlias(string),
+        listOf() // TODO delete me
+    )
 }

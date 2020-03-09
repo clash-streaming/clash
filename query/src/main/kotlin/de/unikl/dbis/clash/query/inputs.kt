@@ -8,5 +8,5 @@ class InputMap(map: Map<RelationAlias, InputName>) : HashMap<RelationAlias, Inpu
 }
 
 fun inputForRelation(relation: Relation, inputMap: Map<RelationAlias, InputName>): InputName {
-    return inputMap.getValue(relation.aliases.first())
+    return inputMap.getValue(relation.inputAliases.first())
 }

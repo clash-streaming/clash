@@ -48,7 +48,6 @@ subprojects {
         compile("com.fasterxml.jackson.core:jackson-databind:2.10.2")
         compile("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.10.2")
 
-
         testCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
         testCompile("io.mockk:mockk:1.9")
         testCompile("org.assertj:assertj-core:3.11.1")

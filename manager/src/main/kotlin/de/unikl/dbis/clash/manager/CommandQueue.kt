@@ -26,7 +26,7 @@ class CommandQueue {
     @Synchronized
     fun removeAll(): List<Command> {
         val res = mutableListOf<Command>()
-        while(inner.isNotEmpty())
+        while (inner.isNotEmpty())
             res.add(inner.remove())
         return res
     }

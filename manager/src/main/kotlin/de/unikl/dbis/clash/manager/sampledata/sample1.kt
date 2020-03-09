@@ -24,27 +24,27 @@ fun main() {
 
     // three rounds of ping-pong (1/3)
     val c1 = SentCommand(t2, COMMAND_PING)
-    val c1m1 = ReceivedMessage(t2.plusMillis(40), MESSAGE_PONG,"fb1", t2)
-    val c1m2 = ReceivedMessage(t2.plusMillis(50), MESSAGE_PONG,"fb2", t2)
-    val c1m3 = ReceivedMessage(t2.plusMillis(60), MESSAGE_PONG,"fb3", t2)
+    val c1m1 = ReceivedMessage(t2.plusMillis(40), MESSAGE_PONG, "fb1", t2)
+    val c1m2 = ReceivedMessage(t2.plusMillis(50), MESSAGE_PONG, "fb2", t2)
+    val c1m3 = ReceivedMessage(t2.plusMillis(60), MESSAGE_PONG, "fb3", t2)
 
     // three rounds of ping-pong (2/3)
     val c2 = SentCommand(t3, COMMAND_PING)
-    val c2m1 = ReceivedMessage(t3.plusMillis(30), MESSAGE_PONG,"fb1", t3)
-    val c2m2 = ReceivedMessage(t3.plusMillis(52), MESSAGE_PONG,"fb2", t3)
-    val c2m3 = ReceivedMessage(t3.plusMillis(60), MESSAGE_PONG,"fb3", t3)
+    val c2m1 = ReceivedMessage(t3.plusMillis(30), MESSAGE_PONG, "fb1", t3)
+    val c2m2 = ReceivedMessage(t3.plusMillis(52), MESSAGE_PONG, "fb2", t3)
+    val c2m3 = ReceivedMessage(t3.plusMillis(60), MESSAGE_PONG, "fb3", t3)
 
     // three rounds of ping-pong (3/3)
     val c3 = SentCommand(t4, COMMAND_PING)
-    val c3m1 = ReceivedMessage(t4.plusMillis(40), MESSAGE_PONG,"fb1", t4)
-    val c3m2 = ReceivedMessage(t4.plusMillis(42), MESSAGE_PONG,"fb2", t4)
-    val c3m3 = ReceivedMessage(t4.plusMillis(44), MESSAGE_PONG,"fb3", t4)
+    val c3m1 = ReceivedMessage(t4.plusMillis(40), MESSAGE_PONG, "fb1", t4)
+    val c3m2 = ReceivedMessage(t4.plusMillis(42), MESSAGE_PONG, "fb2", t4)
+    val c3m3 = ReceivedMessage(t4.plusMillis(44), MESSAGE_PONG, "fb3", t4)
 
     // a reset to everybody
     val c4 = SentCommand(t5, COMMAND_RESET)
-    val c4m1 = ReceivedMessage(t4.plusMillis(120), MESSAGE_RESET,"fb1", t5)
-    val c4m2 = ReceivedMessage(t4.plusMillis(132), MESSAGE_RESET,"fb2", t5)
-    val c4m3 = ReceivedMessage(t4.plusMillis(144), MESSAGE_RESET,"fb3", t5)
+    val c4m1 = ReceivedMessage(t4.plusMillis(120), MESSAGE_RESET, "fb1", t5)
+    val c4m2 = ReceivedMessage(t4.plusMillis(132), MESSAGE_RESET, "fb2", t5)
+    val c4m3 = ReceivedMessage(t4.plusMillis(144), MESSAGE_RESET, "fb3", t5)
 
     // put them into the db
     val commands = listOf(

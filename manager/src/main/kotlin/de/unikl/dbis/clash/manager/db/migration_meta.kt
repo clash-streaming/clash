@@ -22,7 +22,7 @@ fun executeMigration(version: Int, sqlString: String) {
 }
 
 fun currentSchemaVersion(): Int {
-    if(!schemaTableExists()) {
+    if (!schemaTableExists()) {
         createSchemaTable()
     }
     return statement {

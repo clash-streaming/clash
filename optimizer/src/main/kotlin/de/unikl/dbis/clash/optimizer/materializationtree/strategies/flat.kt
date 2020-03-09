@@ -55,7 +55,7 @@ class FlatTheta : TreeStrategy() {
 fun createFlatTree(relation: Relation, dataCharacteristics: DataCharacteristics, params: OptimizationParameters, partitioning: PartitioningAttributesSelection): MaterializationTree { val leafRelations = relation.baseRelations()
     val children = leafRelations.map {
         val storageCost = storageCostFor(it, dataCharacteristics)
-        val partitioningAttributes = partitioning[it.aliases.toList()] ?: listOf()
+        val partitioningAttributes = partitioning[it.inputAliases.toList()] ?: listOf()
         MatSource(it, parallelismFor(it, dataCharacteristics, params.taskCapacity), partitioningAttributes, storageCost)
     }
     return MaterializationTree(NonMatMultiStream(relation, children, createMultiStreamImpl(children, relation.binaryPredicates, params.probeOrderOptimizationStrategy, dataCharacteristics)))

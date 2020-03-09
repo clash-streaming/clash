@@ -49,7 +49,7 @@ class LeastIntermediatesProbeOrder : ProbeOrderOptimizationStrategy {
             cost += joinSize
             currentRelation = foundRelation
             schedulableNodes.remove(nextNode)
-            result.add(Pair(nextNode, predicatesForJoin(predicates, result.map { it.first.relation.aliases }.flatten(), nextNode.relation.aliases)))
+            result.add(Pair(nextNode, predicatesForJoin(predicates, result.map { it.first.relation.inputAliases }.flatten(), nextNode.relation.inputAliases)))
         }
         val probeOrder = ProbeOrder(result.toList())
         val newCost = globalProbeTuplesSentForProbeOrder(dataCharacteristics, probeOrder)
@@ -81,13 +81,13 @@ class LeastSentProbeOrder : ProbeOrderOptimizationStrategy {
             // find the element which generates the smallest join size with the chosen prefix
             val (nextRelation, cur) = todo.map { node ->
                 // TODO does this what I think it does?
-                val relationAliases = result.map { it.first.relation.aliases }.flatten().union(node.relation.aliases)
+                val relationAliases = result.map { it.first.relation.inputAliases }.flatten().union(node.relation.inputAliases)
                 val x = joinSize(dataCharacteristics, relationAliases)
                 Pair(node, x)
             }.minBy { (rel, size) -> size }!!
             cost += cur
             todo.remove(nextRelation)
-            result.add(Pair(nextRelation, predicatesForJoin(predicates, result.map { it.first.relation.aliases }.flatten(), nextRelation.relation.aliases)))
+            result.add(Pair(nextRelation, predicatesForJoin(predicates, result.map { it.first.relation.inputAliases }.flatten(), nextRelation.relation.inputAliases)))
         }
         val probeOrder = ProbeOrder(result.toList())
         val newCost = globalProbeTuplesSentForProbeOrder(dataCharacteristics, probeOrder)

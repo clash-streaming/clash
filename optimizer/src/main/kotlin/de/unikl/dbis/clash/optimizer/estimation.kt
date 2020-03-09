@@ -26,10 +26,10 @@ fun joinSize(dataCharacteristics: DataCharacteristics, relations: Collection<Rel
 }
 
 fun joinSize(dataCharacteristics: DataCharacteristics, relation: Relation): Double {
-    val baseRelations = relation.aliases.toMutableList()
+    val baseRelations = relation.inputAliases.toMutableList()
     return when (baseRelations.size) {
         0 -> 0.0
-        1 -> dataCharacteristics.getRate(relation.aliases.first())
+        1 -> dataCharacteristics.getRate(relation.inputAliases.first())
         else -> {
             val first = baseRelations.first()
             val remainder = baseRelations.minus(first)
@@ -60,7 +60,7 @@ fun tuplesMaterializedPerMaterializedRelation(query: Query, dataCharacteristics:
 
 fun tuplesMaterializedForRelation(relation: Relation, dataCharacteristics: DataCharacteristics): Long {
     val size = estimateSize(relation, dataCharacteristics)
-    val multiplier = relation.windowDefinition.values.minBy { if (it.variant == WindowDefinition.Variant.None) Long.MAX_VALUE else it.amount }!!.amount
+    val multiplier = relation.inputs.values.minBy { if (it.variant == WindowDefinition.Variant.None) Long.MAX_VALUE else it.amount }!!.amount
     return if (multiplier == 0L) size.ceil() else (size * multiplier).ceil()
 }
 

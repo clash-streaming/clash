@@ -24,8 +24,8 @@ import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichSpout
 import org.apache.storm.tuple.Fields
 import org.apache.storm.tuple.Values
-import org.json.simple.parser.JSONParser
 import org.apache.storm.utils.Utils
+import org.json.simple.parser.JSONParser
 
 const val CONTROL_SPOUT_NAME = "control-spout"
 
@@ -39,7 +39,7 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
 
     @KtorExperimentalAPI
     override fun nextTuple() {
-        if(!topologyAliveMessageSent) {
+        if (!topologyAliveMessageSent) {
             sendTopologyAliveMessage()
             topologyAliveMessageSent = true
         }
@@ -56,8 +56,8 @@ class ControlSpout(val managerUrl: String) : BaseRichSpout() {
                 url(managerUrl + MANAGER_COMMAND_QUEUE_PATH)
             }
 
-            for(command in message) {
-                when(command[COMMAND_FIELD].asString) {
+            for (command in message) {
+                when (command[COMMAND_FIELD].asString) {
                     COMMAND_PING, COMMAND_RESET -> send(CONTROL_SPOUT_TO_ALL_STREAM_NAME, command)
                 }
             }

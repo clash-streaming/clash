@@ -29,6 +29,6 @@ class StatisticsGatherer(val numberOfSources: Int) {
 
 fun createStatisticsMessage(internalMap: Map<Int, InternalStatisticsMessage>): JsonObject {
     val result = JsonObject()
-    internalMap.forEach { result.add(it.key.toString(), it.value.asJsonObject())}
+    internalMap.forEach { result.add(it.key.toString(), it.value.asJsonObject()) }
     return result
 }

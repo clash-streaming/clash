@@ -1,7 +1,10 @@
 package de.unikl.dbis.clash.physical
 
+import de.unikl.dbis.clash.query.Aggregation
+import de.unikl.dbis.clash.query.AttributeAccess
 import de.unikl.dbis.clash.query.BinaryPredicate
 import de.unikl.dbis.clash.query.Relation
+import de.unikl.dbis.clash.query.UnaryPredicate
 import java.io.Serializable
 
 /**
@@ -209,6 +212,30 @@ class StoreAndJoinRule
     }
 }
 
+class SelectProjectRule(
+    val predicates: Set<UnaryPredicateEvaluation>,
+    val projection: List<AttributeAccess>,
+    override val incomingEdgeLabel: EdgeLabel
+) : InRule {
+    override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
+        return SelectProjectRule(this.predicates, this.projection, newLabel)
+    }
+}
+
+class AggregateRule(
+    val groupBy: List<AttributeAccess>,
+    val aggregate: List<Aggregation>,
+    override val incomingEdgeLabel: EdgeLabel,
+    override val outgoingEdgeLabel: EdgeLabel
+) : InRule, OutRule {
+    override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
+        return AggregateRule(groupBy, aggregate, newLabel, outgoingEdgeLabel)
+    }
+    override fun replaceOutgoingEdgeLabel(newLabel: EdgeLabel): OutRule {
+        return AggregateRule(groupBy, aggregate, incomingEdgeLabel, newLabel)
+    }
+}
+
 /**
  * A BinaryPredicate has a left and a right AttributeAccess.
  * For example, in the predicate "x.age < y.age",
@@ -229,3 +256,7 @@ interface BinaryPredicateEvaluation : Serializable {
 data class GenericBinaryPredicateEvaluation(override val predicate: BinaryPredicate) : BinaryPredicateEvaluation
 data class BinaryPredicateEvaluationLeftStored(override val predicate: BinaryPredicate) : BinaryPredicateEvaluation
 data class BinaryPredicateEvaluationRightStored(override val predicate: BinaryPredicate) : BinaryPredicateEvaluation
+
+interface UnaryPredicateEvaluation : Serializable {
+    val predicate: UnaryPredicate
+}

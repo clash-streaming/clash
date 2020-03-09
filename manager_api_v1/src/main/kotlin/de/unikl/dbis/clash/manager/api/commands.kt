@@ -13,10 +13,10 @@ interface Command {
     fun toJson(): JsonObject
 
     fun fromJson(obj: JsonObject): Command {
-        return when(obj[COMMAND_FIELD].asString) {
+        return when (obj[COMMAND_FIELD].asString) {
             COMMAND_PING -> PingCommand(Instant.parse(obj[COMMAND_PING_SENT].asString))
             COMMAND_RESET -> ResetCommand()
-            else -> { throw UnknownCommandException(obj[COMMAND_FIELD])}
+            else -> { throw UnknownCommandException(obj[COMMAND_FIELD]) }
         }
     }
 }

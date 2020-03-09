@@ -15,6 +15,8 @@ open class PhysicalGraph {
     private val inputStubs = mutableMapOf<Relation, InputStub>()
     var outputStub: OutputStub? = null
     val relationStores = mutableMapOf<Relation, Store>()
+    val aggregationStores = mutableListOf<AggregationStore>()
+    val selectProjectNodes = mutableListOf<SelectProjectNode>()
 
     // TODO is this needed?    val relationConsumers = mutableMapOf<String, MutableSet<Node>>()
     val relationProducers = mutableMapOf<Relation, MutableSet<Node>>()
@@ -73,6 +75,14 @@ open class PhysicalGraph {
 // TODO is this needed?                .getOrPut(relation) { mutableSetOf() }
 // TODO is this needed?                .add(outputStub)
         return outputStub
+    }
+
+    fun addAggregationStore(aggregationStore: AggregationStore) {
+        aggregationStores.add(aggregationStore)
+    }
+
+    fun addSelectProjectNode(selectProjectNode: SelectProjectNode) {
+        selectProjectNodes.add(selectProjectNode)
     }
 
     /**
@@ -134,5 +144,5 @@ fun addGroupedEdge(
 }
 
 fun label(relation: Relation): String {
-    return relation.aliases.joinToString("")
+    return relation.inputAliases.joinToString("")
 }

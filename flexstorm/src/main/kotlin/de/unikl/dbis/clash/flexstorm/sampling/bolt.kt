@@ -13,6 +13,4 @@ class SampleBoltBuilder {
     }
 }
 
-class SampleBolt(relations: List<String>) {
-
-}
+class SampleBolt(relations: List<String>)

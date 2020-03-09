@@ -159,7 +159,7 @@ class StormRelationSendRule : StormOutRule, StormDataPathRule {
 class StormStoreAndJoinRule : StormInRule, StormDataPathRule {
 
     val relationName: String
-    val predicates: Set<BinaryPredicate>
+    val predicates: Set<BinaryPredicateEvaluation>
     override val incomingEdgeLabel: StormEdgeLabel
 
     override val messageVariant: MessageVariant
@@ -174,16 +174,6 @@ class StormStoreAndJoinRule : StormInRule, StormDataPathRule {
         this.relationName = rule.relationName
         this.predicates = rule.predicates
         this.incomingEdgeLabel = StormEdgeLabel(rule.incomingEdgeLabel)
-    }
-
-    constructor(
-        relationName: String,
-        predicates: Set<BinaryPredicate>,
-        incomingEdgeLabel: StormEdgeLabel
-    ) {
-        this.relationName = relationName
-        this.predicates = predicates
-        this.incomingEdgeLabel = incomingEdgeLabel
     }
 
     override fun toString(): String {

@@ -12,7 +12,7 @@ class CaMEntry(val command: SentCommand? = null) {
 
     fun toJson(): JsonObject {
         val result = JsonObject()
-        if(command != null) {
+        if (command != null) {
             result.add(COMMAND_ATTRIBUTE, command.toJson())
         }
         val jsonMessages = JsonObject()
@@ -34,7 +34,7 @@ fun commandsAndMessages(): JsonObject {
 
     statement {
         val res = it.executeQuery("SELECT timestamp ts, command c, payload p FROM sent_commands ORDER BY timestamp")
-        while(res.next()) {
+        while (res.next()) {
             val timestamp = java.util.Date(res.getDate("ts").time).toInstant()
             val command = res.getString("c")
             val payload = if (res.getString("p") != null) JsonParser().parse(res.getString("p")).asJsonObject else null
@@ -45,7 +45,7 @@ fun commandsAndMessages(): JsonObject {
 
     statement {
         val res = it.executeQuery("SELECT timestamp ts, message m, sender s, answer_to at, payload p FROM received_messages ORDER BY answer_to, timestamp")
-        while(res.next()) {
+        while (res.next()) {
             val timestamp = java.util.Date(res.getDate("ts").time).toInstant()
             val message = res.getString("m")
             val sender = res.getString("s")
@@ -60,7 +60,7 @@ fun commandsAndMessages(): JsonObject {
     }
 
     val jsonResult = JsonObject()
-    for((timestamp, entry) in result) {
+    for ((timestamp, entry) in result) {
         jsonResult.add(timestamp.toString(), entry.toJson())
     }
     return jsonResult

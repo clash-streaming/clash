@@ -1,7 +1,7 @@
 package de.unikl.dbis.clash.flexstorm
 
-import org.apache.storm.task.TopologyContext
 import java.io.Serializable
+import org.apache.storm.task.TopologyContext
 
 class ClashState : Serializable {
     var epochs = Epochs()
@@ -15,8 +15,8 @@ class ClashState : Serializable {
     fun getInstanceIds(timestamp: TimestampValue, key: String, value: Any, relation: RelationValue): List<Int> {
         val epoch = this.epochs.epochFor(timestamp)!!
         val partitioning = epoch.partitioning[relation]!!
-        if(partitioning.attribute == key) {
-          return partitioning.forValue(value)
+        if (partitioning.attribute == key) {
+            return partitioning.forValue(value)
         } else {
             return partitioning.all()
         }

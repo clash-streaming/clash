@@ -8,8 +8,8 @@ fun Query.inspect(): String {
 
 fun Relation.inspect(depth: Int = 0): String {
     return """
-        BaseRelationName: ${this.aliases}
+        BaseRelationName: ${this.inputAliases}
         UnaryPredicates: ${this.unaryPredicates}
-        Window: ${this.windowDefinition}
+        Window: ${this.inputs}
     """
 }

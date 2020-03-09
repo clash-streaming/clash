@@ -13,10 +13,10 @@ import de.unikl.dbis.clash.flexstorm.control.FORWARD_TO_CONTROL_BOLT_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.control.TICK_SPOUT_TO_CONTROL_BOLT_STREAM_NAME
 import de.unikl.dbis.clash.flexstorm.kafka.KafkaTblSpout
 import de.unikl.dbis.clash.flexstorm.partitioning.NaiveHashPartitioning
+import java.time.Instant
 import org.apache.storm.Config
 import org.apache.storm.LocalCluster
 import org.apache.storm.topology.TopologyBuilder
-import java.time.Instant
 
 const val STORE_STREAM_ID = "store"
 const val PROBE_STREAM_ID = "probe"

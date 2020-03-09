@@ -15,7 +15,7 @@ class StoreContainer : Serializable {
         timestamp: TimestampValue,
         what: Map<String, List<String>>
     ) {
-        for((relation, indeces) in what) {
+        for ((relation, indeces) in what) {
             val map = TreeMap<TimestampValue, Store>()
             map[timestamp] = Store(indeces)
             inner[relation] = map
@@ -27,5 +27,4 @@ class StoreContainer : Serializable {
         .flatten()
         .map { it.tupleCounter }
         .sum()
-
 }

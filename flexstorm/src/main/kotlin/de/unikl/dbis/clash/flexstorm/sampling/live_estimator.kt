@@ -113,8 +113,8 @@ fun main() {
     )
 
     val estimator = LiveEstimator(pc)
-    relR.map { Pair("R", it)}
-        .union(relS.map { Pair("S", it)})
-        .union(relT.map { Pair("T", it)})
+    relR.map { Pair("R", it) }
+        .union(relS.map { Pair("S", it) })
+        .union(relT.map { Pair("T", it) })
         .shuffled().forEach { estimator.addTuple(it.first, it.second) }
 }

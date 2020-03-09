@@ -78,7 +78,7 @@ fun exhaustiveLeastSent(
 fun listToProbeOrder(list: List<MtNode>, predicates: Collection<BinaryPredicate>): ProbeOrder {
     val result = mutableListOf<Pair<MtNode, Set<BinaryPredicate>>>()
     for (node in list) {
-        result.add(Pair(node, predicatesForJoin(predicates, result.map { it.first.relation.aliases }.flatten(), node.relation.aliases)))
+        result.add(Pair(node, predicatesForJoin(predicates, result.map { it.first.relation.inputAliases }.flatten(), node.relation.inputAliases)))
     }
     return ProbeOrder(result)
 }

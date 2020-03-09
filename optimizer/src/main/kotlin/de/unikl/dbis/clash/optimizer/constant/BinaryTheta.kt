@@ -88,7 +88,7 @@ class BinaryTheta : GlobalStrategy {
      */
     private fun predicatesForStore(store: ThetaStore, binaryPredicates: Collection<BinaryPredicate>): Set<BinaryPredicateEvaluation> {
         return binaryPredicates.map { predicate ->
-            if (store.relation.aliases.contains(predicate.leftRelationAlias))
+            if (store.relation.inputAliases.contains(predicate.leftRelationAlias))
                 BinaryPredicateEvaluationLeftStored(predicate)
             else BinaryPredicateEvaluationRightStored(predicate)
         }.toSet()

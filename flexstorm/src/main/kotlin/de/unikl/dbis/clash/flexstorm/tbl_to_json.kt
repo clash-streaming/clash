@@ -4,7 +4,7 @@ import com.google.gson.JsonObject
 
 fun tblToJson(raw: String, tablename: String): JsonObject {
     val result = JsonObject()
-    return when(tablename) {
+    return when (tablename) {
         "customer" -> customerTblToJson(raw)
         "order", "orders" -> orderTblToJson(raw)
         "lineitem" -> lineitemTblToJson(raw)

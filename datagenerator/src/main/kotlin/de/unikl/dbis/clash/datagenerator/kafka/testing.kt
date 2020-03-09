@@ -1,11 +1,11 @@
 package de.unikl.dbis.clash.datagenerator.kafka
 
+import java.util.Properties
+import kotlin.concurrent.thread
 import org.apache.kafka.clients.admin.Admin
 import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.Properties
-import kotlin.concurrent.thread
 
 const val BOOTSTRAP_SERVER = "dbis-expsrv15:9094"
 

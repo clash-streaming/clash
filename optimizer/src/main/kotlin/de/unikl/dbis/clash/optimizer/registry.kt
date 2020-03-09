@@ -1,6 +1,7 @@
 package de.unikl.dbis.clash.optimizer
 
 import de.unikl.dbis.clash.optimizer.constant.BinaryTheta
+import de.unikl.dbis.clash.optimizer.constant.NaiveSingleInputAggregation
 import de.unikl.dbis.clash.optimizer.materializationtree.strategies.BottomUpTheta
 import de.unikl.dbis.clash.optimizer.materializationtree.strategies.FlatTheta
 import de.unikl.dbis.clash.optimizer.materializationtree.strategies.LeftDeepGreedyTheta
@@ -26,6 +27,7 @@ object GlobalStrategyRegistry {
             "BottomUpTheta" -> BottomUpTheta()
             "TopDownTheta" -> TopDownTheta()
             "Similarity" -> SimilarityOptimizer()
+            "NaiveSingleInputAggregation" -> NaiveSingleInputAggregation()
             else -> {
                 System.err.println("Unknown Global Strategy $name")
                 exitProcess(1)

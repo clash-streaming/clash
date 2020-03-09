@@ -88,7 +88,7 @@ fun matSourceToJson(matSource: MatSource): JSONObject {
 }
 
 fun probeOrderToJson(probeOrders: ProbeOrders): Array<Array<String>> {
-    return probeOrders.inner.values.map { it.first.steps.map { step -> step.first.relation.aliases.joinToString("-") }.toTypedArray() }.toTypedArray()
+    return probeOrders.inner.values.map { it.first.steps.map { step -> step.first.relation.inputAliases.joinToString("-") }.toTypedArray() }.toTypedArray()
 }
 
 fun partitioningToJson(list: AttributeAccessList): String {

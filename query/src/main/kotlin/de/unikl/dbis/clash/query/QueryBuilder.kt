@@ -3,9 +3,12 @@ package de.unikl.dbis.clash.query
 class QueryBuilder {
     internal val from: MutableMap<RelationAlias, WindowDefinition> = mutableMapOf()
     internal val to: MutableList<String> = mutableListOf()
-    internal val unaryPredicates: MutableList<UnaryPredicate> = mutableListOf()
+    internal val filters: MutableList<UnaryPredicate> = mutableListOf()
     internal val joinPredicates: MutableList<BinaryPredicate> = mutableListOf()
     internal val inputMap: InputMap = InputMap()
+    internal val aggregations: MutableList<Aggregation> = mutableListOf()
+    internal val projections: MutableList<Projection> = mutableListOf()
+    internal var alias: RelationAlias = RelationAlias("_result")
 
     fun from(s: String): QueryBuilder {
         return from(RelationAlias(s), WindowDefinition.infinite())
@@ -42,8 +45,8 @@ class QueryBuilder {
     }
 
     fun where(predicate: Predicate): QueryBuilder {
-        when(predicate) {
-            is UnaryPredicate -> this.unaryPredicates.add(predicate)
+        when (predicate) {
+            is UnaryPredicate -> this.filters.add(predicate)
             is BinaryPredicate -> this.joinPredicates.add(predicate)
         }
         return this
@@ -58,13 +61,36 @@ class QueryBuilder {
         return this.where(BinaryPredicate.fromString(joinPredicate))
     }
 
+    fun select(projection: Projection): QueryBuilder {
+        this.projections.add(projection)
+        return this
+    }
+
+    fun groupBy(aggregation: Aggregation): QueryBuilder {
+        this.aggregations.add(aggregation)
+        return this
+    }
+
     fun to(to: String): QueryBuilder {
         this.to.add(to)
         return this
     }
 
+    fun alias(alias: RelationAlias): QueryBuilder {
+        this.alias = alias
+        return this
+    }
+
     fun build(): Query {
-        val relation = Relation(from, joinPredicates, extractAttributeAccesses(joinPredicates))
+        val relation = Relation(
+            from,
+            filters,
+            joinPredicates,
+            aggregations,
+            projections,
+            alias,
+            listOf() // TODO delete me
+        )
         return Query(relation, inputMap)
     }
 

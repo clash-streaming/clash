@@ -76,10 +76,6 @@ fun extractAttributeAccesses(predicates: List<Predicate>): Collection<AttributeA
     return result
 }
 
-class OrList(val inner: List<Predicate>) : Predicate, Serializable {
+class OrList(val inner: List<Predicate>) : Predicate, Serializable
 
-}
-
-class Not(val inner: Predicate) : Predicate, Serializable {
-
-}
+class Not(val inner: Predicate) : Predicate, Serializable

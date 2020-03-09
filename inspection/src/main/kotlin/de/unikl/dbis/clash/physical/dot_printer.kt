@@ -164,7 +164,7 @@ fun TickOutRule.dotLabel(): String {
 }
 
 fun RelationReceiveRule.dotLabel(): String {
-    val rel = this.relation.aliases.joinToString("+")
+    val rel = this.relation.inputAliases.joinToString("+")
     return "Receive: $rel"
 }
 

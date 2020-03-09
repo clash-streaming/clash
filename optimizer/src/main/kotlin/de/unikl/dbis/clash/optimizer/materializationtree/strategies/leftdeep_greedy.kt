@@ -197,7 +197,7 @@ internal fun binaryNonMatGeneralized(left: MtNode, right: Collection<MtNode>, da
 }
 
 internal fun matSource(relation: Relation, dataCharacteristics: DataCharacteristics, optimizationParameters: OptimizationParameters, partitioning: PartitioningAttributesSelection): MatSource {
-    val partitioningAttributes = partitioning[relation.aliases.toList()] ?: listOf()
+    val partitioningAttributes = partitioning[relation.inputAliases.toList()] ?: listOf()
     return MatSource(
             relation,
             parallelismFor(relation, dataCharacteristics, optimizationParameters.taskCapacity),

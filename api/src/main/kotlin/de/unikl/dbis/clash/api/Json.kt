@@ -124,11 +124,11 @@ class Json : CliktCommand() {
 
     fun runQueryParse(query: String) {
         fun baseRelations(query: Query): JSONArray {
-            return JSONArray(query.result.aliases.map { it.inner })
+            return JSONArray(query.result.inputAliases.map { it.inner })
         }
 
         fun baseRelationAliases(query: Query): JSONArray {
-            return JSONArray(query.result.aliases.map { it.inner })
+            return JSONArray(query.result.inputAliases.map { it.inner })
         }
 
         fun binaryPredicates(query: Query): JSONArray {

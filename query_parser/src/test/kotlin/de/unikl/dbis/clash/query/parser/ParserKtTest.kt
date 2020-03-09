@@ -35,8 +35,8 @@ internal class ParserKtTest {
             FROM x
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(1)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(1)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("x"), WindowDefinition.infinite())
         )
     }
@@ -48,8 +48,8 @@ internal class ParserKtTest {
             FROM x y
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(1)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(1)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("y"), WindowDefinition.infinite())
         )
     }
@@ -61,8 +61,8 @@ internal class ParserKtTest {
             FROM x('sliding', '1', 'minute')
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(1)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(1)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("x"), WindowDefinition.minutes(1))
         )
     }
@@ -74,8 +74,8 @@ internal class ParserKtTest {
             FROM x('sliding', '1', 'minute') y
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(1)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(1)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("y"), WindowDefinition.minutes(1))
         )
     }
@@ -87,8 +87,8 @@ internal class ParserKtTest {
             FROM x1, x2
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(2)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(2)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("x1"), WindowDefinition.infinite()),
                 entry(RelationAlias("x2"), WindowDefinition.infinite())
         )
@@ -101,8 +101,8 @@ internal class ParserKtTest {
             FROM x1 y1, x2 y2
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(2)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(2)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("y1"), WindowDefinition.infinite()),
                 entry(RelationAlias("y2"), WindowDefinition.infinite())
         )
@@ -116,8 +116,8 @@ internal class ParserKtTest {
                  x2('sliding', '5', 'seconds')
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(2)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(2)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("x1"), WindowDefinition.minutes(1)),
                 entry(RelationAlias("x2"), WindowDefinition.seconds(5))
         )
@@ -131,8 +131,8 @@ internal class ParserKtTest {
                  x2('sliding', '1', 'minute') y2
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.windowDefinition.size).isEqualTo(2)
-        assertThat(q1.result.windowDefinition).containsExactly(
+        assertThat(q1.result.inputs.size).isEqualTo(2)
+        assertThat(q1.result.inputs).containsExactly(
                 entry(RelationAlias("y1"), WindowDefinition.hours(2)),
                 entry(RelationAlias("y2"), WindowDefinition.minutes(1))
 
@@ -147,7 +147,7 @@ internal class ParserKtTest {
             WHERE x.a = 'foo'
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.unaryPredicates).containsExactly(
+        assertThat(q1.result.filters).containsExactly(
                 ConstantEquality(AttributeAccess("x", "a"), "foo")
         )
     }

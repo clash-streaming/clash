@@ -1,18 +1,16 @@
 package de.unikl.dbis.clash.flexstorm.kafka
 
-import com.google.gson.JsonParser
 import de.unikl.dbis.clash.flexstorm.SPOUT_OUTPUT_SCHEMA
 import de.unikl.dbis.clash.flexstorm.createSpoutOutput
 import de.unikl.dbis.clash.flexstorm.tblToJson
+import java.time.Duration
+import java.time.Instant
+import java.util.Arrays
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.storm.spout.SpoutOutputCollector
 import org.apache.storm.task.TopologyContext
 import org.apache.storm.topology.OutputFieldsDeclarer
 import org.apache.storm.topology.base.BaseRichSpout
-import java.time.Duration
-import java.time.Instant
-import java.util.Arrays
-import java.util.Properties
 
 class KafkaTblSpout(val topicName: String, val relation: String) : BaseRichSpout() {
     lateinit var collector: SpoutOutputCollector

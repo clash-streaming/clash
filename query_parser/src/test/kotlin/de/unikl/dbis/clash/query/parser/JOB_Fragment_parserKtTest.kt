@@ -115,5 +115,4 @@ internal class JOB_Fragment_parserKtTest {
             assertThat(it.rightAttributeAccess).isEqualTo(AttributeAccess("mi_idx", "info_type_id"))
         }
     }
-
 }

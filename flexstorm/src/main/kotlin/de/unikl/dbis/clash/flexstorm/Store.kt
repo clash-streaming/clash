@@ -11,8 +11,8 @@ class Store(indexes: List<String>) : Serializable {
     }
 
     fun store(payload: PayloadValue) {
-        for((attribute, index) in indexes) {
-            val value = payload[attribute]?: throw AttributeNotFound(attribute)
+        for ((attribute, index) in indexes) {
+            val value = payload[attribute] ?: throw AttributeNotFound(attribute)
             index.getOrPut(value, { mutableListOf() }).add(payload)
         }
         tupleCounter += 1

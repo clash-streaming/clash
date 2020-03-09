@@ -174,7 +174,7 @@ class TopDownTheta : TreeStrategy() {
     private fun buildTree(tree: TDTree, query: Query, dataCharacteristics: DataCharacteristics, optimizationParameters: OptimizationParameters, partitioning: PartitioningAttributesSelection): MtNode {
         if (tree.leftIndex == tree.rightIndex) {
             val relation = query.result.subRelation(tree.relationAliases.first())
-            val partitioningAttributes = partitioning[relation.aliases.toList()] ?: listOf()
+            val partitioningAttributes = partitioning[relation.inputAliases.toList()] ?: listOf()
             return MatSource(relation, parallelismFor(relation, dataCharacteristics, optimizationParameters.taskCapacity), partitioningAttributes, storageCostFor(relation, dataCharacteristics))
         } else {
             val children = tree.children.map { buildTree(it, query, dataCharacteristics, optimizationParameters, noPartitioning()) }
@@ -212,13 +212,13 @@ fun fixInnerPartitioning(matTree: MtNode) {
                 continue
             for (predicate in matTree.relation.binaryPredicates) {
                 if (predicate is BinaryEquality) {
-                    if (child.relation.aliases.contains(predicate.leftAttributeAccess.relationAlias) &&
-                            !child.relation.aliases.contains(predicate.rightAttributeAccess.relationAlias)) {
+                    if (child.relation.inputAliases.contains(predicate.leftAttributeAccess.relationAlias) &&
+                            !child.relation.inputAliases.contains(predicate.rightAttributeAccess.relationAlias)) {
                         candidates.getOrPut(child, { mutableListOf() })
                         candidates[child]!!.add(predicate.leftAttributeAccess)
                     }
-                    if (child.relation.aliases.contains(predicate.rightAttributeAccess.relationAlias) &&
-                            !child.relation.aliases.contains(predicate.leftAttributeAccess.relationAlias)) {
+                    if (child.relation.inputAliases.contains(predicate.rightAttributeAccess.relationAlias) &&
+                            !child.relation.inputAliases.contains(predicate.leftAttributeAccess.relationAlias)) {
                         candidates.getOrPut(child, { mutableListOf() })
                         candidates[child]!!.add(predicate.rightAttributeAccess)
                     }

@@ -23,11 +23,10 @@ import org.slf4j.LoggerFactory
 
 const val CONTROL_BOLT_NAME = "control-bolt"
 
-class ControlBolt(val managerUrl: String, val clashState: ClashState): BaseRichBolt() {
+class ControlBolt(val managerUrl: String, val clashState: ClashState) : BaseRichBolt() {
     lateinit var context: TopologyContext
     lateinit var collector: OutputCollector
     var statisticsGatherer: StatisticsGatherer? = null
-
 
     override fun prepare(topoConf: MutableMap<String, Any>, context: TopologyContext, collector: OutputCollector) {
         this.context = context
@@ -59,11 +58,11 @@ class ControlBolt(val managerUrl: String, val clashState: ClashState): BaseRichB
     }
 
     private fun executeControlToControl(controlOutput: Triple<Long, String, JsonObject>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     private fun executeControlToAll(controlOutput: Triple<Long, String, JsonObject>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     private fun justSend(messageOutput: Any) {
@@ -79,7 +78,7 @@ class ControlBolt(val managerUrl: String, val clashState: ClashState): BaseRichB
 
     private fun startGathering() {
         val currentGatherer = statisticsGatherer
-        if(currentGatherer != null) {
+        if (currentGatherer != null) {
             println("Warning: previous StatisticsGatherer was not null and still waiting for ${currentGatherer.howManyLeft()} messages.")
         }
 
@@ -94,7 +93,7 @@ class ControlBolt(val managerUrl: String, val clashState: ClashState): BaseRichB
     private fun receiveGathered(taskId: Int, message: InternalStatisticsMessage) {
         LOG.debug("$CONTROL_BOLT_NAME receives Internal Statistics Message")
         statisticsGatherer?.add(taskId, message)
-        if(statisticsGatherer?.finished() == true) {
+        if (statisticsGatherer?.finished() == true) {
             val result = statisticsGatherer?.get()!!
             val jsonResult = createStatisticsMessage(result)
             justSend(StatisticsMessage(JsonObject(), jsonResult))
