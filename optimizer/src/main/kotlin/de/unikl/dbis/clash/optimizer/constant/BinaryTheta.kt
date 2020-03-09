@@ -59,11 +59,11 @@ class BinaryTheta : GlobalStrategy {
 
         // Send tuples for probing
         val probeAEdge = addEdge(inputB, storeA, EdgeType.ALL)
-        val predicateEvaluationA = predicatesForStore(storeA, query.result.binaryPredicates)
+        val predicateEvaluationA = predicatesForStore(storeA, query.result.joinPredicates)
         storeA.addRule(JoinResultRule(probeAEdge, predicateEvaluationA, query.result))
 
         val probeBEdge = addEdge(inputA, storeB, EdgeType.ALL)
-        val predicateEvaluationB = predicatesForStore(storeB, query.result.binaryPredicates)
+        val predicateEvaluationB = predicatesForStore(storeB, query.result.joinPredicates)
         storeB.addRule(JoinResultRule(probeBEdge, predicateEvaluationB, query.result))
 
         physicalGraph.addRelationProducer(query.result, storeA)

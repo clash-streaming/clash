@@ -88,8 +88,7 @@ class QueryBuilder {
             joinPredicates,
             aggregations,
             projections,
-            alias,
-            listOf() // TODO delete me
+            alias
         )
         return Query(relation, inputMap)
     }

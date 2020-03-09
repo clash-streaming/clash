@@ -132,11 +132,11 @@ class Json : CliktCommand() {
         }
 
         fun binaryPredicates(query: Query): JSONArray {
-            return JSONArray(query.result.binaryPredicates.map { it.toString() })
+            return JSONArray(query.result.joinPredicates.map { it.toString() })
         }
 
         fun unaryPredicates(query: Query): JSONArray {
-            return JSONArray(query.result.unaryPredicates.map { it.toString() })
+            return JSONArray(query.result.filters.map { it.toString() })
         }
 
         fun success(parsedQuery: Query) {

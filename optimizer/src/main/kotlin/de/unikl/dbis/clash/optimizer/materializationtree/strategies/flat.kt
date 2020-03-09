@@ -58,5 +58,5 @@ fun createFlatTree(relation: Relation, dataCharacteristics: DataCharacteristics,
         val partitioningAttributes = partitioning[it.inputAliases.toList()] ?: listOf()
         MatSource(it, parallelismFor(it, dataCharacteristics, params.taskCapacity), partitioningAttributes, storageCost)
     }
-    return MaterializationTree(NonMatMultiStream(relation, children, createMultiStreamImpl(children, relation.binaryPredicates, params.probeOrderOptimizationStrategy, dataCharacteristics)))
+    return MaterializationTree(NonMatMultiStream(relation, children, createMultiStreamImpl(children, relation.joinPredicates, params.probeOrderOptimizationStrategy, dataCharacteristics)))
 }

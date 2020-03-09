@@ -52,11 +52,11 @@ class SimilarityOptimizer() : GlobalStrategy {
 
         // Send tuples for probing
         val probeAEdge = addEdge(inputB, storeA, EdgeType.ALL)
-        val predicateEvaluationA = query.result.binaryPredicates.map { GenericBinaryPredicateEvaluation(it) }.toSet()
+        val predicateEvaluationA = query.result.joinPredicates.map { GenericBinaryPredicateEvaluation(it) }.toSet()
         storeA.addRule(JoinResultRule(probeAEdge, predicateEvaluationA, query.result))
 
         val probeBEdge = addEdge(inputA, storeB, EdgeType.ALL)
-        val predicateEvaluationB = query.result.binaryPredicates.map { GenericBinaryPredicateEvaluation(it) }.toSet()
+        val predicateEvaluationB = query.result.joinPredicates.map { GenericBinaryPredicateEvaluation(it) }.toSet()
         storeB.addRule(JoinResultRule(probeBEdge, predicateEvaluationB, query.result))
 
         physicalGraph.addRelationProducer(query.result, storeA)

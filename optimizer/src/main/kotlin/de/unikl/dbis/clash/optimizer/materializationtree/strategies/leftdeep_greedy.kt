@@ -58,11 +58,11 @@ internal fun leastMaterializationGeneralizedLeftDeep(query: Query, dataCharacter
         while (notYetJoinedRelations.isNotEmpty()) {
             val nextRelation = notYetJoinedRelations
                     .filter {
-                        optimizationParameters.crossProductsAllowed || !isCrossProduct(relation.binaryPredicates, joinedRelations, it)
+                        optimizationParameters.crossProductsAllowed || !isCrossProduct(relation.joinPredicates, joinedRelations, it)
                     }
                     .map {
                         Pair(it, joinSize(dataCharacteristics,
-                                it.join(relation.binaryPredicates, *joinedRelations.toTypedArray())))
+                                it.join(relation.joinPredicates, *joinedRelations.toTypedArray())))
                     }.minBy { it.second }!!
 
             joinedRelations += nextRelation.first
@@ -79,7 +79,7 @@ internal fun leastMaterializationGeneralizedLeftDeep(query: Query, dataCharacter
             bestOrder!!,
             dataCharacteristics,
             optimizationParameters,
-            relation.binaryPredicates)
+            relation.joinPredicates)
 
     return MaterializationTree(plan)
 }
@@ -174,7 +174,7 @@ internal fun binaryMat(left: MtNode, right: MtNode, dataCharacteristics: DataCha
             parallelismFor(joinedRelation, dataCharacteristics, optimizationParameters.taskCapacity),
             listOf(), // TODO
             storageCostFor(joinedRelation, dataCharacteristics),
-            createMultiStreamImpl(listOf(left, right), joinedRelation.binaryPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
+            createMultiStreamImpl(listOf(left, right), joinedRelation.joinPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
     )
 }
 
@@ -183,7 +183,7 @@ internal fun binaryNonMat(left: MtNode, right: MtNode, dataCharacteristics: Data
     return NonMatMultiStream(
             joinedRelation,
             listOf(left, right),
-            createMultiStreamImpl(listOf(left, right), joinedRelation.binaryPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
+            createMultiStreamImpl(listOf(left, right), joinedRelation.joinPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
     )
 }
 
@@ -192,7 +192,7 @@ internal fun binaryNonMatGeneralized(left: MtNode, right: Collection<MtNode>, da
     return NonMatMultiStream(
             joinedRelation,
             listOf(left) + right,
-            createMultiStreamImpl(listOf(left) + right, joinedRelation.binaryPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
+            createMultiStreamImpl(listOf(left) + right, joinedRelation.joinPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
     )
 }
 

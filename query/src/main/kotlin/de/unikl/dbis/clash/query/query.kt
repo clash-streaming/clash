@@ -34,7 +34,6 @@ fun relationOf(string: String): Relation {
         listOf(),
         listOf(),
         listOf(),
-        RelationAlias(string),
-        listOf() // TODO delete me
+        RelationAlias(string)
     )
 }

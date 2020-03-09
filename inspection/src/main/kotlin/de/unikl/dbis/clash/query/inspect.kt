@@ -9,7 +9,7 @@ fun Query.inspect(): String {
 fun Relation.inspect(depth: Int = 0): String {
     return """
         BaseRelationName: ${this.inputAliases}
-        UnaryPredicates: ${this.unaryPredicates}
+        UnaryPredicates: ${this.filters}
         Window: ${this.inputs}
     """
 }

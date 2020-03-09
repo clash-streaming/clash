@@ -9,7 +9,7 @@ class ClassicEstimator(val dataCharacteristics: DataCharacteristics) {
     fun estimateSize(relation: Relation): Double {
         val rate = relation.inputAliases.map { dataCharacteristics.getRate(it) }.reduce { acc, rate -> acc * rate }
         val relationPairs = relation.inputAliases.toList().subsetsOfSize(2)
-        val joinSelectivity = relation.binaryPredicates.map { dataCharacteristics.getSelectivity(it) }.fold(1.0) { acc, rate -> acc * rate }
+        val joinSelectivity = relation.joinPredicates.map { dataCharacteristics.getSelectivity(it) }.fold(1.0) { acc, rate -> acc * rate }
 
         return rate * joinSelectivity
     }

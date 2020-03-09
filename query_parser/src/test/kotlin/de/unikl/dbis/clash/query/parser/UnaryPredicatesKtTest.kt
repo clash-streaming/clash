@@ -16,10 +16,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeLessThanConstant(AttributeAccess("r", "x"), 5L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeLessThanConstant(AttributeAccess("r", "x"), 1.582)
         )
     }
@@ -31,10 +31,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeLessThanConstant(AttributeAccess("s", "x"), 3L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeLessThanConstant(AttributeAccess("s", "x"), 3.141)
         )
     }
@@ -46,10 +46,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeLessThanOrEqualConstant(AttributeAccess("r", "x"), 5L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeLessThanOrEqualConstant(AttributeAccess("r", "x"), 1.582)
         )
     }
@@ -61,10 +61,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeLessThanOrEqualConstant(AttributeAccess("s", "x"), 3L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeLessThanOrEqualConstant(AttributeAccess("s", "x"), 3.141)
         )
     }
@@ -76,10 +76,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeGreaterThanConstant(AttributeAccess("r", "x"), 5L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeGreaterThanConstant(AttributeAccess("r", "x"), 1.582)
         )
     }
@@ -91,10 +91,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeGreaterThanConstant(AttributeAccess("s", "x"), 3L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeGreaterThanConstant(AttributeAccess("s", "x"), 3.141)
         )
     }
@@ -106,10 +106,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeGreaterThanOrEqualConstant(AttributeAccess("r", "x"), 5L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeGreaterThanOrEqualConstant(AttributeAccess("r", "x"), 1.582)
         )
     }
@@ -121,10 +121,10 @@ internal class UnaryPredicatesKtTest {
         val qlong = parseQuery(qlongs)
         val qdouble = parseQuery(qdoubles)
 
-        assertThat(qlong.result.unaryPredicates).containsExactly(
+        assertThat(qlong.result.filters).containsExactly(
                 AttributeGreaterThanOrEqualConstant(AttributeAccess("s", "x"), 3L)
         )
-        assertThat(qdouble.result.unaryPredicates).containsExactly(
+        assertThat(qdouble.result.filters).containsExactly(
                 AttributeGreaterThanOrEqualConstant(AttributeAccess("s", "x"), 3.141)
         )
     }

@@ -167,7 +167,7 @@ class TopDownTheta : TreeStrategy() {
         return NonMatMultiStream(
                 query.result,
                 children,
-                createMultiStreamImpl(children, query.result.binaryPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
+                createMultiStreamImpl(children, query.result.joinPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
         )
     }
 
@@ -185,7 +185,7 @@ class TopDownTheta : TreeStrategy() {
                     parallelismFor(childRelation, dataCharacteristics, optimizationParameters.taskCapacity),
                     listOf(),
                     storageCostFor(childRelation, dataCharacteristics),
-                    createMultiStreamImpl(children, query.result.binaryPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
+                    createMultiStreamImpl(children, query.result.joinPredicates, optimizationParameters.probeOrderOptimizationStrategy, dataCharacteristics)
             )
         }
     }
@@ -210,7 +210,7 @@ fun fixInnerPartitioning(matTree: MtNode) {
         for (child in matTree.children) {
             if (child.partitioning.isNotEmpty() || child is MatSource)
                 continue
-            for (predicate in matTree.relation.binaryPredicates) {
+            for (predicate in matTree.relation.joinPredicates) {
                 if (predicate is BinaryEquality) {
                     if (child.relation.inputAliases.contains(predicate.leftAttributeAccess.relationAlias) &&
                             !child.relation.inputAliases.contains(predicate.rightAttributeAccess.relationAlias)) {

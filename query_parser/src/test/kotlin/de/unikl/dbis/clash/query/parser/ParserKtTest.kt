@@ -170,7 +170,7 @@ internal class ParserKtTest {
             WHERE x.a = y.b
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        assertThat(q1.result.binaryPredicates).containsExactly(
+        assertThat(q1.result.joinPredicates).containsExactly(
                 BinaryEquality(AttributeAccess("x", "a"), AttributeAccess("y", "b"))
         )
     }

@@ -21,7 +21,7 @@ internal class LeastIntermediatesProbeOrderTest {
         val nationNode = MatSource(relationOf(TpcHConstants.nation), 1, listOf(), dc.getRate(RelationAlias(TpcHConstants.nation)))
         val regionNode = MatSource(relationOf(TpcHConstants.region), 1, listOf(), dc.getRate(RelationAlias(TpcHConstants.region)))
 
-        val predicates = TpcHOnlyJoins.q2().result.binaryPredicates
+        val predicates = TpcHOnlyJoins.q2().result.joinPredicates
         val nodes = listOf(partNode, partSuppNode, suppNode, nationNode, regionNode)
 
         val result = LeastIntermediatesProbeOrder().optimize(dc, predicates, nodes)

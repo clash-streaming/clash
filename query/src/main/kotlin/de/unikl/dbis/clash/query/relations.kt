@@ -9,33 +9,23 @@ data class Relation(
     val joinPredicates: Collection<BinaryPredicate>,
     val aggregations: Collection<Aggregation>,
     val projections: Collection<Projection>,
-    val alias: RelationAlias,
-    @Deprecated("Use filters or join predicates") val predicates: Collection<Predicate>
+    val alias: RelationAlias
 ) : Serializable {
     val inputAliases: Collection<RelationAlias> get() = inputs.keys
-    @Deprecated("Use filters or join predicates") val unaryPredicates: Collection<UnaryPredicate> get() = predicates.filterIsInstance<UnaryPredicate>()
-    @Deprecated("Use filters or join predicates") val binaryPredicates: Collection<BinaryPredicate> get() = predicates.filterIsInstance<BinaryPredicate>()
 
     /**
      * Creates a new relation as restriction of this one to the given aliases.
      * The output will have all according windows and predicates.
      */
-    fun subRelation(vararg relationAliases: RelationAlias, alias: RelationAlias = RelationAlias(relationAliases.joinToString(","))): Relation {
-        // val newWindows = inputs.filter { relationAliases.contains(it.key) }
-        // val newPredicates: Collection<Predicate> = unaryPredicates.filter { relationAliases.contains(it.relationAlias) } +
-        //         binaryPredicates.filter { relationAliases.contains(it.leftRelationAlias) && relationAliases.contains(it.rightRelationAlias) }
-        // val newAttributeAccesses = extractAttributeAccesses(unaryPredicates + binaryPredicates)
-        // return Relation(newWindows, newPredicates, newAttributeAccesses)
-        return Relation(
+    fun subRelation(vararg relationAliases: RelationAlias, alias: RelationAlias = RelationAlias(relationAliases.joinToString(","))): Relation =
+        Relation(
             inputs.filter { relationAliases.contains(it.key) },
             filters.filter { relationAliases.contains(it.relationAlias) },
             joinPredicates.filter { relationAliases.contains(it.leftRelationAlias) && relationAliases.contains(it.rightRelationAlias) },
-            listOf(), // TODO: Think about that
+            listOf(), // TODO: Think about that: Are aggregations really as easy projectable?
             projections.filter { relationAliases.contains(it.attributeAccess.relationAlias) },
-            alias,
-            listOf() // TODO delete me
+            alias
         )
-    }
 
     /**
      * Creates all base relations from this relation, i.e., the relations that
@@ -48,8 +38,7 @@ data class Relation(
             listOf(),
             aggregations.filter { aggregation -> aggregation.attributeAccess.relationAlias == it.key },
             projections.filter { projection -> projection.attributeAccess.relationAlias == it.key },
-            it.key,
-            listOf() // TODO delete me
+            it.key
         )
     }
 
@@ -66,7 +55,7 @@ data class Relation(
     // TODO adjust to new data structure
     override fun toString(): String {
         val windowPart = inputs.map { "${it.key.inner}${it.value}" }.joinToString(", ", "{", "}")
-        val predicatePart = predicates.joinToString(", ", "{", "}")
+        val predicatePart = (filters + joinPredicates).joinToString(", ", "{", "}")
         return "<$windowPart, $predicatePart>"
     }
 

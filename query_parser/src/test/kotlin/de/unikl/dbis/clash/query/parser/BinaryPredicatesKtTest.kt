@@ -11,7 +11,7 @@ internal class BinaryPredicatesKtTest {
     fun `less-than parsed correctly`() {
         val qs = "SELECT * FROM r, s WHERE r.x < s.y"
         val q = parseQuery(qs)
-        assertThat(q.result.binaryPredicates).containsExactly(
+        assertThat(q.result.joinPredicates).containsExactly(
             BinaryLessThan(AttributeAccess("r", "x"), AttributeAccess("s", "y"))
         )
     }
@@ -20,7 +20,7 @@ internal class BinaryPredicatesKtTest {
     fun `less-than-or-equal parsed correctly`() {
         val qs = "SELECT * FROM r, s WHERE r.x <= s.y"
         val q = parseQuery(qs)
-        assertThat(q.result.binaryPredicates).containsExactly(
+        assertThat(q.result.joinPredicates).containsExactly(
                 BinaryLessThanOrEqual(AttributeAccess("r", "x"), AttributeAccess("s", "y"))
         )
     }
@@ -29,7 +29,7 @@ internal class BinaryPredicatesKtTest {
     fun `greater-than parsed correctly`() {
         val qs = "SELECT * FROM r, s WHERE r.x > s.y"
         val q = parseQuery(qs)
-        assertThat(q.result.binaryPredicates).containsExactly(
+        assertThat(q.result.joinPredicates).containsExactly(
                 BinaryLessThan(AttributeAccess("s", "y"), AttributeAccess("r", "x"))
         )
     }
@@ -38,7 +38,7 @@ internal class BinaryPredicatesKtTest {
     fun `greater-than-or-equal parsed correctly`() {
         val qs = "SELECT * FROM r, s WHERE r.x >= s.y"
         val q = parseQuery(qs)
-        assertThat(q.result.binaryPredicates).containsExactly(
+        assertThat(q.result.joinPredicates).containsExactly(
                 BinaryLessThanOrEqual(AttributeAccess("s", "y"), AttributeAccess("r", "x"))
         )
     }

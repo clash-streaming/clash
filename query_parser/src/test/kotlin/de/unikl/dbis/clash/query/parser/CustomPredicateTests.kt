@@ -14,7 +14,7 @@ internal class CustomPredicateTests {
             WHERE similar(x, y)
         """.trimIndent()
         val q1 = parseQuery(qs1)
-        Assertions.assertThat(q1.result.binaryPredicates).containsExactly(
+        Assertions.assertThat(q1.result.joinPredicates).containsExactly(
                 Similarity(RelationAlias("x"), RelationAlias("y"))
         )
     }

@@ -68,12 +68,11 @@ fun parseQuery(query: String): Query {
     val attributeAccessList = extractAttributeAccesses(predicates)
     val rel = Relation(
             aliases,
-        predicates.filterIsInstance<UnaryPredicate>(), // TODO
-        predicates.filterIsInstance<BinaryPredicate>(), // TODO
+        predicates.filterIsInstance<UnaryPredicate>(),
+        predicates.filterIsInstance<BinaryPredicate>(),
         listOf(), // TODO
         listOf(), // TODO
-        RelationAlias("_result"),
-            predicates // TODO replace me and insert filters and joinPredicates accordingly
+        RelationAlias("_result")
     )
     return Query(rel, inputMap)
 }
