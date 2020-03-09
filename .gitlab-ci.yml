@@ -12,15 +12,11 @@ stages:
   - test
 
 lint:
-  tags:
-    - docker
   stage: test
   script:
     - ./gradlew check
 
 tests:
-  tags:
-    - docker
   stage: test
   script:
     - ./gradlew test
