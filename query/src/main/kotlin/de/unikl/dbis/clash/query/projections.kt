@@ -16,7 +16,7 @@ data class Projection(val attributeAccess: AttributeAccess, val alias: String) {
                 return Projection(attributeAccess, alias)
             }
             if (string.matches(projectionWithoutAliasRegex)) {
-                val matchResult = projectionWithAliasRegex.find(string)!!
+                val matchResult = projectionWithoutAliasRegex.find(string)!!
                 val relationAlias = matchResult.groupValues[0]
                 val attribute = matchResult.groupValues[1]
                 val attributeAccess = AttributeAccess(relationAlias, attribute)

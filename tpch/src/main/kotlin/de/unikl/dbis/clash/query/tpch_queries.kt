@@ -1,5 +1,7 @@
 package de.unikl.dbis.clash.query
 
+import de.unikl.dbis.clash.query.parser.parseJoinPredicate
+
 object TpcHConstants {
     const val part = "part"
     const val supplier = "supplier"
@@ -31,10 +33,10 @@ object TpcHJoinsAndFilters {
                 .from(TpcHConstants.partsupp)
                 .from(TpcHConstants.nation)
                 .from(TpcHConstants.region)
-                .where(BinaryPredicate.fromString("${TpcHConstants.part}.${TpcHConstants.partkey} = ${TpcHConstants.partsupp}.${TpcHConstants.partkey}"))
-                .where(BinaryPredicate.fromString("${TpcHConstants.partsupp}.${TpcHConstants.suppkey} = ${TpcHConstants.supplier}.${TpcHConstants.suppkey}"))
-                .where(BinaryPredicate.fromString("${TpcHConstants.supplier}.${TpcHConstants.nationkey} = ${TpcHConstants.nation}.${TpcHConstants.nationkey}"))
-                .where(BinaryPredicate.fromString("${TpcHConstants.nation}.${TpcHConstants.regionkey} = ${TpcHConstants.region}.${TpcHConstants.regionkey}"))
+                .where(parseJoinPredicate("${TpcHConstants.part}.${TpcHConstants.partkey} = ${TpcHConstants.partsupp}.${TpcHConstants.partkey}")!!)
+                .where(parseJoinPredicate("${TpcHConstants.partsupp}.${TpcHConstants.suppkey} = ${TpcHConstants.supplier}.${TpcHConstants.suppkey}")!!)
+                .where(parseJoinPredicate("${TpcHConstants.supplier}.${TpcHConstants.nationkey} = ${TpcHConstants.nation}.${TpcHConstants.nationkey}")!!)
+                .where(parseJoinPredicate("${TpcHConstants.nation}.${TpcHConstants.regionkey} = ${TpcHConstants.region}.${TpcHConstants.regionkey}")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -53,8 +55,8 @@ object TpcHJoinsAndFilters {
         queryBuilder.from("customer")
                 .from("orders")
                 .from("lineitem")
-                .where(BinaryPredicate.fromString("customer.custkey = orders.custkey"))
-                .where(BinaryPredicate.fromString("orders.orderkey = lineitem.orderkey"))
+                .where(parseJoinPredicate("customer.custkey = orders.custkey")!!)
+                .where(parseJoinPredicate("orders.orderkey = lineitem.orderkey")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -76,12 +78,12 @@ object TpcHJoinsAndFilters {
                 .from("supplier")
                 .from("nation")
                 .from("region")
-                .where(BinaryPredicate.fromString("customer.custkey = orders.custkey"))
-                .where(BinaryPredicate.fromString("lineitem.orderkey = orders.orderkey"))
-                .where(BinaryPredicate.fromString("lineitem.suppkey = supplier.suppkey"))
-                .where(BinaryPredicate.fromString("customer.nationkey = supplier.nationkey"))
-                .where(BinaryPredicate.fromString("supplier.nationkey = nation.nationkey"))
-                .where(BinaryPredicate.fromString("nation.regionkey = region.regionkey"))
+                .where(parseJoinPredicate("customer.custkey = orders.custkey")!!)
+                .where(parseJoinPredicate("lineitem.orderkey = orders.orderkey")!!)
+                .where(parseJoinPredicate("lineitem.suppkey = supplier.suppkey")!!)
+                .where(parseJoinPredicate("customer.nationkey = supplier.nationkey")!!)
+                .where(parseJoinPredicate("supplier.nationkey = nation.nationkey")!!)
+                .where(parseJoinPredicate("nation.regionkey = region.regionkey")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -99,8 +101,8 @@ object TpcHJoinsAndFilters {
         queryBuilder.from("partsupp")
                 .from("supplier")
                 .from("nation")
-                .where(BinaryPredicate.fromString("partsupp.suppkey = supplier.suppkey"))
-                .where(BinaryPredicate.fromString("supplier.nationkey = nation.nationkey"))
+                .where(parseJoinPredicate("partsupp.suppkey = supplier.suppkey")!!)
+                .where(parseJoinPredicate("supplier.nationkey = nation.nationkey")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -120,10 +122,10 @@ object TpcHOnlyJoins {
                 .from(TpcHConstants.partsupp)
                 .from(TpcHConstants.nation)
                 .from(TpcHConstants.region)
-                .where(BinaryPredicate.fromString("part.partkey = partsupp.partkey"))
-                .where(BinaryPredicate.fromString("partsupp.suppkey = supplier.suppkey"))
-                .where(BinaryPredicate.fromString("supplier.nationkey = nation.nationkey"))
-                .where(BinaryPredicate.fromString("nation.regionkey = region.regionkey"))
+                .where(parseJoinPredicate("part.partkey = partsupp.partkey")!!)
+                .where(parseJoinPredicate("partsupp.suppkey = supplier.suppkey")!!)
+                .where(parseJoinPredicate("supplier.nationkey = nation.nationkey")!!)
+                .where(parseJoinPredicate("nation.regionkey = region.regionkey")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -138,8 +140,8 @@ object TpcHOnlyJoins {
         queryBuilder.from("customer")
                 .from("orders")
                 .from("lineitem")
-                .where(BinaryPredicate.fromString("customer.custkey = orders.custkey"))
-                .where(BinaryPredicate.fromString("orders.orderkey = lineitem.orderkey"))
+                .where(parseJoinPredicate("customer.custkey = orders.custkey")!!)
+                .where(parseJoinPredicate("orders.orderkey = lineitem.orderkey")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -157,13 +159,13 @@ object TpcHOnlyJoins {
                 .from("supplier")
                 .from("nation")
                 .from("region")
-                .where(BinaryPredicate.fromString("customer.custkey = orders.custkey"))
-                .where(BinaryPredicate.fromString("lineitem.orderkey = orders.orderkey"))
-                .where(BinaryPredicate.fromString("lineitem.suppkey = supplier.suppkey"))
-                .where(BinaryPredicate.fromString("customer.nationkey = supplier.nationkey"))
-                .where(BinaryPredicate.fromString("supplier.nationkey = nation.nationkey"))
-                .where(BinaryPredicate.fromString("customer.nationkey = nation.nationkey"))
-                .where(BinaryPredicate.fromString("nation.regionkey = region.regionkey"))
+                .where(parseJoinPredicate("customer.custkey = orders.custkey")!!)
+                .where(parseJoinPredicate("lineitem.orderkey = orders.orderkey")!!)
+                .where(parseJoinPredicate("lineitem.suppkey = supplier.suppkey")!!)
+                .where(parseJoinPredicate("customer.nationkey = supplier.nationkey")!!)
+                .where(parseJoinPredicate("supplier.nationkey = nation.nationkey")!!)
+                .where(parseJoinPredicate("customer.nationkey = nation.nationkey")!!)
+                .where(parseJoinPredicate("nation.regionkey = region.regionkey")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -178,8 +180,8 @@ object TpcHOnlyJoins {
         queryBuilder.from("partsupp")
                 .from("supplier")
                 .from("nation")
-                .where(BinaryPredicate.fromString("partsupp.suppkey = supplier.suppkey"))
-                .where(BinaryPredicate.fromString("supplier.nationkey = nation.nationkey"))
+                .where(parseJoinPredicate("partsupp.suppkey = supplier.suppkey")!!)
+                .where(parseJoinPredicate("supplier.nationkey = nation.nationkey")!!)
                 .to("result")
         return queryBuilder.build()
     }
@@ -200,11 +202,10 @@ object TpchContinuous {
     fun q1(): Query {
         val queryBuilder = QueryBuilder()
         queryBuilder.from("lineitem")
-            .where("lineitem.shipdate <= date '1998-12-01'") // TODO add interval subtraction
-            .groupBy("returnflag", "linestatus")
-            .select("returnflag")
-            .select("linestatus")
-            .select("count(*)")
+            .where("lineitem.shipdate <= '1998-12-01'") // TODO add interval subtraction and date operator
+            .groupBy(listOf("lineitem.returnflag", "lineitem.linestatus"), listOf("sum(lineitem.quantity) sum_qty", "count(lineitem.*) count_order"))
+            .select("lineitem.returnflag")
+            .select("lineitem.linestatus")
         return queryBuilder.build()
     }
 }

@@ -32,18 +32,6 @@ interface BinaryPredicate : Predicate, Serializable {
         fun toString(predicates: Set<BinaryPredicate>): String {
             return predicates.joinToString(", ")
         }
-
-        @Deprecated("Use fragment parser")
-        fun fromString(joinPredicate: String): BinaryPredicate {
-            val attributePairEqualityRegex = "(\\w+)\\.(\\w+)\\s*=\\s*(\\w+)\\.(\\w+)".toRegex()
-
-            if (joinPredicate.matches(attributePairEqualityRegex)) {
-                val matchResult = attributePairEqualityRegex.find(joinPredicate)!!
-                val (leftRelation, leftAttr, rightRelation, rightAttr) = matchResult.destructured
-                return BinaryEquality(AttributeAccess(leftRelation, leftAttr), AttributeAccess(rightRelation, rightAttr))
-            }
-            throw RuntimeException("Did not understand join predicate '$joinPredicate'")
-        }
     }
 }
 

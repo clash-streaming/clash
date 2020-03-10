@@ -1,5 +1,8 @@
 package de.unikl.dbis.clash.query
 
+import de.unikl.dbis.clash.query.parser.parsePredicate
+import java.lang.RuntimeException
+
 class QueryBuilder {
     internal val from: MutableMap<RelationAlias, WindowDefinition> = mutableMapOf()
     internal val to: MutableList<String> = mutableListOf()
@@ -57,8 +60,13 @@ class QueryBuilder {
         return this
     }
 
-    fun where(joinPredicate: String): QueryBuilder {
-        return this.where(BinaryPredicate.fromString(joinPredicate))
+    fun where(predicate: String): QueryBuilder {
+        val parsedPredicate = parsePredicate(predicate)
+        return when (parsedPredicate) {
+            is BinaryPredicate -> where(parsedPredicate as BinaryPredicate)
+            is UnaryPredicate -> where(parsedPredicate as UnaryPredicate)
+            else -> { throw RuntimeException("Could not parse where predicate `$predicate`") }
+        }
     }
 
     fun select(string: String): QueryBuilder {

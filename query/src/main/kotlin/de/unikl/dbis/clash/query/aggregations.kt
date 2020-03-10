@@ -1,5 +1,7 @@
 package de.unikl.dbis.clash.query
 
+import java.lang.RuntimeException
+
 /**
  *
  */
@@ -8,9 +10,16 @@ data class Aggregation(
     val aggregationInstructions: List<AggregationOperation>
 ) {
     companion object {
+
         fun fromStrings(group: List<String>, agg: List<String>): Aggregation {
-            val groupAttributeAccesses = group.map { AttributeAccess(it) }
-            val aggregations = agg.map { AggregationOperation.fromString(it)!! }
+            val groupAttributeAccesses = group.map {
+                AttributeAccess(it)
+            }
+            val aggregations = agg.map {
+                val result = AggregationOperation.fromString(it)
+                if (result == null) throw RuntimeException("Could not understand aggregation `$it`")
+                result!!
+            }
             return Aggregation(groupAttributeAccesses, aggregations)
         }
     }
@@ -18,7 +27,7 @@ data class Aggregation(
 
 open class AggregationOperation(val attributeAccess: AttributeAccess, val alias: String) {
     companion object {
-        val aggregationnWithAliasRegex = "(\\w+)\\((\\w+)\\.(\\w+)\\)\\s+(\\w+)".toRegex()
+        val aggregationnWithAliasRegex = "(\\w+)\\((\\w+)\\.(\\w+|\\*)\\)\\s+(\\w+)".toRegex()
         val aggregationWithoutAliasRegex = "(\\w+)\\((\\w+)\\.(\\w+)\\)".toRegex()
 
         fun fromString(string: String): AggregationOperation? {
@@ -32,6 +41,7 @@ open class AggregationOperation(val attributeAccess: AttributeAccess, val alias:
                 return when (aggregationString.toLowerCase()) {
                     "sum" -> AggregationSum(attributeAccess, alias)
                     "avg" -> AggregationAverage(attributeAccess, alias)
+                    "count" -> AggregationCount(attributeAccess, alias)
                     else -> null
                 }
             }
@@ -61,3 +71,4 @@ open class AggregationOperation(val attributeAccess: AttributeAccess, val alias:
 
 class AggregationSum(attributeAccess: AttributeAccess, alias: String) : AggregationOperation(attributeAccess, alias)
 class AggregationAverage(attributeAccess: AttributeAccess, alias: String) : AggregationOperation(attributeAccess, alias)
+class AggregationCount(attributeAccess: AttributeAccess, alias: String) : AggregationOperation(attributeAccess, alias)
