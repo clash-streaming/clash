@@ -15,7 +15,10 @@ import de.unikl.dbis.clash.query.UnaryNotLike
 import de.unikl.dbis.clash.query.UnaryPredicate
 
 fun parsePredicate(s: String): Predicate? {
-    return (parseUnaryPredicate(s) ?: parseBinaryPredicate(s)) as Predicate? ?: parseOrList(s)
+    return (parseUnaryPredicate(s)
+        ?: parseJoinPredicate(s)) as Predicate? ?: parseOrList(
+        s
+    )
 }
 
 fun parseUnaryPredicate(s: String): UnaryPredicate? {
@@ -175,7 +178,7 @@ fun parseUnaryPredicate(s: String): UnaryPredicate? {
         ?: parseAttributeGreaterThanOrEqualConstantString(s)
 }
 
-fun parseBinaryPredicate(s: String): BinaryPredicate? {
+fun parseJoinPredicate(s: String): BinaryPredicate? {
     val binaryEqualityRegex = "(\\w+)\\.(\\w+)\\s*=\\s*(\\w+)\\.(\\w+)".toRegex()
     fun parseBinaryEquality(s: String): BinaryEquality? {
         if (s.matches(binaryEqualityRegex)) {

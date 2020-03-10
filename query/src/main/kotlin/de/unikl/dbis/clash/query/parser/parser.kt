@@ -57,7 +57,10 @@ fun parseQuery(query: String): Query {
     visitor.verify()
 
     val selects = extractSelects(visitor.selectItems!!)
-    val froms = extractFrom(visitor.fromItem!!, if (visitor.joins == null) listOf() else visitor.joins!!)
+    val froms = extractFrom(
+        visitor.fromItem!!,
+        if (visitor.joins == null) listOf() else visitor.joins!!
+    )
     val aliases = froms.map { it.relationAlias to it.window }.toMap()
     val predicates = extractPredicates(visitor.where)
     val associated = froms.associate { it.relationAlias to it.inputName }

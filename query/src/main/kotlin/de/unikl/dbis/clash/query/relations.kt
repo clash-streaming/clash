@@ -36,7 +36,7 @@ data class Relation(
             mapOf(it.key to it.value),
             filters.filter { predicate -> predicate.relationAlias == it.key },
             listOf(),
-            aggregations.filter { aggregation -> aggregation.attributeAccess.relationAlias == it.key },
+            aggregations.filter { aggregation -> aggregation.attributeAccesses.all { access -> access.relationAlias == it.key } },
             projections.filter { projection -> projection.attributeAccess.relationAlias == it.key },
             it.key
         )
@@ -89,5 +89,3 @@ fun isCrossProduct(binaryPredicates: Collection<BinaryPredicate>, relations1: Co
     val relationAliases2 = relations2.flatMap { it.inputAliases }
     return isCrossProductAlias(binaryPredicates, relationAliases1, relationAliases2)
 }
-
-data class Aggregation(val attributeAccess: AttributeAccess, val alias: String)

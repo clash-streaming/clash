@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test
 internal class ClassicEstimatorTest {
     @Test
     fun `size estimation for three way full-history is correct`() {
-        val q = parseQuery("Select * from r, s, t where r.a = s.a and t.b = s.b")
+        val q =
+            parseQuery("Select * from r, s, t where r.a = s.a and t.b = s.b")
         val r = RelationAlias("r")
         val s = RelationAlias("s")
         val t = RelationAlias("t")

@@ -29,9 +29,16 @@ import net.sf.jsqlparser.schema.Column
  * If it is something else, an exception is thrown.
  */
 fun isUnary(expr: BinaryExpression): Boolean {
-    val potentialUnary = (isConstant(expr.leftExpression) && isColumn(expr.rightExpression)) ||
-            (isConstant(expr.rightExpression) && isColumn(expr.leftExpression))
-    if (isConstant(expr.leftExpression) && isConstant(expr.rightExpression)) {
+    val potentialUnary = (isConstant(expr.leftExpression) && isColumn(
+        expr.rightExpression
+    )) ||
+            (isConstant(expr.rightExpression) && isColumn(
+                expr.leftExpression
+            ))
+    if (isConstant(expr.leftExpression) && isConstant(
+            expr.rightExpression
+        )
+    ) {
         throw QueryParseException("Predicate with both operands being constant is not allowed.")
     }
     return potentialUnary

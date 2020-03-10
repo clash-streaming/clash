@@ -61,13 +61,20 @@ class QueryBuilder {
         return this.where(BinaryPredicate.fromString(joinPredicate))
     }
 
+    fun select(string: String): QueryBuilder {
+        this.projections.add(Projection.fromString(string)!!) // todo check errors
+        return this
+    }
+
     fun select(projection: Projection): QueryBuilder {
         this.projections.add(projection)
         return this
     }
 
-    fun groupBy(aggregation: Aggregation): QueryBuilder {
-        this.aggregations.add(aggregation)
+    fun groupBy(group: String, agg: String) = groupBy(listOf(group), listOf(agg))
+
+    fun groupBy(group: List<String>, agg: List<String>): QueryBuilder {
+        this.aggregations.add(Aggregation.fromStrings(group, agg))
         return this
     }
 

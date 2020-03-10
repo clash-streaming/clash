@@ -56,7 +56,11 @@ fun extractFrom(
             val rawAlias = tableFunction.alias?.name ?: tableFunction.function.name
             val alias = RelationAlias(rawAlias)
             val inputName = InputName(tableFunction.function.name)
-            fromElements += BasicFrom(inputName, extractParameters(tableFunction.function.parameters), alias)
+            fromElements += BasicFrom(
+                inputName,
+                extractParameters(tableFunction.function.parameters),
+                alias
+            )
         }
     }
     stmt.accept(JoinVisitor())

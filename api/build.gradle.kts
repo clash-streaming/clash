@@ -8,7 +8,6 @@ dependencies {
     implementation(project(":physical_graph"))
     implementation(project(":postgres"))
     implementation(project(":query"))
-    implementation(project(":query_parser"))
     implementation(project(":storm"))
     implementation(project(":tpch"))
 

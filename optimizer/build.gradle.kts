@@ -5,7 +5,7 @@ dependencies {
     implementation(project(":physical_graph"))
     implementation(project(":query"))
 
-    testImplementation(project(":query_parser"))
+    testImplementation(project(":query"))
     testImplementation(project(":tpch"))
 }
 

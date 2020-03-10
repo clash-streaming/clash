@@ -198,14 +198,13 @@ object TpchContinuous {
      * DELTA is randomly selected within [60..120].
      */
     fun q1(): Query {
-        // val queryBuilder = QueryBuilder()
-        // queryBuilder.from("lineitem")
-        //     .where("lineitem.shipdate <= date '1998-12-01'") // TODO add interval subtraction
-        //     .groupBy("returnflag", "linestatus")
-        //     .select("returnflag")
-        //     .select("linestatus")
-        //     .select("count(*)")
-        // return queryBuilder.build()
-        TODO()
+        val queryBuilder = QueryBuilder()
+        queryBuilder.from("lineitem")
+            .where("lineitem.shipdate <= date '1998-12-01'") // TODO add interval subtraction
+            .groupBy("returnflag", "linestatus")
+            .select("returnflag")
+            .select("linestatus")
+            .select("count(*)")
+        return queryBuilder.build()
     }
 }

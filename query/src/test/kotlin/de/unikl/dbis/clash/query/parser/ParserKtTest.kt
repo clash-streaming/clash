@@ -159,7 +159,8 @@ internal class ParserKtTest {
             FROM x
             WHERE a = 'foo'
         """.trimIndent()
-        assertThatThrownBy { parseQuery(qs1) }.isInstanceOf(QueryParseException::class.java)
+        assertThatThrownBy { parseQuery(qs1) }.isInstanceOf(
+            QueryParseException::class.java)
     }
 
     @Test
@@ -182,7 +183,8 @@ internal class ParserKtTest {
             FROM x, y
             WHERE a = y.b
         """.trimIndent()
-        assertThatThrownBy { parseQuery(qs1) }.isInstanceOf(QueryParseException::class.java)
+        assertThatThrownBy { parseQuery(qs1) }.isInstanceOf(
+            QueryParseException::class.java)
     }
 
     @Test
@@ -192,7 +194,8 @@ internal class ParserKtTest {
             FROM x, y
             WHERE x.a = b
         """.trimIndent()
-        assertThatThrownBy { parseQuery(qs1) }.isInstanceOf(QueryParseException::class.java)
+        assertThatThrownBy { parseQuery(qs1) }.isInstanceOf(
+            QueryParseException::class.java)
     }
 
     @Test
@@ -242,16 +245,19 @@ internal class ParserKtTest {
     @Test
     fun `query that references in where clause non introduced alias is rejected`() {
         val q1 = """SELECT * FROM x xa, y ya WHERE xa.foo = za.bar"""
-        assertThatThrownBy { parseQuery(q1) }.isInstanceOf(QueryParseException::class.java)
+        assertThatThrownBy { parseQuery(q1) }.isInstanceOf(
+            QueryParseException::class.java)
 
         val q2 = """SELECT * FROM x xa, y ya WHERE za.foo = 19"""
-        assertThatThrownBy { parseQuery(q2) }.isInstanceOf(QueryParseException::class.java)
+        assertThatThrownBy { parseQuery(q2) }.isInstanceOf(
+            QueryParseException::class.java)
     }
 
     @Test
     fun `query that references in select clause non introduced alias is rejected`() {
         val q = """SELECT xa.foo, za.baz FROM x xa, y ya WHERE xa.foo = ya.bar"""
-        assertThatThrownBy { parseQuery(q) }.isInstanceOf(QueryParseException::class.java)
+        assertThatThrownBy { parseQuery(q) }.isInstanceOf(
+            QueryParseException::class.java)
     }
 
     @Test

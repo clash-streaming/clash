@@ -24,9 +24,6 @@ data class AttributeAccess(val relationAlias: RelationAlias, val attribute: Attr
     }
 }
 
-typealias ProjectionList = List<Projection>
-data class Projection(val attributeAccess: AttributeAccess, val alias: String)
-
 fun relationOf(string: String): Relation {
     return Relation(
         mapOf(RelationAlias(string) to WindowDefinition.infinite()),

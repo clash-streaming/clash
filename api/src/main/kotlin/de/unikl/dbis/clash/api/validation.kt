@@ -17,6 +17,7 @@ import de.unikl.dbis.clash.query.InputName
 import de.unikl.dbis.clash.query.Query
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.query.TpcHOnlyJoins
+import de.unikl.dbis.clash.query.TpchContinuous
 import de.unikl.dbis.clash.query.parser.parseQuery
 import de.unikl.dbis.clash.storm.bolts.CommonSinkI
 import de.unikl.dbis.clash.storm.bolts.FileSinkBolt
@@ -47,6 +48,7 @@ class Validate : CommonCLI(help = "Validate certain scenarios") {
             "rst1" -> Scenario.rst1()
             "tpchq3j" -> Scenario.tpchq3j()
             "similarity1" -> Scenario.similarity1()
+            "tpchq1" -> Scenario.tpchq1()
             else -> throw UnknownScenarioException(scenarioName)
         }
         runLocalCluster(scenario)
@@ -95,7 +97,7 @@ data class Scenario(
     companion object {
         fun rsTheta1(): Scenario {
             return Scenario(
-                    parseQuery("SELECT * FROM r, s WHERE r.x < s.y"),
+                parseQuery("SELECT * FROM r, s WHERE r.x < s.y"),
                     AllCross(),
                     GlobalStrategyRegistry.initialize("BinaryTheta"),
                     OptimizationParameters(),
@@ -114,7 +116,7 @@ data class Scenario(
 
         fun rst1(): Scenario {
             return Scenario(
-                    parseQuery("SELECT * FROM r, s, t WHERE r.x = s.x AND s.y = t.y"),
+                parseQuery("SELECT * FROM r, s, t WHERE r.x = s.x AND s.y = t.y"),
                     AllCross(),
                     GlobalStrategyRegistry.initialize(),
                     OptimizationParameters(),
@@ -157,7 +159,7 @@ data class Scenario(
 
         fun similarity1(): Scenario {
             return Scenario(
-                    parseQuery("SELECT * FROM input in1, input in2 WHERE similar(in1, in2)"),
+                parseQuery("SELECT * FROM input in1, input in2 WHERE similar(in1, in2)"),
                     AllCross(),
                     GlobalStrategyRegistry.initialize("Similarity"),
                     OptimizationParameters(),
@@ -173,6 +175,23 @@ data class Scenario(
                     ),
                     "validation/similarity1_result.json",
                     "validation/similarity1_expected.json"
+            )
+        }
+
+        fun tpchq1(): Scenario {
+            return Scenario(
+                TpchContinuous.q1(),
+                AllCross(),
+                GlobalStrategyRegistry.initialize("NaiveSingleInputAggregation"),
+                OptimizationParameters(),
+                OutsideInterface(mapOf(
+                    InputName("input") to JsonFileSpout(InputName("input"), RelationAlias("input"), "validation/tpchq1_lineitem")
+                ),
+                    FileSinkBolt("output", "valudation/tpchq1_result.json")
+                ),
+                mapOf(RelationAlias("input") to InputName("input")),
+                "validation/tpchq1_result.json",
+                "validation/tpchq1_expected.json"
             )
         }
     }
