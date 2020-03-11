@@ -1,6 +1,7 @@
 package de.unikl.dbis.clash.storm.builder
 
 import de.unikl.dbis.clash.ClashConfig
+import de.unikl.dbis.clash.physical.AggregationStore
 import de.unikl.dbis.clash.physical.ControlInRule
 import de.unikl.dbis.clash.physical.ControlOutRule
 import de.unikl.dbis.clash.physical.Controller
@@ -13,6 +14,7 @@ import de.unikl.dbis.clash.physical.PhysicalGraph
 import de.unikl.dbis.clash.physical.RelationReceiveRule
 import de.unikl.dbis.clash.physical.RelationSendRule
 import de.unikl.dbis.clash.physical.Reporter
+import de.unikl.dbis.clash.physical.SelectProjectNode
 import de.unikl.dbis.clash.physical.Sink
 import de.unikl.dbis.clash.physical.Spout
 import de.unikl.dbis.clash.physical.Store
@@ -29,6 +31,8 @@ class StormPhysicalGraph(internal var dispatcher: Dispatcher, internal var sink:
     internal var controllerInput: ControllerInput? = null
     internal var tickSpout: TickSpout? = null
     internal val relationStores = mutableMapOf<Relation, Store>()
+    internal val aggregationStores = mutableListOf<AggregationStore>()
+    internal val selectProjectNodes = mutableListOf<SelectProjectNode>()
 
     fun streamNodes(): Collection<Node> {
         return spouts + listOf()
@@ -58,6 +62,7 @@ class PhysicalGraphEnhancer(
     fun enhance(): StormPhysicalGraph {
         buildSpouts()
         buildDispatcher()
+        copySelectProjectNodes()
         copyStores()
         buildSink()
 
@@ -107,6 +112,21 @@ class PhysicalGraphEnhancer(
         }
     }
 
+    private fun copySelectProjectNodes() {
+        val dispatcher = stormPhysicalGraph.dispatcher
+
+        for (spNode in originalGraph.selectProjectNodes) {
+            stormPhysicalGraph.selectProjectNodes.add(spNode)
+            for ((oldLabel, node) in spNode.incomingEdges) {
+                if (node is InputStub) {
+                    val newLabel = addEdge(dispatcher, spNode, oldLabel.edgeType)
+                    dispatcher.replaceOutgoingEdge(oldLabel, newLabel)
+                    spNode.replaceIncomingEdge(oldLabel, newLabel)
+                }
+            }
+        }
+    }
+
     private fun copyStores() {
         val dispatcher = stormPhysicalGraph.dispatcher
 
@@ -120,6 +140,18 @@ class PhysicalGraphEnhancer(
                     // TODO maybe                     dispatcher.outgoingEdges[newLabel] = store
                     dispatcher.replaceOutgoingEdge(oldLabel, newLabel)
                     store.replaceIncomingEdge(oldLabel, newLabel)
+                }
+            }
+        }
+
+        for (aggregationStore in originalGraph.aggregationStores) {
+            stormPhysicalGraph.aggregationStores.add(aggregationStore)
+
+            for ((oldLabel, node) in aggregationStore.incomingEdges.toMap()) {
+                if (node is InputStub) {
+                    val newLabel = addEdge(dispatcher, aggregationStore, oldLabel.edgeType)
+                    dispatcher.replaceOutgoingEdge(oldLabel, newLabel)
+                    aggregationStore.replaceIncomingEdge(oldLabel, newLabel)
                 }
             }
         }

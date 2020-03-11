@@ -223,16 +223,15 @@ class SelectProjectRule(
 }
 
 class AggregateRule(
-    val groupBy: List<AttributeAccess>,
-    val aggregate: List<Aggregation>,
+    val aggregates: List<Aggregation>,
     override val incomingEdgeLabel: EdgeLabel,
     override val outgoingEdgeLabel: EdgeLabel
 ) : InRule, OutRule {
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
-        return AggregateRule(groupBy, aggregate, newLabel, outgoingEdgeLabel)
+        return AggregateRule(aggregates, newLabel, outgoingEdgeLabel)
     }
     override fun replaceOutgoingEdgeLabel(newLabel: EdgeLabel): OutRule {
-        return AggregateRule(groupBy, aggregate, incomingEdgeLabel, newLabel)
+        return AggregateRule(aggregates, incomingEdgeLabel, newLabel)
     }
 }
 

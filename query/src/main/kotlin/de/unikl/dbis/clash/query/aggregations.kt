@@ -1,5 +1,6 @@
 package de.unikl.dbis.clash.query
 
+import java.io.Serializable
 import java.lang.RuntimeException
 
 /**
@@ -8,7 +9,7 @@ import java.lang.RuntimeException
 data class Aggregation(
     val attributeAccesses: List<AttributeAccess>,
     val aggregationInstructions: List<AggregationOperation>
-) {
+) : Serializable {
     companion object {
 
         fun fromStrings(group: List<String>, agg: List<String>): Aggregation {
@@ -25,7 +26,7 @@ data class Aggregation(
     }
 }
 
-open class AggregationOperation(val attributeAccess: AttributeAccess, val alias: String) {
+open class AggregationOperation(val attributeAccess: AttributeAccess, val alias: String) : Serializable {
     companion object {
         val aggregationnWithAliasRegex = "(\\w+)\\((\\w+)\\.(\\w+|\\*)\\)\\s+(\\w+)".toRegex()
         val aggregationWithoutAliasRegex = "(\\w+)\\((\\w+)\\.(\\w+)\\)".toRegex()

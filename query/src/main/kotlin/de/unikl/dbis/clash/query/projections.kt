@@ -1,7 +1,9 @@
 package de.unikl.dbis.clash.query
 
+import java.io.Serializable
+
 typealias ProjectionList = List<Projection>
-data class Projection(val attributeAccess: AttributeAccess, val alias: String) {
+data class Projection(val attributeAccess: AttributeAccess, val alias: String) : Serializable {
     companion object {
         val projectionWithAliasRegex = "(\\w+)\\.(\\w+)\\s+(\\w+)".toRegex()
         val projectionWithoutAliasRegex = "(\\w+)\\.(\\w+)".toRegex()

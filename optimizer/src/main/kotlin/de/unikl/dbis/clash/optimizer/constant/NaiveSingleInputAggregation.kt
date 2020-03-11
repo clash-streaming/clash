@@ -4,8 +4,11 @@ import de.unikl.dbis.clash.datacharacteristics.DataCharacteristics
 import de.unikl.dbis.clash.optimizer.GlobalStrategy
 import de.unikl.dbis.clash.optimizer.OptimizationParameters
 import de.unikl.dbis.clash.optimizer.OptimizationResult
+import de.unikl.dbis.clash.optimizer.emptyCost
+import de.unikl.dbis.clash.physical.AggregateRule
 import de.unikl.dbis.clash.physical.AggregationStore
 import de.unikl.dbis.clash.physical.EdgeType
+import de.unikl.dbis.clash.physical.OutputStub
 import de.unikl.dbis.clash.physical.PhysicalGraph
 import de.unikl.dbis.clash.physical.RelationSendRule
 import de.unikl.dbis.clash.physical.SelectProjectNode
@@ -55,7 +58,14 @@ class NaiveSingleInputAggregation : GlobalStrategy {
 
         val spToAggregationEdge = addEdge(selectProjectNode, store, EdgeType.GROUP_BY)
         selectProjectNode.addRule(RelationSendRule(relation, spToAggregationEdge))
-        // store.addRule()
-        TODO()
+
+        val outputStub = OutputStub(label(query.result), query.result)
+        physicalGraph.outputStub = outputStub
+        val sendOutput = addEdge(store, outputStub, EdgeType.SHUFFLE)
+        store.addRule(AggregateRule(query.result.aggregations.toList(), spToAggregationEdge, sendOutput))
+
+        physicalGraph.addRelationProducer(query.result, store)
+
+        return OptimizationResult(physicalGraph, emptyCost())
     }
 }
