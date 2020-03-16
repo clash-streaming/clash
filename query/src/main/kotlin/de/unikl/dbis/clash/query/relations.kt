@@ -43,6 +43,35 @@ data class Relation(
     }
 
     /**
+     * Creates a relation that consists just of the inputs and join predicates, but no aggregation, filter, or projection.
+     */
+    fun justInput(): Relation {
+        return Relation(
+            inputs,
+            listOf(),
+            joinPredicates,
+            listOf(),
+            listOf(),
+            alias
+        )
+    }
+
+    /**
+     * Creates a relation that does not consist of aggregation,
+     * but still contains all attributes required by the aggregation.
+     */
+    fun withoutAggregation(): Relation {
+        return Relation(
+            inputs,
+            filters,
+            joinPredicates,
+            listOf(),
+            projections.plus(aggregations.map { it.attributeAccesses.map { attributeAccess -> Projection(attributeAccess, attributeAccess.toString()) } }.flatten()),
+            alias
+        )
+    }
+
+    /**
      * Creates a new relation composed of the join of this relation and the passed relations.
      * Additionally all predicates that are valid join predicates (i.e., where one side has an relationAlias
      * of this relation and the other side as an relationAlias to the passed relations) are added.

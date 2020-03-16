@@ -1,5 +1,6 @@
 package de.unikl.dbis.clash.storm
 
+import de.unikl.dbis.clash.physical.AggregateRule
 import de.unikl.dbis.clash.physical.BinaryPredicateEvaluation
 import de.unikl.dbis.clash.physical.ControlInRule
 import de.unikl.dbis.clash.physical.ControlOutRule
@@ -8,10 +9,15 @@ import de.unikl.dbis.clash.physical.JoinResultRule
 import de.unikl.dbis.clash.physical.RelationReceiveRule
 import de.unikl.dbis.clash.physical.RelationSendRule
 import de.unikl.dbis.clash.physical.Rule
+import de.unikl.dbis.clash.physical.SelectProjectRule
 import de.unikl.dbis.clash.physical.StoreAndJoinRule
 import de.unikl.dbis.clash.physical.TickInRule
 import de.unikl.dbis.clash.physical.TickOutRule
+import de.unikl.dbis.clash.physical.UnaryPredicateEvaluation
+import de.unikl.dbis.clash.query.Aggregation
+import de.unikl.dbis.clash.query.AttributeAccess
 import de.unikl.dbis.clash.query.BinaryPredicate
+import de.unikl.dbis.clash.query.ProjectionList
 import de.unikl.dbis.clash.query.Relation
 import java.io.Serializable
 
@@ -38,6 +44,8 @@ interface StormRule : Serializable {
                 is ControlOutRule -> StormControlOutRule(rule)
                 is TickInRule -> StormTickInRule(rule)
                 is TickOutRule -> StormTickOutRule(rule)
+                is SelectProjectRule -> StormSelectProjectRule(rule)
+                is AggregateRule -> StormAggregateRule(rule)
                 else -> throw RuntimeException("Cannot convert rule $rule to StormRule")
             }
         }
@@ -58,18 +66,6 @@ interface StormInRule : StormRule {
 interface StormOutRule : StormRule {
 
     val outgoingEdgeLabel: StormEdgeLabel
-}
-
-/**
- * A OldJoinRule is a rule which provides an output stream label.
- */
-@Deprecated("Use new variant with BinaryPredicateEvaluation instead!")
-internal interface OldStormJoinRule : StormRule {
-
-    val predicates: Set<BinaryPredicate>
-
-    override val messageVariant: MessageVariant
-        get() = MessageVariant.DataPath
 }
 
 /**
@@ -200,6 +196,39 @@ class StormJoinResultRule : StormInRule, StormJoinRule, StormDataPathRule {
         return "JoinResultRule: join from $incomingEdgeLabel and use as result if " + predicates
                 .size + " predicates match: " + predicates
     }
+}
+
+class StormSelectProjectRule : StormInRule, StormOutRule, StormDataPathRule {
+    val predicates: Set<UnaryPredicateEvaluation>
+    val projection: ProjectionList
+
+    constructor(rule: SelectProjectRule) {
+        predicates = rule.predicates
+        projection = rule.projection
+        incomingEdgeLabel = StormEdgeLabel(rule.incomingEdgeLabel)
+        outgoingEdgeLabel = StormEdgeLabel(rule.outgoingEdgeLabel)
+    }
+
+    override val incomingEdgeLabel: StormEdgeLabel
+    override val outgoingEdgeLabel: StormEdgeLabel
+
+    override val messageVariant: MessageVariant
+        get() = MessageVariant.DataPath
+}
+
+class StormAggregateRule : StormInRule, StormOutRule {
+    val aggregates: List<Aggregation>
+
+    constructor(rule: AggregateRule) {
+        aggregates = rule.aggregates
+        incomingEdgeLabel = StormEdgeLabel(rule.incomingEdgeLabel)
+        outgoingEdgeLabel = StormEdgeLabel(rule.outgoingEdgeLabel)
+    }
+
+    override val incomingEdgeLabel: StormEdgeLabel
+    override val outgoingEdgeLabel: StormEdgeLabel
+    override val messageVariant: MessageVariant
+        get() = MessageVariant.DataPath
 }
 
 /**

@@ -30,6 +30,8 @@ enum class MessageVariant {
                 is StormIntermediateJoinRule,
                 is StormJoinResultRule,
                 is StormStoreAndJoinRule,
+                is StormSelectProjectRule,
+                is StormAggregateRule,
                 is StormRelationReceiveRule -> DataPath
                 is StormTickInRule -> Tick
                 else -> throw RuntimeException("Cannot handle stormInRule $stormInRule")

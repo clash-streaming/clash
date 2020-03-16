@@ -16,7 +16,7 @@ import de.unikl.dbis.clash.physical.SelectProjectRule
 import de.unikl.dbis.clash.physical.UnaryPredicateEvaluation
 import de.unikl.dbis.clash.physical.addEdge
 import de.unikl.dbis.clash.physical.label
-import de.unikl.dbis.clash.query.AttributeAccess
+import de.unikl.dbis.clash.query.Projection
 import de.unikl.dbis.clash.query.Query
 import java.lang.RuntimeException
 
@@ -36,35 +36,34 @@ class NaiveSingleInputAggregation : GlobalStrategy {
         }
 
         val relationAlias = query.inputMap.keys.first()
-        val relation = query.result.subRelation(relationAlias)
 
-        val predicates = setOf<UnaryPredicateEvaluation>() // TODO
-        val projection = listOf<AttributeAccess>() // TODO
+        val inputRelation = query.result.justInput()
+        val spRelation = query.result.withoutAggregation()
+        val resultRelation = query.result
 
+        val predicates = spRelation.filters
+        val projection = spRelation.projections.toList()
+
+        // Build the graph
         val physicalGraph = PhysicalGraph()
-        val input = physicalGraph.addInputStubFor(relation)
-
-        // Attach select-project node to the input
-        val selectProjectNode = SelectProjectNode(label(relation), relation, 1)
+        val input = physicalGraph.addInputStubFor(inputRelation)
+        val selectProjectNode = SelectProjectNode(label(spRelation), spRelation, 1)
         physicalGraph.addSelectProjectNode(selectProjectNode)
-
-        val inputToSPEdge = addEdge(input, selectProjectNode, EdgeType.SHUFFLE)
-        input.addRule(RelationSendRule(relation, inputToSPEdge))
-        selectProjectNode.addRule(SelectProjectRule(predicates, projection, inputToSPEdge))
-
-        // Attach the aggregation to the select-project node
-        val store = AggregationStore(label(relation), relation, 1)
-        physicalGraph.addAggregationStore(store)
-
-        val spToAggregationEdge = addEdge(selectProjectNode, store, EdgeType.GROUP_BY)
-        selectProjectNode.addRule(RelationSendRule(relation, spToAggregationEdge))
-
+        val aggregationStore = AggregationStore(label(resultRelation) + "_agg", resultRelation, 1)
+        physicalGraph.addAggregationStore(aggregationStore)
         val outputStub = OutputStub(label(query.result), query.result)
         physicalGraph.outputStub = outputStub
-        val sendOutput = addEdge(store, outputStub, EdgeType.SHUFFLE)
-        store.addRule(AggregateRule(query.result.aggregations.toList(), spToAggregationEdge, sendOutput))
+        physicalGraph.addRelationProducer(resultRelation, aggregationStore)
 
-        physicalGraph.addRelationProducer(query.result, store)
+        // Connect the nodes
+        val inputToSPEdge = addEdge(input, selectProjectNode, EdgeType.SHUFFLE)
+        val spToAggregationEdge = addEdge(selectProjectNode, aggregationStore, EdgeType.GROUP_BY)
+        val aggregationToOutputEdge = addEdge(aggregationStore, outputStub, EdgeType.SHUFFLE)
+
+        // Configure the rules
+        input.addRule(RelationSendRule(inputRelation, inputToSPEdge))
+        selectProjectNode.addRule(SelectProjectRule(predicates, projection, inputToSPEdge, spToAggregationEdge))
+        aggregationStore.addRule(AggregateRule(resultRelation.aggregations.toList(), spToAggregationEdge, aggregationToOutputEdge))
 
         return OptimizationResult(physicalGraph, emptyCost())
     }

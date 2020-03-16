@@ -3,6 +3,7 @@ package de.unikl.dbis.clash.physical
 import de.unikl.dbis.clash.query.Aggregation
 import de.unikl.dbis.clash.query.AttributeAccess
 import de.unikl.dbis.clash.query.BinaryPredicate
+import de.unikl.dbis.clash.query.ProjectionList
 import de.unikl.dbis.clash.query.Relation
 import de.unikl.dbis.clash.query.UnaryPredicate
 import java.io.Serializable
@@ -214,11 +215,16 @@ class StoreAndJoinRule
 
 class SelectProjectRule(
     val predicates: Set<UnaryPredicateEvaluation>,
-    val projection: List<AttributeAccess>,
-    override val incomingEdgeLabel: EdgeLabel
-) : InRule {
+    val projection: ProjectionList,
+    override val incomingEdgeLabel: EdgeLabel,
+    override val outgoingEdgeLabel: EdgeLabel
+) : InRule, OutRule {
     override fun replaceIncomingEdgeLabel(newLabel: EdgeLabel): InRule {
-        return SelectProjectRule(this.predicates, this.projection, newLabel)
+        return SelectProjectRule(predicates, projection, newLabel, outgoingEdgeLabel)
+    }
+
+    override fun replaceOutgoingEdgeLabel(newLabel: EdgeLabel): OutRule {
+        return SelectProjectRule(predicates, projection, incomingEdgeLabel, newLabel)
     }
 }
 

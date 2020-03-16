@@ -1,6 +1,7 @@
 package de.unikl.dbis.clash.documents
 
 import de.unikl.dbis.clash.query.AttributeAccess
+import de.unikl.dbis.clash.query.ProjectionList
 import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.query.Tuple
 import java.util.Arrays
@@ -17,6 +18,14 @@ class Document : HashMap<AttributeAccess, String>, Tuple {
             val attributeAccess = AttributeAccess(relation, key)
             this[attributeAccess] = jsonObject.getString(key)
         }
+    }
+
+    constructor(map: Map<AttributeAccess, String>) : super(map)
+
+    fun project(projectionList: ProjectionList): Document {
+        // TODO: incorporate aliasing
+        val result = filterKeys { documentKey -> projectionList.any { projection -> projection.attributeAccess == documentKey }}
+        return Document(result)
     }
 
     fun createJoint(other: Document): Document {

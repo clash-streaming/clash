@@ -1,6 +1,7 @@
 package de.unikl.dbis.clash.storm.builder
 
 import de.unikl.dbis.clash.ClashConfig
+import de.unikl.dbis.clash.physical.AggregationStore
 import de.unikl.dbis.clash.physical.ControlOutRule
 import de.unikl.dbis.clash.physical.Controller
 import de.unikl.dbis.clash.physical.ControllerInput
@@ -11,6 +12,7 @@ import de.unikl.dbis.clash.physical.Node
 import de.unikl.dbis.clash.physical.OutRule
 import de.unikl.dbis.clash.physical.PartitionedStore
 import de.unikl.dbis.clash.physical.PhysicalGraph
+import de.unikl.dbis.clash.physical.SelectProjectNode
 import de.unikl.dbis.clash.physical.SimilarityStore
 import de.unikl.dbis.clash.physical.Sink
 import de.unikl.dbis.clash.physical.Spout
@@ -23,10 +25,12 @@ import de.unikl.dbis.clash.query.RelationAlias
 import de.unikl.dbis.clash.query.inputForRelation
 import de.unikl.dbis.clash.storm.DataPathMessage
 import de.unikl.dbis.clash.storm.StormEdgeLabel
+import de.unikl.dbis.clash.storm.bolts.AggregateStore
 import de.unikl.dbis.clash.storm.bolts.CommonSinkI
 import de.unikl.dbis.clash.storm.bolts.ControlBolt
 import de.unikl.dbis.clash.storm.bolts.DispatchBolt
 import de.unikl.dbis.clash.storm.bolts.GeneralStore
+import de.unikl.dbis.clash.storm.bolts.SelectProjectBolt
 import de.unikl.dbis.clash.storm.spouts.CommonSpout
 import de.unikl.dbis.clash.storm.spouts.CommonSpoutI
 import de.unikl.dbis.clash.storm.spouts.ControlSpout
@@ -68,7 +72,8 @@ class StormTopologyBuilder(
 
         this.buildSpouts(builder)
         this.buildStores(builder)
-
+        this.buildSelectProjectBolts(builder)
+        this.buildAggregates(builder)
         this.buildDispatcher(this.enhancedGraph.dispatcher, builder)
         this.buildSink(this.enhancedGraph.sink, builder)
 
@@ -145,7 +150,47 @@ class StormTopologyBuilder(
         for (rule in storeNode.rules) {
             storeBolt.addRule(rule)
         }
-        LOG.debug("Store {} built.", storeNode.label)
+        LOG.debug("Store {} built.", nodeLabel)
+    }
+
+    internal fun buildSelectProjectBolts(builder: TopologyBuilder) {
+        this.enhancedGraph
+            .selectProjectNodes
+            .forEach { this.buildSelectProjectBolt(it, builder) }
+    }
+
+    internal fun buildSelectProjectBolt(spNode: SelectProjectNode, builder: TopologyBuilder) {
+        val label = spNode.label
+        LOG.debug("Building Select-Project-Bolt {}...", label)
+        val bolt = SelectProjectBolt(label)
+
+        val declarer = builder.setBolt(label, bolt, spNode.parallelism)
+        declareGroupings(spNode, declarer)
+
+        for (rule in spNode.rules) {
+            bolt.addRule(rule)
+        }
+        LOG.debug("Selct-Project-Node {} built", label)
+    }
+
+    internal fun buildAggregates(builder: TopologyBuilder) {
+        this.enhancedGraph
+            .aggregationStores
+            .forEach { this.buildAggregate(it, builder) }
+    }
+
+    internal fun buildAggregate(store: AggregationStore, builder: TopologyBuilder) {
+        val label = store.label
+        LOG.debug("Building Select-Project-Bolt {}...", label)
+        val bolt = AggregateStore(label)
+
+        val declarer = builder.setBolt(label, bolt, store.parallelism)
+        declareGroupings(store, declarer)
+
+        for (rule in store.rules) {
+            bolt.addRule(rule)
+        }
+        LOG.debug("Selct-Project-Node {} built", label)
     }
 
     internal fun buildDispatcher(

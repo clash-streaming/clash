@@ -185,9 +185,9 @@ data class Scenario(
                 GlobalStrategyRegistry.initialize("NaiveSingleInputAggregation"),
                 OptimizationParameters(),
                 OutsideInterface(mapOf(
-                    InputName("lineitem") to JsonFileSpout(InputName("lineitem"), RelationAlias("lineitem"), "validation/tpchq1_lineitem")
+                    InputName("lineitem") to JsonFileSpout(InputName("lineitem"), RelationAlias("lineitem"), "validation/tpchq1_lineitem.json")
                 ),
-                    FileSinkBolt("output", "valudation/tpchq1_result.json")
+                    FileSinkBolt("output", "validation/tpchq1_result.json")
                 ),
                 mapOf(RelationAlias("lineitem") to InputName("lineitem")),
                 "validation/tpchq1_result.json",
